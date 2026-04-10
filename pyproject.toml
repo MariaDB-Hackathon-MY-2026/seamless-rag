@@ -52,7 +52,7 @@ markers = [
     "spec: TOON spec conformance tests",
     "props: Property-based tests (hypothesis)",
 ]
-addopts = "-v --tb=short --strict-markers -x"
+addopts = "-v --tb=short --strict-markers"
 timeout = 30
 
 [tool.coverage.run]

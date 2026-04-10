@@ -16,7 +16,11 @@
       "WebFetch(domain:toonformat.dev)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:pypi.org)",
-      "WebFetch(domain:docs.python.org)"
+      "WebFetch(domain:docs.python.org)",
+      "WebFetch(domain:mariadb.com)",
+      "WebFetch(domain:mariadb-corporation.github.io)",
+      "WebFetch(domain:huggingface.co)",
+      "WebFetch(domain:sdk.vercel.ai)"
     ]
   },
   "hooks": {
@@ -26,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && conda run -n seamless-rag python -m pytest tests/unit -x -q --tb=line --no-header 2>&1 | tail -15",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && conda run -n seamless-rag python -m pytest tests/unit -x -q --tb=line --no-header -m 'not slow' 2>&1 | tail -15",
             "timeout": 30000
           }
         ]

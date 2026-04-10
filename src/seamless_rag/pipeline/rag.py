@@ -28,7 +28,7 @@ class RAGEngine:
     JSON vs TOON token counts without extra API calls.
     """
 
-    def __init__(self, provider: object, store: object) -> None:
+    def __init__(self, provider: object, storage: object) -> None:
         raise NotImplementedError("RAG engine not yet implemented")
 
     def ask(self, question: str, top_k: int = 5, context_window: int = 1) -> RAGResult:
