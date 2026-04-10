@@ -1,0 +1,43 @@
+# serializer version: 1
+# name: test_toon_output_snapshot[empty_and_keyword_strings]
+  '''
+  [2,]{id,val,kw,nl}:
+    1,"","true","null"
+    2,normal,"false",hello
+  '''
+# ---
+# name: test_toon_output_snapshot[numeric_edge_cases]
+  '''
+  [2,]{id,int_val,float_val,neg}:
+    1,0,1.5,-42
+    2,1000000,0.001,0
+  '''
+# ---
+# name: test_toon_output_snapshot[rag_search_results]
+  '''
+  [3,]{id,content,distance}:
+    1,Climate change affects biodiversity,0.12
+    2,Recent studies show temperature rise,0.18
+    3,Ocean acidification impacts marine life,0.25
+  '''
+# ---
+# name: test_toon_output_snapshot[single_result]
+  '''
+  [1,]{id,content,distance}:
+    42,The answer to everything,0.001
+  '''
+# ---
+# name: test_toon_output_snapshot[with_nulls]
+  '''
+  [2,]{id,title,author,score}:
+    1,Climate Report,null,0.95
+    2,Ocean Study,Smith,0.88
+  '''
+# ---
+# name: test_toon_output_snapshot[with_special_chars]
+  '''
+  [2,]{id,text,active}:
+    1,"He said \"hello, world\"",true
+    2,"line1\nline2",false
+  '''
+# ---
