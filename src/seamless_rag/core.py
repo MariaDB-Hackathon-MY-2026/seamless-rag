@@ -11,13 +11,17 @@ Usage:
     print(result.answer)
     print(f"Tokens saved: {result.savings_pct:.1f}%")
 """
+from __future__ import annotations
+
+from seamless_rag.pipeline.embedder import AutoEmbedder
+from seamless_rag.pipeline.rag import RAGEngine, RAGResult
+from seamless_rag.providers.sentence_transformers import SentenceTransformersProvider
+from seamless_rag.storage.mariadb import MariaDBVectorStore
+from seamless_rag.toon.encoder import encode_tabular
 
 
 class SeamlessRAG:
-    """Top-level facade for Seamless-RAG toolkit.
-
-    Manages lifecycle of all dependencies and exposes a clean public API.
-    """
+    """Top-level facade for Seamless-RAG toolkit."""
 
     def __init__(
         self,
@@ -29,24 +33,35 @@ class SeamlessRAG:
         provider: str = "sentence-transformers",
         model: str | None = None,
     ) -> None:
-        raise NotImplementedError("SeamlessRAG facade not yet implemented")
+        self._store = MariaDBVectorStore(
+            host=host, port=port, user=user, password=password, database=database,
+        )
+        self._provider = SentenceTransformersProvider(
+            model_name=model or "all-MiniLM-L6-v2",
+        )
+        self._embedder = AutoEmbedder(provider=self._provider, store=self._store)
+        self._rag = RAGEngine(provider=self._provider, storage=self._store)
 
-    def embed_table(self, table: str, text_column: str, batch_size: int = 64) -> None:
+    def embed_table(self, table: str, text_column: str = "content", batch_size: int = 64) -> dict:
         """Bulk-embed all rows in a table that lack embeddings."""
-        raise NotImplementedError
+        return self._embedder.batch_embed(table, text_column, batch_size=batch_size)
 
-    def watch(self, table: str, text_column: str, interval: float = 2.0) -> None:
+    def watch(self, table: str, text_column: str = "content", interval: float = 2.0) -> None:
         """Watch a table for new inserts and auto-embed them."""
-        raise NotImplementedError
+        self._embedder.watch(table, text_column, interval=interval)
 
-    def ask(self, question: str, top_k: int = 5) -> object:
-        """RAG query: embed question → search → TOON format → LLM → answer."""
-        raise NotImplementedError
+    def ask(self, question: str, top_k: int = 5) -> RAGResult:
+        """RAG query: embed question -> search -> TOON format -> answer."""
+        return self._rag.ask(question, top_k=top_k)
 
     def export(self, query: str) -> str:
         """Export a SQL query's results as TOON format."""
-        raise NotImplementedError
+        cursor = self._store._dict_cursor()
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        return encode_tabular(rows) if rows else "[0,]:"
 
-    def benchmark(self, query: str, n_queries: int = 10) -> object:
-        """Run token comparison benchmark."""
-        raise NotImplementedError
+    def close(self) -> None:
+        """Close database connection."""
+        self._store.close()
