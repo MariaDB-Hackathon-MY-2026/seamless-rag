@@ -10,11 +10,8 @@ Tests cover:
 - Edge cases (NULL, booleans, Unicode, special chars)
 """
 import json
-import math
 
-import pytest
-
-from seamless_rag.toon.encoder import encode_tabular, encode_value, encode_object
+from seamless_rag.toon.encoder import encode_tabular
 
 
 class TestEncodeTabular:

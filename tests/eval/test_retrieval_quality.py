@@ -9,19 +9,18 @@ Uses golden QA pairs to verify:
 These tests require LLM API access (via deepeval).
 Run with: make test-eval
 """
-import json
 
 import pytest
 
 try:
     from deepeval import assert_test
-    from deepeval.test_case import LLMTestCase
     from deepeval.metrics import (
-        ContextualRelevancyMetric,
-        ContextualPrecisionMetric,
-        FaithfulnessMetric,
         AnswerRelevancyMetric,
+        ContextualPrecisionMetric,
+        ContextualRelevancyMetric,
+        FaithfulnessMetric,
     )
+    from deepeval.test_case import LLMTestCase
     HAS_DEEPEVAL = True
 except ImportError:
     HAS_DEEPEVAL = False
@@ -87,8 +86,8 @@ class TestTokenEfficiencyEval:
     def test_toon_saves_tokens_on_golden_data(self, golden_qa_pairs):
         """TOON format should save tokens on all golden dataset contexts."""
         try:
-            from seamless_rag.toon.encoder import encode_tabular
             from seamless_rag.benchmark.compare import TokenBenchmark
+            from seamless_rag.toon.encoder import encode_tabular
         except ImportError:
             pytest.skip("seamless_rag not yet implemented")
 

@@ -3,7 +3,6 @@ Root conftest.py — shared fixtures and quality scoring plugin.
 
 This file is automatically loaded by pytest for ALL test suites.
 """
-import json
 from pathlib import Path
 
 import pytest

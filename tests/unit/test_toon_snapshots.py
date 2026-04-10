@@ -10,7 +10,6 @@ import pytest
 
 from seamless_rag.toon.encoder import encode_tabular
 
-
 CANONICAL_FIXTURES = {
     "rag_search_results": [
         {"id": 1, "content": "Climate change affects biodiversity", "distance": 0.12},

@@ -12,7 +12,6 @@ from unittest.mock import Mock
 
 import pytest
 
-
 # ============================================================
 #  Protocol definitions (same as production code)
 # ============================================================

@@ -9,7 +9,6 @@ Verifies:
 """
 import pytest
 
-from seamless_rag.providers.protocol import EmbeddingProvider
 from seamless_rag.providers.sentence_transformers import SentenceTransformersProvider
 
 

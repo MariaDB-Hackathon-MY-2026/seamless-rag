@@ -5,11 +5,10 @@ This directly supports Judge Directive #2:
 "Your TOON token savings benchmark (58% claim) needs to be demonstrated
 live with real LLM API calls and cost comparisons."
 """
-import json
 
 import pytest
 
-from seamless_rag.benchmark.compare import TokenBenchmark, BenchmarkResult
+from seamless_rag.benchmark.compare import BenchmarkResult, TokenBenchmark
 
 
 class TestTokenBenchmark:

@@ -50,23 +50,25 @@ def run_suite(name: str, cmd: list[str], timeout: int = 120) -> SuiteResult:
         passed = failed = errors = 0
         for line in output.splitlines():
             line = line.strip()
-            # Match patterns like "5 passed", "2 failed", "1 error"
+            # Match patterns like "5 passed", "2 failed,", "1 error"
             if "passed" in line or "failed" in line or "error" in line:
                 parts = line.split()
                 for i, part in enumerate(parts):
-                    if part == "passed" and i > 0:
+                    # Strip trailing punctuation (commas, parens)
+                    clean = part.rstrip(",)")
+                    if clean == "passed" and i > 0:
                         try:
-                            passed = int(parts[i - 1])
+                            passed = int(parts[i - 1].rstrip(",)"))
                         except ValueError:
                             pass
-                    elif part == "failed" and i > 0:
+                    elif clean == "failed" and i > 0:
                         try:
-                            failed = int(parts[i - 1])
+                            failed = int(parts[i - 1].rstrip(",)"))
                         except ValueError:
                             pass
-                    elif part in ("error", "errors") and i > 0:
+                    elif clean in ("error", "errors") and i > 0:
                         try:
-                            errors = int(parts[i - 1])
+                            errors = int(parts[i - 1].rstrip(",)"))
                         except ValueError:
                             pass
 

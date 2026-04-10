@@ -10,11 +10,10 @@ import math
 import re
 
 import pytest
-from hypothesis import given, assume, settings, HealthCheck
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from seamless_rag.toon.encoder import encode_tabular, encode_value
-
 
 # ============================================================
 #  Custom Strategies
