@@ -118,13 +118,50 @@ Then update live docs:
 - Update `docs/SPECIFICATION.md` with what's now implemented
 - Update `docs/HANDOFF.md` milestones
 
-### Phase 7: LOOP
+### Phase 7: ANTI-IDLE & RETRY — Never get stuck, never stop
 
-Go back to Phase 1. **Do NOT stop.** Do NOT ask the user.
-If you hit an unsolvable blocker after 3 attempts:
-1. Log it to `docs/ISSUES.md` with full context
-2. Skip to the next TODO item
-3. Continue the loop
+**Retry policy per failing test (3 escalating attempts):**
+1. Read the error message carefully, fix the obvious issue
+2. Read reference code (TOON spec, TypeScript encoder, winner projects in /references/)
+3. Spawn a research Agent to investigate the root cause with WebSearch
+
+**If all 3 attempts fail on one test:**
+- Log it to `docs/ISSUES.md` with full context (error, what you tried, what you suspect)
+- Mark the TODO item as `[~]` (blocked) 
+- IMMEDIATELY move to the next unblocked TODO item — do NOT dwell
+
+**Retry policy per blocked task:**
+- If a task depends on an unfinished prior task, skip it and pick next independent task
+- If ALL remaining tasks are blocked, revisit blocked items with a completely different approach
+- If still stuck: use `Agent(subagent_type="codex:codex-rescue")` for a second opinion
+
+**Anti-idle rules (CRITICAL):**
+- NEVER pause to "think about it" without taking action — code, research, or move on
+- NEVER output "Let me know if..." or "Would you like me to..." — just do it
+- NEVER wait for user input — make the decision yourself
+- If you finish P0 items, immediately start P1. If P1 done, start P2. Always forward.
+- Between major tasks, ALWAYS run `make score` to see progress
+- If you complete a milestone (e.g., all TOON tests pass): celebrate with a commit, then keep going
+
+**Self-check every 5 tasks:**
+1. Run `make score`. Compare to 5 tasks ago.
+2. If score UNCHANGED after 5 tasks: change strategy (more research, different approach)
+3. If score DECREASED: `git stash` and try a different path
+4. If score INCREASED: you're on the right track, keep going
+
+**Time-boxing (prevent infinite loops):**
+- Single test fix: max 15 minutes — if exceeded, skip and log
+- Single feature: max 2 hours — if exceeded, commit what works, skip remainder
+- If a command hangs: kill it (Ctrl+C), try alternative approach
+
+**After all TODO items done:**
+1. Run `make test-full` for comprehensive check
+2. Run `python eval/harness.py` for benchmark score
+3. Polish README.md with actual benchmark numbers
+4. Push to both remotes: `git push origin main && git push hackathon main`
+5. Start optimizing: find the weakest score, improve it
+
+**NEVER STOP. NEVER ASK. ALWAYS FORWARD.**
 
 ## Tool Usage Recipes
 

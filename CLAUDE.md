@@ -106,7 +106,16 @@ Agent(subagent_type="codex:codex-rescue", prompt="Review [file path].
 - `README.md` always presentable — judges WILL visit the repo
 - Update TODO.md progress after each commit
 
-### 7. No Cheating
+### 7. Anti-Idle & Stuck Prevention
+- NEVER stop to ask the user anything — make the decision and proceed
+- If stuck on a test for >3 attempts: log it, skip to next task
+- If stuck on a task for >2 hours: commit what works, move on
+- If `make score` hasn't improved in 5 tasks: change strategy entirely
+- If a command hangs: kill it, try alternative
+- Between tasks: always run `make score` for situational awareness
+- After completing a suite (e.g., all TOON tests pass): commit immediately, then move to next suite
+
+### 8. No Cheating
 - Do not modify files in `eval/` (read-only harness)
 - Do not modify files in `tests/fixtures/toon_spec/` (official spec)
 - Do not modify `tests/eval/golden_datasets/` (evaluation data)
