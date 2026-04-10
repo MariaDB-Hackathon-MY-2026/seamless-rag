@@ -1,0 +1,314 @@
+{
+  "version": "2.0",
+  "description": "Golden QA pairs for Seamless-RAG evaluation. 20 questions across 5 difficulty levels and 4 topic areas. Each case includes the question, expected answer, relevant context chunks, and irrelevant distractors for precision testing.",
+  "metadata": {
+    "total_cases": 20,
+    "topics": ["environment", "technology", "database", "general_science", "cross_topic"],
+    "difficulty_levels": ["easy", "medium", "hard"],
+    "embedding_model": "all-MiniLM-L6-v2",
+    "dimensions": 384
+  },
+  "test_cases": [
+    {
+      "id": "env-easy-01",
+      "input": "What is the impact of climate change on biodiversity?",
+      "expected_output": "Climate change affects biodiversity through habitat shifts, species migration, and ecosystem disruption. Coral reefs face increased bleaching events, and conservation strategies must account for shifting temperature zones.",
+      "context": [
+        "Climate change is one of the most pressing environmental challenges facing humanity today. Rising global temperatures are causing widespread changes in weather patterns, sea levels, and ecosystem dynamics.",
+        "Biodiversity loss accelerates as habitats shift faster than species can adapt. Coral reefs, which support 25% of marine species, face bleaching events that have increased in frequency by 300% since the 1980s.",
+        "Conservation strategies must integrate climate projections into habitat protection plans. Protected area networks need to account for species migration corridors as temperature zones shift poleward."
+      ],
+      "distractors": [
+        "Solar photovoltaic technology has achieved grid parity in many regions.",
+        "Docker containers package applications with their dependencies into isolated environments."
+      ],
+      "expected_source_ids": [1],
+      "difficulty": "easy",
+      "topic": "environment"
+    },
+    {
+      "id": "env-easy-02",
+      "input": "How does ocean acidification affect marine organisms?",
+      "expected_output": "Ocean acidification reduces carbonate ion availability, weakening shells of organisms like oysters and pteropods. Coral reefs face compound threats from both warming and acidification, with reduced calcification rates making them more vulnerable to damage.",
+      "context": [
+        "Ocean acidification occurs when seawater absorbs excess carbon dioxide from the atmosphere, forming carbonic acid. Since the Industrial Revolution, ocean pH has dropped by approximately 0.1 units, representing a 30% increase in acidity.",
+        "Shell-forming organisms such as oysters, clams, and pteropods are particularly vulnerable to reduced carbonate ion availability. Laboratory experiments show that many species exhibit thinner shells and reduced growth rates under projected future pH conditions.",
+        "Coral reef ecosystems face compound threats from both warming and acidification. Reduced calcification rates weaken reef structures, making them more susceptible to storm damage and bioerosion."
+      ],
+      "distractors": [
+        "Quantum computers use qubits that can exist in superposition states.",
+        "The MIT License is the most permissive widely-used open source license."
+      ],
+      "expected_source_ids": [6],
+      "difficulty": "easy",
+      "topic": "environment"
+    },
+    {
+      "id": "env-medium-03",
+      "input": "What are the main causes and consequences of deforestation?",
+      "expected_output": "Agricultural expansion, particularly cattle ranching and soybean cultivation, is the leading cause of deforestation. Deforestation accounts for about 10% of global greenhouse gas emissions. Reforestation can partially offset carbon but cannot match the biodiversity of primary old-growth forests.",
+      "context": [
+        "Tropical deforestation accounts for approximately 10% of global greenhouse gas emissions. The Amazon rainforest alone has lost over 17% of its forest cover in the last 50 years, primarily due to cattle ranching and soybean cultivation.",
+        "Agricultural expansion is the leading driver of forest loss worldwide. Palm oil plantations in Southeast Asia and cattle ranches in South America have replaced millions of hectares of biodiverse tropical forests.",
+        "Reforestation programs can partially offset carbon emissions, but restored forests support significantly fewer species than primary old-growth forests. Prevention of deforestation is more effective than restoration for biodiversity conservation."
+      ],
+      "distractors": [
+        "Graph databases model data as nodes and relationships, excelling at traversing complex connections."
+      ],
+      "expected_source_ids": [11],
+      "difficulty": "medium",
+      "topic": "environment"
+    },
+    {
+      "id": "env-medium-04",
+      "input": "How is Arctic ice loss contributing to sea level rise?",
+      "expected_output": "Arctic sea ice has declined about 13% per decade since 1979. The Greenland ice sheet, containing enough water for 7.4 meters of sea level rise, is losing approximately 280 billion tonnes annually. Permafrost thawing creates a feedback loop releasing stored greenhouse gases.",
+      "context": [
+        "Arctic sea ice extent has declined by approximately 13% per decade since satellite observations began in 1979. The Arctic Ocean may experience ice-free summers before 2050, fundamentally altering global weather patterns.",
+        "The Greenland ice sheet contains enough water to raise global sea levels by approximately 7.4 meters if fully melted. Current melt rates have accelerated, with the ice sheet losing approximately 280 billion tonnes of ice annually.",
+        "Permafrost thawing releases stored methane and carbon dioxide, creating a positive feedback loop that amplifies warming. An estimated 1,500 billion tonnes of carbon are locked in permafrost soils, roughly twice the amount currently in the atmosphere."
+      ],
+      "distractors": [
+        "Rate limiting protects API servers from abuse and ensures fair resource allocation."
+      ],
+      "expected_source_ids": [19],
+      "difficulty": "medium",
+      "topic": "environment"
+    },
+    {
+      "id": "env-hard-05",
+      "input": "What is the relationship between freshwater scarcity and agricultural practices?",
+      "expected_output": "Agriculture accounts for 70% of freshwater withdrawals with irrigation efficiency below 50% in many regions. Global freshwater demand may exceed supply by 40% by 2030. Cover cropping and soil health practices can improve water efficiency by increasing infiltration rates and reducing runoff.",
+      "context": [
+        "Global freshwater demand is projected to exceed supply by 40% by 2030 without significant policy changes. Agriculture accounts for 70% of freshwater withdrawals, with irrigation efficiency averaging below 50% in many developing regions.",
+        "Cover cropping between cash crop seasons prevents erosion, fixes atmospheric nitrogen, and adds organic matter. Legume cover crops can provide 50-200 kg of nitrogen per hectare, reducing synthetic fertilizer requirements.",
+        "No-till farming preserves soil structure and reduces carbon emissions from tillage. Long-term no-till fields show increased water infiltration rates and higher populations of beneficial soil organisms compared to conventionally tilled fields.",
+        "Watershed management integrates land use planning with water quality protection. Riparian buffer zones along waterways filter agricultural runoff and reduce nutrient loading in downstream water bodies."
+      ],
+      "distractors": [],
+      "expected_source_ids": [14, 17],
+      "difficulty": "hard",
+      "topic": "environment"
+    },
+    {
+      "id": "tech-easy-06",
+      "input": "What are the three main paradigms of machine learning?",
+      "expected_output": "The three main paradigms are supervised learning, unsupervised learning, and reinforcement learning. Deep learning uses neural networks with many hidden layers, and transfer learning enables models to be fine-tuned for specific tasks with limited data.",
+      "context": [
+        "Machine learning is a subset of artificial intelligence that enables systems to learn from data without being explicitly programmed. The three main paradigms are supervised, unsupervised, and reinforcement learning.",
+        "Neural networks, inspired by biological brain structures, consist of interconnected layers of nodes. Deep learning uses networks with many hidden layers to learn hierarchical representations of data.",
+        "Transfer learning allows models trained on large datasets to be fine-tuned for specific tasks with limited data. This approach has revolutionized natural language processing through models like BERT and GPT."
+      ],
+      "distractors": [
+        "Docker Compose orchestrates multi-container applications."
+      ],
+      "expected_source_ids": [2],
+      "difficulty": "easy",
+      "topic": "technology"
+    },
+    {
+      "id": "tech-easy-07",
+      "input": "How does TOON format reduce token consumption compared to JSON?",
+      "expected_output": "TOON uses a tabular format where column names appear once in the header instead of repeating for every row. For arrays of uniform objects like SQL results, TOON achieves up to 58% fewer tokens than standard JSON, directly reducing LLM API costs.",
+      "context": [
+        "JSON (JavaScript Object Notation) is the most widely used data interchange format, valued for its human readability and broad language support. However, JSON's verbose key repetition in arrays of objects leads to significant token waste when used in LLM prompts.",
+        "TOON (Token Oriented Object Notation) addresses JSON's token inefficiency by using a tabular format where column names appear once in the header. For arrays of uniform objects, TOON achieves up to 58% fewer tokens than standard JSON.",
+        "Protocol Buffers and MessagePack offer compact binary serialization but sacrifice human readability. For LLM context windows where token count directly impacts cost and latency, text-based formats like TOON provide the optimal balance."
+      ],
+      "distractors": [],
+      "expected_source_ids": [7],
+      "difficulty": "easy",
+      "topic": "technology"
+    },
+    {
+      "id": "tech-medium-08",
+      "input": "How do vector embeddings enable semantic search in databases?",
+      "expected_output": "Vector embeddings transform text into dense numerical representations capturing semantic meaning. Models like all-MiniLM-L6-v2 produce 384-dimensional vectors. MariaDB stores these as packed float32 arrays and uses VEC_DISTANCE_COSINE for similarity ranking, with HNSW indexes for efficient approximate nearest neighbor search.",
+      "context": [
+        "Vector embeddings transform text into dense numerical representations that capture semantic meaning. Sentence-transformers models like all-MiniLM-L6-v2 produce 384-dimensional vectors suitable for similarity search.",
+        "MariaDB's VECTOR type stores embeddings as packed float32 arrays, with each dimension occupying 4 bytes. The VEC_DISTANCE_COSINE function computes cosine distance for semantic similarity ranking.",
+        "Embedding models map text to dense vector spaces where semantic similarity corresponds to geometric proximity. Models trained with contrastive learning objectives produce embeddings particularly suited for retrieval and similarity search tasks.",
+        "Vector indexes like HNSW (Hierarchical Navigable Small World) enable approximate nearest neighbor search in high-dimensional spaces. MariaDB supports HNSW indexing with configurable M and ef_search parameters."
+      ],
+      "distractors": [],
+      "expected_source_ids": [8, 3, 13],
+      "difficulty": "medium",
+      "topic": "database"
+    },
+    {
+      "id": "tech-medium-09",
+      "input": "What is RAG and how does context formatting affect it?",
+      "expected_output": "RAG combines information retrieval with language model generation to produce grounded responses, reducing hallucination. Context formatting directly impacts cost and quality. Token-efficient formats like TOON reduce API expenses while maintaining or improving retrieval accuracy compared to verbose JSON.",
+      "context": [
+        "RAG combines information retrieval with language model generation to produce grounded, factual responses. The retrieval step fetches relevant documents from a knowledge base, providing context that reduces hallucination.",
+        "Context formatting for LLM prompts directly impacts both cost and quality. Token-efficient formats reduce API expenses while maintaining or improving retrieval accuracy compared to verbose JSON formatting.",
+        "TOON (Token Oriented Object Notation) addresses JSON's token inefficiency by using a tabular format where column names appear once in the header. For arrays of uniform objects, TOON achieves up to 58% fewer tokens than standard JSON."
+      ],
+      "distractors": [
+        "Quantum entanglement creates correlations between qubits that have no classical analog."
+      ],
+      "expected_source_ids": [9, 7],
+      "difficulty": "medium",
+      "topic": "technology"
+    },
+    {
+      "id": "tech-medium-10",
+      "input": "What is the role of automatic embedding generation in RAG systems?",
+      "expected_output": "Automatic embedding generation eliminates the need for external pipelines by monitoring table inserts and generating embeddings in real-time. This watch mode ensures the vector index stays synchronized with source data, removing the fragile multi-step pipeline that traditional RAG setups require.",
+      "context": [
+        "Automatic embedding generation eliminates the need for external pipelines. A watch mode that monitors table inserts and generates embeddings in real-time ensures the vector index stays synchronized with source data.",
+        "Chunk size and overlap significantly affect retrieval quality. Smaller chunks increase precision but may lose surrounding context, while larger chunks provide more context at the cost of including irrelevant information."
+      ],
+      "distractors": [
+        "Energy storage solutions, particularly lithium-ion batteries, are critical for managing intermittency."
+      ],
+      "expected_source_ids": [8, 9],
+      "difficulty": "medium",
+      "topic": "database"
+    },
+    {
+      "id": "db-medium-11",
+      "input": "What are the trade-offs of database indexing?",
+      "expected_output": "Database indexes improve read performance but come with trade-offs in write overhead and storage cost. B-tree indexes provide logarithmic search time for equality and range queries, while HNSW vector indexes enable approximate nearest neighbor search. Over-indexing can degrade INSERT and UPDATE performance.",
+      "context": [
+        "Database indexes are data structures that improve the speed of data retrieval operations. B-tree indexes are the most common type, providing logarithmic search time for equality and range queries.",
+        "Vector indexes like HNSW (Hierarchical Navigable Small World) enable approximate nearest neighbor search in high-dimensional spaces. MariaDB supports HNSW indexing with configurable M and ef_search parameters.",
+        "Index selection involves trade-offs between read performance, write overhead, and storage cost. Over-indexing can degrade INSERT and UPDATE performance while consuming significant disk space."
+      ],
+      "distractors": [],
+      "expected_source_ids": [3],
+      "difficulty": "medium",
+      "topic": "database"
+    },
+    {
+      "id": "db-hard-12",
+      "input": "How can graph databases and vector search be combined for improved retrieval?",
+      "expected_output": "Combining vector search with knowledge graphs creates hybrid retrieval systems. Vector similarity identifies semantically relevant documents while graph traversal enriches results with structured relational context. Graph databases follow edges directly rather than using JOINs, making multi-hop queries faster.",
+      "context": [
+        "Combining vector search with knowledge graphs creates powerful hybrid retrieval systems. Vector similarity identifies semantically relevant documents while graph traversal enriches results with structured relational context.",
+        "Graph databases model data as nodes and relationships, excelling at traversing complex connections. Unlike relational databases that use JOIN operations, graph databases follow edges directly, making multi-hop queries significantly faster.",
+        "Knowledge graphs represent real-world entities and their relationships in a structured format. Organizations use knowledge graphs to integrate heterogeneous data sources and enable semantic search across enterprise information."
+      ],
+      "distractors": [],
+      "expected_source_ids": [18],
+      "difficulty": "hard",
+      "topic": "database"
+    },
+    {
+      "id": "tech-easy-13",
+      "input": "What are the benefits of Docker containerization for development?",
+      "expected_output": "Docker containers package applications with dependencies into isolated, reproducible environments. Docker Compose orchestrates multi-container applications. Health checks prevent race conditions during startup, and multi-stage builds reduce image size. tmpfs mounts improve I/O performance for testing.",
+      "context": [
+        "Docker containers package applications with their dependencies into isolated, reproducible environments. Docker Compose orchestrates multi-container applications, defining services, networks, and volumes in a single YAML file.",
+        "Health checks ensure containers are ready to accept connections before dependent services start. The condition: service_healthy directive in Docker Compose prevents race conditions during startup.",
+        "Multi-stage builds reduce image size by separating build dependencies from runtime. Using tmpfs mounts for database containers in testing significantly improves I/O performance by keeping data in memory."
+      ],
+      "distractors": [],
+      "expected_source_ids": [10],
+      "difficulty": "easy",
+      "topic": "technology"
+    },
+    {
+      "id": "tech-medium-14",
+      "input": "How does Python's typing.Protocol enable better architecture?",
+      "expected_output": "typing.Protocol allows structural subtyping (duck-typing with type checker support), enabling dependency injection where implementations satisfy interfaces without explicit inheritance. This pattern, combined with pytest fixtures, allows testing with mock providers that satisfy the protocol contract.",
+      "context": [
+        "Python's typing module provides static type hints that improve code readability and enable IDE autocompletion. The typing.Protocol class allows structural subtyping, enabling duck-typing with type checker support.",
+        "Testing with pytest provides a flexible framework for writing unit, integration, and parametrized tests. Fixtures enable dependency injection and test isolation without global state."
+      ],
+      "distractors": [
+        "RESTful APIs use HTTP methods to perform CRUD operations on resources."
+      ],
+      "expected_source_ids": [5],
+      "difficulty": "medium",
+      "topic": "technology"
+    },
+    {
+      "id": "sci-medium-15",
+      "input": "What are the current challenges facing quantum computing?",
+      "expected_output": "Current quantum computers face decoherence, high error rates, and limited qubit counts. Quantum error correction requires significant overhead, with some algorithms needing thousands of physical qubits per logical qubit. Despite qubits' ability to exist in superposition and become entangled, practical applications remain limited.",
+      "context": [
+        "Quantum computers use qubits that can exist in superposition states, enabling parallel exploration of solution spaces. Unlike classical bits that are either 0 or 1, qubits can represent both states simultaneously until measured.",
+        "Quantum entanglement creates correlations between qubits that have no classical analog. Measuring one entangled qubit instantly determines the state of its partner, regardless of physical distance.",
+        "Current quantum computers face challenges including decoherence, error rates, and limited qubit counts. Quantum error correction requires significant overhead, with some algorithms needing thousands of physical qubits per logical qubit."
+      ],
+      "distractors": [],
+      "expected_source_ids": [16],
+      "difficulty": "medium",
+      "topic": "general_science"
+    },
+    {
+      "id": "sci-medium-16",
+      "input": "How do soil microorganisms contribute to agricultural productivity?",
+      "expected_output": "Healthy soil contains billions of microorganisms per gram that cycle nutrients and suppress diseases. Mycorrhizal fungi extend root networks by up to 100 times, improving nutrient and water uptake. Cover cropping and no-till farming support beneficial soil organisms and improve water infiltration.",
+      "context": [
+        "Healthy soil contains billions of microorganisms per gram, forming complex food webs that cycle nutrients and suppress plant diseases. Mycorrhizal fungi extend root networks by up to 100 times, dramatically improving nutrient and water uptake.",
+        "Cover cropping between cash crop seasons prevents erosion, fixes atmospheric nitrogen, and adds organic matter. Legume cover crops can provide 50-200 kg of nitrogen per hectare, reducing synthetic fertilizer requirements.",
+        "No-till farming preserves soil structure and reduces carbon emissions from tillage. Long-term no-till fields show increased water infiltration rates and higher populations of beneficial soil organisms compared to conventionally tilled fields."
+      ],
+      "distractors": [],
+      "expected_source_ids": [17],
+      "difficulty": "medium",
+      "topic": "general_science"
+    },
+    {
+      "id": "tech-hard-17",
+      "input": "What are the key differences between open source licenses?",
+      "expected_output": "MIT License is most permissive, requiring only copyright preservation. GPL copyleft licenses require derivative works to remain open source, creating potential compatibility issues. Apache 2.0 includes an explicit patent grant and is the standard for database ecosystem projects including MariaDB.",
+      "context": [
+        "The MIT License is the most permissive widely-used open source license, allowing commercial use, modification, and distribution with minimal restrictions. It requires only preservation of copyright notices in copies of the software.",
+        "Copyleft licenses like GPL require derivative works to be distributed under the same license terms. This viral nature ensures modifications remain open source but can create compatibility issues with proprietary software.",
+        "The Apache 2.0 License includes an explicit patent grant, protecting users from patent claims by contributors. MariaDB and many database-related tools use Apache 2.0, making it the standard for database ecosystem projects."
+      ],
+      "distractors": [],
+      "expected_source_ids": [20],
+      "difficulty": "hard",
+      "topic": "technology"
+    },
+    {
+      "id": "cross-hard-18",
+      "input": "How do renewable energy storage and climate change mitigation relate?",
+      "expected_output": "Lithium-ion batteries manage the intermittency of solar and wind energy, providing grid stability. Solar costs have declined over 90% in a decade, and offshore wind turbines reach 15MW per unit. These technologies directly reduce the fossil fuel emissions driving climate change, Arctic ice loss, and ocean acidification.",
+      "context": [
+        "Energy storage solutions, particularly lithium-ion batteries, are critical for managing the intermittency of renewable sources. Grid-scale battery installations provide frequency regulation and peak demand management.",
+        "Solar photovoltaic technology has achieved grid parity in many regions, with module costs declining by over 90% in the last decade. Utility-scale solar farms now generate electricity at costs below fossil fuel alternatives.",
+        "Wind energy capacity has grown exponentially, with offshore wind turbines reaching capacities of 15 megawatts per unit. Floating platform designs enable deployment in deep water locations previously inaccessible.",
+        "Climate change is one of the most pressing environmental challenges facing humanity today. Rising global temperatures are causing widespread changes in weather patterns, sea levels, and ecosystem dynamics."
+      ],
+      "distractors": [],
+      "expected_source_ids": [4, 1],
+      "difficulty": "hard",
+      "topic": "cross_topic"
+    },
+    {
+      "id": "cross-hard-19",
+      "input": "How does SQL injection work and how do parameterized queries prevent it?",
+      "expected_output": "SQL injection occurs when user input is concatenated directly into SQL strings, allowing attackers to execute arbitrary database commands. Parameterized queries and prepared statements separate code from data, ensuring input is treated as values rather than executable SQL. This follows the zero-trust principle of never trusting user input.",
+      "context": [
+        "SQL injection remains one of the most common web application vulnerabilities. Parameterized queries and prepared statements are the primary defense, ensuring user input is never concatenated directly into SQL strings.",
+        "Zero-trust architecture assumes no implicit trust for any user or system, requiring continuous verification. This model is particularly important for database access, where the principle of least privilege limits each connection to only necessary operations."
+      ],
+      "distractors": [
+        "API versioning strategies include URL path versioning, header versioning, and query parameter versioning."
+      ],
+      "expected_source_ids": [12],
+      "difficulty": "hard",
+      "topic": "database"
+    },
+    {
+      "id": "cross-hard-20",
+      "input": "How do NLP tokenization and embedding techniques enable RAG pipelines?",
+      "expected_output": "Subword tokenizers like BPE break text into meaningful units without unknown tokens. Attention mechanisms in transformers enable parallel sequence processing. Embedding models trained with contrastive learning map text to vector spaces where semantic similarity corresponds to proximity, enabling the retrieval step in RAG that fetches relevant context to ground LLM responses.",
+      "context": [
+        "Tokenization is the first step in NLP pipelines, breaking text into meaningful units. Subword tokenizers like BPE (Byte Pair Encoding) balance vocabulary size with the ability to represent any input text without unknown tokens.",
+        "Attention mechanisms allow models to weigh the importance of different input positions when generating each output token. Self-attention in transformers enables parallel processing of entire sequences, replacing sequential RNN architectures.",
+        "Embedding models map text to dense vector spaces where semantic similarity corresponds to geometric proximity. Models trained with contrastive learning objectives produce embeddings particularly suited for retrieval and similarity search tasks.",
+        "RAG combines information retrieval with language model generation to produce grounded, factual responses. The retrieval step fetches relevant documents from a knowledge base, providing context that reduces hallucination."
+      ],
+      "distractors": [],
+      "expected_source_ids": [13, 9],
+      "difficulty": "hard",
+      "topic": "cross_topic"
+    }
+  ]
+}

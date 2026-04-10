@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(conda run -n seamless-rag *)",
+      "Bash(docker compose *)",
+      "Bash(make *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(pip install *)",
+      "Bash(python -m pytest *)",
+      "Bash(python eval/*)",
+      "Bash(python scripts/*)",
+      "Bash(ruff *)",
+      "WebSearch",
+      "WebFetch(domain:mariadb.org)",
+      "WebFetch(domain:toonformat.dev)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:docs.python.org)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && conda run -n seamless-rag python -m pytest tests/unit -x -q --tb=line --no-header 2>&1 | tail -15",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty' 2>/dev/null); if echo \"$CMD\" | grep -q 'git commit'; then cd \"$CLAUDE_PROJECT_DIR\" && conda run -n seamless-rag python -m pytest tests/unit -x -q --tb=no 2>&1 | tail -3; fi; exit 0",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
+  }
+}

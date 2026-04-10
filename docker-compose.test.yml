@@ -1,0 +1,15 @@
+services:
+  mariadb-test:
+    image: mariadb:11.8
+    environment:
+      MARIADB_ROOT_PASSWORD: seamless
+      MARIADB_DATABASE: test_seamless_rag
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+    tmpfs:
+      - /var/lib/mysql

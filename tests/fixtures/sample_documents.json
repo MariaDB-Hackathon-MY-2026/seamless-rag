@@ -1,0 +1,206 @@
+{
+  "version": "1.0",
+  "description": "Sample documents corpus for Seamless-RAG testing. Covers diverse topics to test embedding quality, vector search relevance, and TOON formatting. 20 documents, 60 chunks.",
+  "documents": [
+    {
+      "id": 1,
+      "title": "Climate Change and Biodiversity",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Climate change is one of the most pressing environmental challenges facing humanity today. Rising global temperatures are causing widespread changes in weather patterns, sea levels, and ecosystem dynamics."},
+        {"chunk_order": 1, "content": "Biodiversity loss accelerates as habitats shift faster than species can adapt. Coral reefs, which support 25% of marine species, face bleaching events that have increased in frequency by 300% since the 1980s."},
+        {"chunk_order": 2, "content": "Conservation strategies must integrate climate projections into habitat protection plans. Protected area networks need to account for species migration corridors as temperature zones shift poleward."}
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Machine Learning Fundamentals",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Machine learning is a subset of artificial intelligence that enables systems to learn from data without being explicitly programmed. The three main paradigms are supervised, unsupervised, and reinforcement learning."},
+        {"chunk_order": 1, "content": "Neural networks, inspired by biological brain structures, consist of interconnected layers of nodes. Deep learning uses networks with many hidden layers to learn hierarchical representations of data."},
+        {"chunk_order": 2, "content": "Transfer learning allows models trained on large datasets to be fine-tuned for specific tasks with limited data. This approach has revolutionized natural language processing through models like BERT and GPT."}
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Database Indexing Strategies",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Database indexes are data structures that improve the speed of data retrieval operations. B-tree indexes are the most common type, providing logarithmic search time for equality and range queries."},
+        {"chunk_order": 1, "content": "Vector indexes like HNSW (Hierarchical Navigable Small World) enable approximate nearest neighbor search in high-dimensional spaces. MariaDB supports HNSW indexing with configurable M and ef_search parameters."},
+        {"chunk_order": 2, "content": "Index selection involves trade-offs between read performance, write overhead, and storage cost. Over-indexing can degrade INSERT and UPDATE performance while consuming significant disk space."}
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Renewable Energy Technologies",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Solar photovoltaic technology has achieved grid parity in many regions, with module costs declining by over 90% in the last decade. Utility-scale solar farms now generate electricity at costs below fossil fuel alternatives."},
+        {"chunk_order": 1, "content": "Wind energy capacity has grown exponentially, with offshore wind turbines reaching capacities of 15 megawatts per unit. Floating platform designs enable deployment in deep water locations previously inaccessible."},
+        {"chunk_order": 2, "content": "Energy storage solutions, particularly lithium-ion batteries, are critical for managing the intermittency of renewable sources. Grid-scale battery installations provide frequency regulation and peak demand management."}
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Python Programming Best Practices",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Python's typing module provides static type hints that improve code readability and enable IDE autocompletion. The typing.Protocol class allows structural subtyping, enabling duck-typing with type checker support."},
+        {"chunk_order": 1, "content": "Virtual environments isolate project dependencies, preventing version conflicts between projects. Tools like uv, poetry, and pipenv manage both virtual environments and dependency resolution."},
+        {"chunk_order": 2, "content": "Testing with pytest provides a flexible framework for writing unit, integration, and parametrized tests. Fixtures enable dependency injection and test isolation without global state."}
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Ocean Acidification",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Ocean acidification occurs when seawater absorbs excess carbon dioxide from the atmosphere, forming carbonic acid. Since the Industrial Revolution, ocean pH has dropped by approximately 0.1 units, representing a 30% increase in acidity."},
+        {"chunk_order": 1, "content": "Shell-forming organisms such as oysters, clams, and pteropods are particularly vulnerable to reduced carbonate ion availability. Laboratory experiments show that many species exhibit thinner shells and reduced growth rates under projected future pH conditions."},
+        {"chunk_order": 2, "content": "Coral reef ecosystems face compound threats from both warming and acidification. Reduced calcification rates weaken reef structures, making them more susceptible to storm damage and bioerosion."}
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Data Serialization Formats",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "JSON (JavaScript Object Notation) is the most widely used data interchange format, valued for its human readability and broad language support. However, JSON's verbose key repetition in arrays of objects leads to significant token waste when used in LLM prompts."},
+        {"chunk_order": 1, "content": "TOON (Token Oriented Object Notation) addresses JSON's token inefficiency by using a tabular format where column names appear once in the header. For arrays of uniform objects, TOON achieves up to 58% fewer tokens than standard JSON."},
+        {"chunk_order": 2, "content": "Protocol Buffers and MessagePack offer compact binary serialization but sacrifice human readability. For LLM context windows where token count directly impacts cost and latency, text-based formats like TOON provide the optimal balance."}
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Vector Embeddings in Databases",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Vector embeddings transform text into dense numerical representations that capture semantic meaning. Sentence-transformers models like all-MiniLM-L6-v2 produce 384-dimensional vectors suitable for similarity search."},
+        {"chunk_order": 1, "content": "MariaDB's VECTOR type stores embeddings as packed float32 arrays, with each dimension occupying 4 bytes. The VEC_DISTANCE_COSINE function computes cosine distance for semantic similarity ranking."},
+        {"chunk_order": 2, "content": "Automatic embedding generation eliminates the need for external pipelines. A watch mode that monitors table inserts and generates embeddings in real-time ensures the vector index stays synchronized with source data."}
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Retrieval-Augmented Generation",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "RAG combines information retrieval with language model generation to produce grounded, factual responses. The retrieval step fetches relevant documents from a knowledge base, providing context that reduces hallucination."},
+        {"chunk_order": 1, "content": "Chunk size and overlap significantly affect retrieval quality. Smaller chunks increase precision but may lose surrounding context, while larger chunks provide more context at the cost of including irrelevant information."},
+        {"chunk_order": 2, "content": "Context formatting for LLM prompts directly impacts both cost and quality. Token-efficient formats reduce API expenses while maintaining or improving retrieval accuracy compared to verbose JSON formatting."}
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Docker Containerization",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Docker containers package applications with their dependencies into isolated, reproducible environments. Docker Compose orchestrates multi-container applications, defining services, networks, and volumes in a single YAML file."},
+        {"chunk_order": 1, "content": "Health checks ensure containers are ready to accept connections before dependent services start. The condition: service_healthy directive in Docker Compose prevents race conditions during startup."},
+        {"chunk_order": 2, "content": "Multi-stage builds reduce image size by separating build dependencies from runtime. Using tmpfs mounts for database containers in testing significantly improves I/O performance by keeping data in memory."}
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Deforestation and Land Use",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Tropical deforestation accounts for approximately 10% of global greenhouse gas emissions. The Amazon rainforest alone has lost over 17% of its forest cover in the last 50 years, primarily due to cattle ranching and soybean cultivation."},
+        {"chunk_order": 1, "content": "Agricultural expansion is the leading driver of forest loss worldwide. Palm oil plantations in Southeast Asia and cattle ranches in South America have replaced millions of hectares of biodiverse tropical forests."},
+        {"chunk_order": 2, "content": "Reforestation programs can partially offset carbon emissions, but restored forests support significantly fewer species than primary old-growth forests. Prevention of deforestation is more effective than restoration for biodiversity conservation."}
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Cybersecurity Fundamentals",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "The CIA triad (Confidentiality, Integrity, Availability) forms the foundation of information security. Modern cybersecurity adds additional principles including authentication, non-repudiation, and privacy."},
+        {"chunk_order": 1, "content": "SQL injection remains one of the most common web application vulnerabilities. Parameterized queries and prepared statements are the primary defense, ensuring user input is never concatenated directly into SQL strings."},
+        {"chunk_order": 2, "content": "Zero-trust architecture assumes no implicit trust for any user or system, requiring continuous verification. This model is particularly important for database access, where the principle of least privilege limits each connection to only necessary operations."}
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Natural Language Processing",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Tokenization is the first step in NLP pipelines, breaking text into meaningful units. Subword tokenizers like BPE (Byte Pair Encoding) balance vocabulary size with the ability to represent any input text without unknown tokens."},
+        {"chunk_order": 1, "content": "Attention mechanisms allow models to weigh the importance of different input positions when generating each output token. Self-attention in transformers enables parallel processing of entire sequences, replacing sequential RNN architectures."},
+        {"chunk_order": 2, "content": "Embedding models map text to dense vector spaces where semantic similarity corresponds to geometric proximity. Models trained with contrastive learning objectives produce embeddings particularly suited for retrieval and similarity search tasks."}
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Water Resource Management",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Global freshwater demand is projected to exceed supply by 40% by 2030 without significant policy changes. Agriculture accounts for 70% of freshwater withdrawals, with irrigation efficiency averaging below 50% in many developing regions."},
+        {"chunk_order": 1, "content": "Desalination technologies, particularly reverse osmosis, have become cost-competitive for coastal communities. However, brine discharge and energy consumption remain environmental concerns for large-scale deployment."},
+        {"chunk_order": 2, "content": "Watershed management integrates land use planning with water quality protection. Riparian buffer zones along waterways filter agricultural runoff and reduce nutrient loading in downstream water bodies."}
+      ]
+    },
+    {
+      "id": 15,
+      "title": "API Design Patterns",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "RESTful APIs use HTTP methods (GET, POST, PUT, DELETE) to perform CRUD operations on resources identified by URLs. Consistent URL naming conventions and appropriate status codes improve developer experience and API discoverability."},
+        {"chunk_order": 1, "content": "Rate limiting protects API servers from abuse and ensures fair resource allocation. Token bucket and sliding window algorithms are common implementations, typically returning 429 status codes when limits are exceeded."},
+        {"chunk_order": 2, "content": "API versioning strategies include URL path versioning (/v1/resource), header versioning, and query parameter versioning. Each approach has trade-offs in terms of discoverability, caching behavior, and backward compatibility."}
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Quantum Computing Basics",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Quantum computers use qubits that can exist in superposition states, enabling parallel exploration of solution spaces. Unlike classical bits that are either 0 or 1, qubits can represent both states simultaneously until measured."},
+        {"chunk_order": 1, "content": "Quantum entanglement creates correlations between qubits that have no classical analog. Measuring one entangled qubit instantly determines the state of its partner, regardless of physical distance."},
+        {"chunk_order": 2, "content": "Current quantum computers face challenges including decoherence, error rates, and limited qubit counts. Quantum error correction requires significant overhead, with some algorithms needing thousands of physical qubits per logical qubit."}
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Soil Health and Agriculture",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Healthy soil contains billions of microorganisms per gram, forming complex food webs that cycle nutrients and suppress plant diseases. Mycorrhizal fungi extend root networks by up to 100 times, dramatically improving nutrient and water uptake."},
+        {"chunk_order": 1, "content": "Cover cropping between cash crop seasons prevents erosion, fixes atmospheric nitrogen, and adds organic matter. Legume cover crops can provide 50-200 kg of nitrogen per hectare, reducing synthetic fertilizer requirements."},
+        {"chunk_order": 2, "content": "No-till farming preserves soil structure and reduces carbon emissions from tillage. Long-term no-till fields show increased water infiltration rates and higher populations of beneficial soil organisms compared to conventionally tilled fields."}
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Graph Databases and Knowledge Graphs",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Graph databases model data as nodes and relationships, excelling at traversing complex connections. Unlike relational databases that use JOIN operations, graph databases follow edges directly, making multi-hop queries significantly faster."},
+        {"chunk_order": 1, "content": "Knowledge graphs represent real-world entities and their relationships in a structured format. Organizations use knowledge graphs to integrate heterogeneous data sources and enable semantic search across enterprise information."},
+        {"chunk_order": 2, "content": "Combining vector search with knowledge graphs creates powerful hybrid retrieval systems. Vector similarity identifies semantically relevant documents while graph traversal enriches results with structured relational context."}
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Arctic Ice and Sea Level Rise",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "Arctic sea ice extent has declined by approximately 13% per decade since satellite observations began in 1979. The Arctic Ocean may experience ice-free summers before 2050, fundamentally altering global weather patterns."},
+        {"chunk_order": 1, "content": "The Greenland ice sheet contains enough water to raise global sea levels by approximately 7.4 meters if fully melted. Current melt rates have accelerated, with the ice sheet losing approximately 280 billion tonnes of ice annually."},
+        {"chunk_order": 2, "content": "Permafrost thawing releases stored methane and carbon dioxide, creating a positive feedback loop that amplifies warming. An estimated 1,500 billion tonnes of carbon are locked in permafrost soils, roughly twice the amount currently in the atmosphere."}
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Open Source Software Licensing",
+      "source": "synthetic",
+      "chunks": [
+        {"chunk_order": 0, "content": "The MIT License is the most permissive widely-used open source license, allowing commercial use, modification, and distribution with minimal restrictions. It requires only preservation of copyright notices in copies of the software."},
+        {"chunk_order": 1, "content": "Copyleft licenses like GPL require derivative works to be distributed under the same license terms. This viral nature ensures modifications remain open source but can create compatibility issues with proprietary software."},
+        {"chunk_order": 2, "content": "The Apache 2.0 License includes an explicit patent grant, protecting users from patent claims by contributors. MariaDB and many database-related tools use Apache 2.0, making it the standard for database ecosystem projects."}
+      ]
+    }
+  ]
+}
