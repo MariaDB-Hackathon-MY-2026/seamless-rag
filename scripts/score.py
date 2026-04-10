@@ -104,12 +104,14 @@ def main():
     print("=" * 50)
     print()
 
+    # -o addopts= clears any global -x from pyproject.toml so we see full results
+    override = ["-o", "addopts="]
     suites = [
-        ("unit", ["python", "-m", "pytest", "tests/unit", "-q", "--tb=no", "--no-header", "-m", "not slow"]),
-        ("spec", ["python", "-m", "pytest", "tests/unit/test_toon_spec_fixtures.py", "-q", "--tb=no", "--no-header"]),
-        ("props", ["python", "-m", "pytest", "tests/unit/test_toon_properties.py", "-q", "--tb=no", "--no-header"]),
-        ("integration", ["python", "-m", "pytest", "tests/integration", "-q", "--tb=no", "--no-header", "-m", "integration"]),
-        ("eval", ["python", "-m", "pytest", "tests/eval", "-q", "--tb=no", "--no-header", "-m", "eval"]),
+        ("unit", ["python", "-m", "pytest", "tests/unit", "-q", "--tb=no", "--no-header", "-m", "not slow"] + override),
+        ("spec", ["python", "-m", "pytest", "tests/unit/test_toon_spec_fixtures.py", "-q", "--tb=no", "--no-header"] + override),
+        ("props", ["python", "-m", "pytest", "tests/unit/test_toon_properties.py", "-q", "--tb=no", "--no-header"] + override),
+        ("integration", ["python", "-m", "pytest", "tests/integration", "-q", "--tb=no", "--no-header", "-m", "integration"] + override),
+        ("eval", ["python", "-m", "pytest", "tests/eval", "-q", "--tb=no", "--no-header", "-m", "eval"] + override),
     ]
 
     results: list[SuiteResult] = []

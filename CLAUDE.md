@@ -68,7 +68,14 @@ Check tests/fixtures/toon_spec/ for concrete examples
 ```
 
 ### 3. Test-Driven Development
-- The PostToolUse hook auto-runs `pytest tests/unit -x` after EVERY Edit/Write
+- The PostToolUse hook auto-runs RELEVANT tests based on which file you edited:
+  - Edit `src/seamless_rag/toon/*` → runs `test_toon_encoder.py` + `test_toon_properties.py`
+  - Edit `src/seamless_rag/benchmark/*` → runs `test_token_benchmark.py`
+  - Edit `src/seamless_rag/pipeline/*` → runs `test_rag_pipeline.py`
+  - Edit `src/seamless_rag/providers/*` → runs `test_embedding_provider.py`
+  - Edit anything else → runs all unit tests
+- To manually run a specific test: `conda run -n seamless-rag python -m pytest tests/unit/test_toon_encoder.py -v`
+- To run ALL tests (for pre-commit check): `make test-all`
 - Write tests BEFORE implementation when adding new features
 - NEVER modify tests to make them pass — fix the implementation
 - NEVER skip or delete failing tests

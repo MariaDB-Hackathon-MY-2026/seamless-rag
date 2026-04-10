@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && conda run -n seamless-rag python -m pytest tests/unit -x -q --tb=line --no-header -m 'not slow' 2>&1 | tail -15",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty' 2>/dev/null); MOD=$(basename \"$(dirname \"$FILE\")\"); if echo \"$FILE\" | grep -q 'src/seamless_rag/toon'; then conda run -n seamless-rag python -m pytest tests/unit/test_toon_encoder.py tests/unit/test_toon_properties.py -x -q --tb=line --no-header 2>&1 | tail -10; elif echo \"$FILE\" | grep -q 'src/seamless_rag/benchmark'; then conda run -n seamless-rag python -m pytest tests/unit/test_token_benchmark.py -x -q --tb=line --no-header 2>&1 | tail -10; elif echo \"$FILE\" | grep -q 'src/seamless_rag/pipeline'; then conda run -n seamless-rag python -m pytest tests/unit/test_rag_pipeline.py -x -q --tb=line --no-header 2>&1 | tail -10; elif echo \"$FILE\" | grep -q 'src/seamless_rag/providers'; then conda run -n seamless-rag python -m pytest tests/unit/test_embedding_provider.py -x -q --tb=line --no-header -m 'not slow' 2>&1 | tail -10; elif echo \"$FILE\" | grep -q 'tests/'; then conda run -n seamless-rag python -m pytest \"$FILE\" -x -q --tb=line --no-header 2>&1 | tail -10; else conda run -n seamless-rag python -m pytest tests/unit -x -q --tb=line --no-header -m 'not slow' -o addopts= 2>&1 | tail -10; fi",
             "timeout": 30000
           }
         ]
