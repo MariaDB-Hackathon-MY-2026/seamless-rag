@@ -35,25 +35,56 @@ When you finish a task, pick the next highest-priority unfinished item and conti
 Only stop if the user explicitly types STOP in the terminal.
 
 ### 2. Research Before Implementing
-When facing a non-trivial problem:
-- Use `WebSearch` to find current best practices
-- Use `Agent` tool with subagent_type="Explore" to search the codebase
-- Use `Agent` tool to spawn research sub-agents for parallel investigation
-- Read reference implementations in `/Users/sunfl/Documents/study/MSrag/references/`
-- NEVER guess at API signatures — read the source or docs first
+When facing a non-trivial problem, use these tools (NOT trial-and-error):
+
+**Codebase exploration:**
+```
+Agent(subagent_type="Explore", prompt="Find how X works in /path/to/reference/")
+```
+
+**Web search for current docs/patterns:**
+```
+WebSearch(query="mariadb vector python insert example 2026")
+```
+
+**Read a specific doc page:**
+```
+WebFetch(url="https://mariadb.com/kb/en/vector-overview/")
+```
+
+**Parallel research team for complex decisions:**
+```
+Launch 3 Agent tools simultaneously:
+  Agent 1: Research option A
+  Agent 2: Research option B
+  Agent 3: Check winner reference implementations
+```
+
+**TOON spec questions — always read the source:**
+```
+Read /Users/sunfl/Documents/study/MSrag/references/p0-core/toon-spec/SPEC.md
+Read /Users/sunfl/Documents/study/MSrag/references/p0-core/toon-official/packages/toon/src/encode/
+Check tests/fixtures/toon_spec/ for concrete examples
+```
 
 ### 3. Test-Driven Development
-- Run `make test-quick` after EVERY code change (hook does this automatically)
+- The PostToolUse hook auto-runs `pytest tests/unit -x` after EVERY Edit/Write
 - Write tests BEFORE implementation when adding new features
 - NEVER modify tests to make them pass — fix the implementation
 - NEVER skip or delete failing tests
+- When a test fails, read the full error with `pytest path/to/test.py::test_name -v --tb=long`
 - Target: 100% unit, 100% spec, 90%+ integration
 
 ### 4. Codex Review for Quality
 Before any significant commit (new feature, major refactor):
-- Use the `codex:codex-rescue` agent to review the code
-- Get a quality rating before committing
-- Fix issues identified by Codex before proceeding
+```
+Agent(subagent_type="codex:codex-rescue", prompt="Review [file path].
+  Check: correctness, edge cases, code quality, performance.
+  Rate A/B/C/D. List specific issues.")
+```
+- Fix ALL issues Codex identifies before committing
+- Critical code (TOON encoder, RAG engine) MUST be rated A
+- Non-critical code (CLI, config) can be B+
 
 ### 5. Atomic Git Commits
 - One logical change per commit
