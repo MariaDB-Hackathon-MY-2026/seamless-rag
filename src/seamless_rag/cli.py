@@ -102,7 +102,12 @@ def ingest(
     chunk_size: int = typer.Option(500, "--chunk-size", help="Chars per chunk"),
     overlap: int = typer.Option(50, "--overlap", help="Overlap between chunks"),
 ) -> None:
-    """Ingest text files with sentence-boundary chunking and overlap."""
+    """Convenience: load text files into MariaDB, then embed.
+
+    For production use, load data into MariaDB directly (LOAD DATA INFILE,
+    application writes, ETL pipeline), then run 'seamless-rag embed'.
+    This command is a shortcut for quick demos and testing.
+    """
     with _get_rag() as rag:
         rag.init()
         files = list(path.glob("*.txt")) if path.is_dir() else [path]

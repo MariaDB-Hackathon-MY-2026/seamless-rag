@@ -44,26 +44,32 @@ TOON is not magic — it shines on **structured tabular data**, which is exactly
 
 ## Quick Start
 
+Your data is already in MariaDB. Seamless-RAG adds vectors and TOON.
+
 ```bash
-pip install -e ".[mariadb,embeddings]"    # or: pip install seamless-rag
-docker compose up -d                       # MariaDB 11.8
-seamless-rag init                          # create schema
-seamless-rag ingest ./data/docs/           # chunk + embed files
-seamless-rag ask "What are the key trends?" # vector search → TOON → LLM
+pip install -e ".[mariadb,embeddings]"         # install
+docker compose up -d                            # MariaDB 11.8
+
+seamless-rag init                               # create VECTOR columns + HNSW index
+seamless-rag embed --table products --column description  # embed existing rows
+seamless-rag ask "Which products are most relevant?"      # vector search → TOON → LLM
+seamless-rag export "SELECT id, name, price FROM products LIMIT 20"  # SQL → TOON
 ```
+
+No file loading, no document chunking — data lives in MariaDB, Seamless-RAG bridges it to vectors and LLMs.
 
 ## CLI Commands
 
 ```
-seamless-rag init             Set up MariaDB schema (VECTOR columns + HNSW index)
-seamless-rag ingest <path>    Chunk files at sentence boundaries, embed, store
-seamless-rag embed            Bulk-embed existing table rows
-seamless-rag watch            Auto-embed new inserts (Rich live display)
-seamless-rag ask <question>   RAG query → answer + token/cost comparison
-seamless-rag export <sql>     SELECT → TOON format
-seamless-rag benchmark        Run JSON vs TOON token comparison
-seamless-rag web              Launch Gradio web UI
-seamless-rag demo             End-to-end demo with sample data
+seamless-rag init              Create VECTOR columns + HNSW index
+seamless-rag embed             Bulk-embed existing table rows (core workflow)
+seamless-rag watch             Auto-embed new inserts in real time (Rich live)
+seamless-rag ask <question>    Vector search → TOON context → LLM answer
+seamless-rag export <sql>      Any SELECT → TOON format
+seamless-rag benchmark         JSON vs TOON token/cost comparison
+seamless-rag web               Gradio web UI
+seamless-rag demo              End-to-end demo with sample data
+seamless-rag ingest <path>     Convenience: load text files for quick testing
 ```
 
 Global options: `--host`, `--port`, `--database`, `--provider`, `--model`, `--log-level`
