@@ -19,6 +19,7 @@ from seamless_rag.toon.encoder import encode_tabular
 if TYPE_CHECKING:
     from seamless_rag.llm.protocol import LLMProvider
     from seamless_rag.providers.protocol import EmbeddingProvider
+    from seamless_rag.storage.protocol import VectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,9 @@ class RAGResult:
     json_tokens: int
     toon_tokens: int
     savings_pct: float
+    json_cost_usd: float
+    toon_cost_usd: float
+    savings_cost_usd: float
     sources: list[dict]
 
 
@@ -46,7 +50,7 @@ class RAGEngine:
     def __init__(
         self,
         provider: EmbeddingProvider,
-        storage: object,
+        storage: VectorStore,
         table: str = "chunks",
         llm: LLMProvider | None = None,
     ) -> None:
@@ -99,5 +103,8 @@ class RAGEngine:
             json_tokens=bench.json_tokens,
             toon_tokens=bench.toon_tokens,
             savings_pct=bench.savings_pct,
+            json_cost_usd=bench.json_cost_usd,
+            toon_cost_usd=bench.toon_cost_usd,
+            savings_cost_usd=bench.savings_cost_usd,
             sources=results,
         )

@@ -102,13 +102,24 @@ def ask(
         rprint(f"[bold]Context (TOON — {result.toon_tokens} tokens):[/bold]")
         rprint(result.context_toon)
 
-        table = Table(title="\nToken Benchmark")
+        table = Table(title="\nToken & Cost Comparison (GPT-4o pricing)")
         table.add_column("Format", style="cyan")
         table.add_column("Tokens", justify="right")
-        table.add_row("JSON", str(result.json_tokens))
-        table.add_row("TOON", str(result.toon_tokens))
-        table.add_row("Savings", f"{result.savings_pct:.1f}%", style="green")
+        table.add_column("Est. Cost", justify="right")
+        table.add_row("JSON", str(result.json_tokens), f"${result.json_cost_usd:.6f}")
+        table.add_row("TOON", str(result.toon_tokens), f"${result.toon_cost_usd:.6f}")
+        table.add_row(
+            "Savings",
+            f"{result.savings_pct:.1f}%",
+            f"${result.savings_cost_usd:.6f}/query",
+            style="green",
+        )
         console.print(table)
+        daily_savings = result.savings_cost_usd * 1000
+        rprint(
+            f"  [dim]At 1,000 queries/day: "
+            f"${daily_savings:.2f}/day saved → ${daily_savings * 30:.2f}/month[/dim]"
+        )
     else:
         rprint(
             "[yellow]No results found. "

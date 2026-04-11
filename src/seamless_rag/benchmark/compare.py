@@ -8,6 +8,9 @@ import tiktoken
 
 from seamless_rag.toon.encoder import encode_tabular
 
+# GPT-4o pricing: $2.50 per 1M input tokens (as of 2026)
+_GPT4O_COST_PER_TOKEN = 2.50 / 1_000_000
+
 
 @dataclass
 class BenchmarkResult:
@@ -18,6 +21,9 @@ class BenchmarkResult:
     savings_pct: float
     json_bytes: int
     toon_bytes: int
+    json_cost_usd: float
+    toon_cost_usd: float
+    savings_cost_usd: float
 
 
 class TokenBenchmark:
@@ -40,6 +46,8 @@ class TokenBenchmark:
         toon_tokens = self.count_tokens(toon_str)
 
         savings_pct = (json_tokens - toon_tokens) / json_tokens * 100 if json_tokens > 0 else 0.0
+        json_cost = json_tokens * _GPT4O_COST_PER_TOKEN
+        toon_cost = toon_tokens * _GPT4O_COST_PER_TOKEN
 
         return BenchmarkResult(
             json_tokens=json_tokens,
@@ -47,4 +55,7 @@ class TokenBenchmark:
             savings_pct=savings_pct,
             json_bytes=json_bytes,
             toon_bytes=toon_bytes,
+            json_cost_usd=json_cost,
+            toon_cost_usd=toon_cost,
+            savings_cost_usd=json_cost - toon_cost,
         )
