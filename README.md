@@ -4,13 +4,13 @@
 
 **Vector Search & Structured-Data RAG Toolkit for MariaDB**
 
-> Turn any MariaDB table into a searchable vector store. Query results come back in TOON v3 tabular format — a compact wire format that saves 30-68% of tokens when feeding structured data to LLMs or agents.
+> Turn any MariaDB table into a searchable vector store. Query results come back in TOON v3 tabular format — a compact wire format that saves 10-55% of tokens (vs compact JSON) when feeding structured data to LLMs or agents.
 
 ![Powered by MariaDB](docs/assets/badge-mariadb.svg)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://python.org)
 [![TOON v3](https://img.shields.io/badge/TOON%20v3-166%2F166%20conformance-blue)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-520%2F522%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-538%2F538%20passing-brightgreen)]()
 
 ---
 
@@ -31,16 +31,25 @@ TOON tabular writes field names once, values as compact rows:
   2,Gadget,Tools,19.99,300,Acme,4.2
 ```
 
-**Where it matters most:**
+**Measured on real public datasets** ([full benchmark](docs/BENCHMARK_REAL_DATA.md)):
 
-| Scenario | Token savings | Why |
-|----------|--------------|-----|
-| DB query results (50 rows, 7 cols) | **55-65%** | Short values, many repeated field names |
-| Agent multi-step context (20 steps) | **40-60% per step, compounding** | Structured state carried across steps |
-| Metadata tables (booleans, IDs) | **60-68%** | Minimal content, maximum structure |
-| Text-heavy RAG chunks | **10-25%** | Content dominates, structure overhead small |
+| Dataset (query type) | Rows | JSON Tokens | TOON Tokens | Savings |
+|---------------------|------|-------------|-------------|---------|
+| MovieLens — top rated movies (7 cols) | 100 | 6,540 | 5,019 | **23.3%** |
+| MovieLens — metadata only (4 cols) | 100 | 2,258 | 1,364 | **39.6%** |
+| SF Restaurant — violations (9 cols) | 100 | 7,071 | 4,326 | **38.8%** |
+| SF Restaurant — high risk (9 cols) | 50 | 3,437 | 2,076 | **39.6%** |
 
-TOON is not magic — it shines on **structured tabular data**, which is exactly what comes out of database queries.
+Savings scale with row count and stabilize at the dataset's natural ceiling:
+
+| Rows | MovieLens (7 cols) | Restaurant (9 cols) |
+|------|--------------------|---------------------|
+| 10 | 21.7% | 34.6% |
+| 50 | 22.0% | 38.2% |
+| 100 | 24.1% | 38.8% |
+| 500 | **29.0%** | **38.9%** |
+
+TOON is not magic — it shines on **structured tabular data with many columns and short values**, which is exactly what comes out of database queries. All measurements use compact JSON (`separators=(",",":")`) as baseline.
 
 ## Where It Fits
 
@@ -58,7 +67,7 @@ For structured database data, the industry uses two retrieval approaches. Seamle
                    ▼
            list[dict] results
                    ▼
-        Seamless-RAG → TOON format     ← saves 30-68% tokens
+        Seamless-RAG → TOON format     ← saves 20-40% tokens
                    ▼
            LLM / Agent consumes
 ```
@@ -94,9 +103,23 @@ seamless-rag watch             Auto-embed new inserts in real time (Rich live)
 seamless-rag ask <question>    Vector search → TOON context → LLM answer
 seamless-rag export <sql>      Any SELECT → TOON format
 seamless-rag benchmark         JSON vs TOON token/cost comparison
-seamless-rag web               Gradio web UI
+seamless-rag web               Gradio web UI (localhost-only by default)
 seamless-rag demo              End-to-end demo with sample data
 seamless-rag ingest <path>     Convenience: load text files for quick testing
+```
+
+**Multi-column embedding** — embed multiple columns for richer semantics:
+
+```bash
+# Single column (default)
+seamless-rag embed --table products --column description
+
+# Multi-column — values concatenated for richer vector search
+seamless-rag embed --table products --columns "name,category,price,rating"
+# Internally: "Widget — Tools — 29.99 — 4.5"
+
+# Now "cheap high-rated tools" matches on price AND rating, not just description
+seamless-rag ask "cheap high-rated tools" --where "price < 50"
 ```
 
 Global options: `--host`, `--port`, `--database`, `--provider`, `--model`, `--log-level`
@@ -109,17 +132,23 @@ Seamless-RAG commands work as agent tools. An LLM agent can call these to intera
 # Agent tool: search MariaDB and get compact context
 result = rag.ask("quarterly revenue by region", top_k=10)
 # result.context_toon → compact tabular format for next LLM call
-# result.savings_pct → 55% fewer tokens than JSON
+# result.savings_pct → token savings vs compact JSON
 
 # Agent tool: export any SQL query as TOON
 toon = rag.export("SELECT region, revenue, quarter FROM sales")
 # Feed to next agent step with minimal token overhead
+
+# Agent tool: multi-column embed for richer search
+rag.embed_table("products", text_column=["name", "category", "price"])
+# "Widget — Tools — 29.99" → vector search matches name AND price
 ```
 
-In a 20-step agent workflow querying a database at each step:
-- **JSON context**: ~2000 tokens/step × 20 = 40,000 input tokens
-- **TOON context**: ~850 tokens/step × 20 = 17,000 input tokens
-- **Savings**: 23,000 tokens = faster inference + lower cost + more room in context window
+In a 20-step agent workflow querying a database at each step (measured on real data):
+
+| Dataset | JSON (20 steps) | TOON (20 steps) | Tokens Saved | Cost Saved |
+|---------|-----------------|-----------------|--------------|------------|
+| MovieLens (7 cols, 50 rows/step) | 73,680 | 58,760 | **14,920** | $0.037 |
+| Restaurant (9 cols, 50 rows/step) | 69,640 | 42,640 | **27,000** | $0.068 |
 
 ## Python API
 
@@ -129,9 +158,15 @@ from seamless_rag import SeamlessRAG
 with SeamlessRAG(host="localhost", database="mydb") as rag:
     rag.init()
     rag.ingest("research.txt", ["chunk1...", "chunk2..."])
+
+    # Single-column embed (default)
     rag.embed_table("articles", text_column="content")
 
-    result = rag.ask("What are the main findings?")
+    # Multi-column embed — richer semantics
+    rag.embed_table("products", text_column=["name", "category", "price"])
+
+    # Semantic search with hybrid filter
+    result = rag.ask("affordable tools", where="price < 50", mmr=True)
     print(result.answer)           # LLM-generated answer
     print(result.context_toon)     # compact context
     print(f"Saved {result.savings_pct:.0f}% tokens")
@@ -159,8 +194,8 @@ seamless-rag CLI / Python API / Agent Tools
     ├── LLMProvider (Protocol)           ← 3 built-in, add your own
     ├── VectorStore (Protocol)           ← MariaDB with connection pool
     │     └── VECTOR(N) + HNSW index + VEC_DISTANCE_COSINE
-    ├── AutoEmbedder                     ← batch + watch with Rich live
-    ├── RAGEngine                        ← search → TOON → LLM → benchmark
+    ├── AutoEmbedder                     ← batch + watch, multi-column concat
+    ├── RAGEngine                        ← search → TOON → LLM (retry) → benchmark
     ├── TOONEncoder                      ← full v3 spec (166/166)
     └── TokenBenchmark                   ← tiktoken + GPT-4o cost calc
 ```
@@ -168,13 +203,20 @@ seamless-rag CLI / Python API / Agent Tools
 ## Test Results
 
 ```
-520/522 tests passing (99.6%)
+538 tests passing (100%)
   lint:        100%
-  unit:        99.7% (329/330)
-  spec:        100%  (166/166 TOON v3 conformance)
-  integration: 100%  (17/17)
+  unit:        100% (338/338)
+  spec:        100% (166/166 TOON v3 conformance)
+  integration: 100% (17/17)
   eval:        100%
 ```
+
+## Security
+
+- **SQL injection prevention**: WHERE filters and SELECT queries validated via [sqlglot](https://github.com/tobymao/sqlglot) AST parsing — blocks writes, DDL, subqueries, and dangerous functions (SLEEP, BENCHMARK, LOAD_FILE)
+- **Web UI**: binds `127.0.0.1` by default; `--share` requires auth via `SEAMLESS_WEB_USER` / `SEAMLESS_WEB_PASSWORD`; error messages never leak server internals
+- **LLM calls**: context truncated to 20K chars; retry with jitter for transient errors; rate-limit detection
+- **Identifiers**: all table/column names validated against `^[A-Za-z_][A-Za-z0-9_]*$`
 
 ## Built for the MariaDB Ecosystem
 
@@ -184,7 +226,7 @@ seamless-rag CLI / Python API / Agent Tools
 
 - **MariaDB 11.7+** VECTOR columns, HNSW indexes, VEC_DISTANCE_COSINE
 - **Native binary protocol** via `mariadb-connector-python` (array.array float32)
-- **Connection pooling** (pool_size=5) for production workloads
+- **Connection pooling** with unique pool names for concurrent instances
 - **Version validation** (>= 11.7.2) on init
 
 ## License

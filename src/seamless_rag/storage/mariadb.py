@@ -5,17 +5,94 @@ import array
 import contextlib
 import re
 import threading
+import uuid
 
 import mariadb
+import sqlglot
+from sqlglot import exp as sqlglot_exp
 
 _IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
-# Strict SQL validation: only allow simple SELECT (no subquery writes)
-_FORBIDDEN_RE = re.compile(
-    r"\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|GRANT|REVOKE"
-    r"|EXECUTE|CALL|LOAD|INTO\s+OUTFILE|INTO\s+DUMPFILE)\b",
-    re.IGNORECASE,
+# ── SQL safety helpers ────────────────────────────────────────
+
+# Node types that indicate write/DDL/dangerous operations
+_DANGEROUS_NODES = (
+    sqlglot_exp.Insert, sqlglot_exp.Update, sqlglot_exp.Delete,
+    sqlglot_exp.Drop, sqlglot_exp.Create, sqlglot_exp.Alter,
+    sqlglot_exp.Command,
 )
+
+
+def _validate_where_clause(where: str) -> str:
+    """Validate a WHERE clause fragment using sqlglot AST parsing.
+
+    Wraps the fragment in a synthetic SELECT, parses the AST, and
+    rejects any dangerous nodes (writes, DDL, subqueries with writes).
+
+    Returns:
+        The validated WHERE clause string (from the original input).
+
+    Raises:
+        ValueError: If the clause is invalid or contains dangerous SQL.
+    """
+    if not where or not where.strip():
+        return ""
+    synthetic = f"SELECT * FROM _t WHERE {where}"
+    try:
+        parsed = sqlglot.parse_one(synthetic, dialect="mysql")
+    except sqlglot.errors.ParseError as e:
+        raise ValueError(f"Invalid WHERE clause: {e}") from e
+
+    # Walk AST — reject dangerous nodes anywhere (including subqueries)
+    where_node = parsed.find(sqlglot_exp.Where)
+    if where_node is None:
+        raise ValueError("Failed to parse WHERE clause")
+
+    for node in where_node.walk():
+        if isinstance(node, _DANGEROUS_NODES):
+            raise ValueError(
+                f"WHERE clause contains disallowed operation: {type(node).__name__}"
+            )
+        # Block subqueries to prevent data exfiltration via EXISTS/IN/etc.
+        if isinstance(node, sqlglot_exp.Select):
+            raise ValueError("Subqueries are not allowed in WHERE clauses")
+        # Reject function calls that could have side effects
+        if isinstance(node, sqlglot_exp.Anonymous):
+            func_name = node.name.upper()
+            if func_name in ("SLEEP", "BENCHMARK", "LOAD_FILE", "INTO_OUTFILE"):
+                raise ValueError(f"WHERE clause contains disallowed function: {func_name}")
+
+    return where.strip()
+
+
+def _validate_select_query(sql: str) -> str:
+    """Validate a full SELECT query using sqlglot AST parsing.
+
+    Raises:
+        ValueError: If the query is not a valid SELECT or contains dangerous operations.
+    """
+    stripped = sql.strip()
+    try:
+        parsed = sqlglot.parse_one(stripped, dialect="mysql")
+    except sqlglot.errors.ParseError as e:
+        raise ValueError(f"Invalid SQL query: {e}") from e
+
+    # Top-level must be a SELECT
+    if not isinstance(parsed, sqlglot_exp.Select):
+        raise ValueError("Only SELECT queries are allowed")
+
+    # Walk AST — reject dangerous nodes anywhere
+    for node in parsed.walk():
+        if isinstance(node, _DANGEROUS_NODES):
+            raise ValueError(
+                f"Query contains disallowed operation: {type(node).__name__}"
+            )
+        if isinstance(node, sqlglot_exp.Anonymous):
+            func_name = node.name.upper()
+            if func_name in ("SLEEP", "BENCHMARK", "LOAD_FILE", "INTO_OUTFILE"):
+                raise ValueError(f"Query contains disallowed function: {func_name}")
+
+    return stripped
 
 _MIN_MARIADB_VERSION = (11, 7, 2)
 
@@ -78,7 +155,7 @@ class MariaDBVectorStore:
         pool_size: int = 5,
     ) -> None:
         self._pool = mariadb.ConnectionPool(
-            pool_name="seamless_rag",
+            pool_name=f"seamless_rag_{uuid.uuid4().hex[:8]}",
             pool_size=pool_size,
             host=host,
             port=port,
@@ -219,6 +296,18 @@ class MariaDBVectorStore:
 
     # ── Read / Search ─────────────────────────────────────────
 
+    def _get_non_vector_columns(self, conn, table: str) -> list[str]:
+        """Get all column names except the embedding vector column."""
+        cursor = conn.cursor()
+        try:
+            cursor.execute(f"SHOW COLUMNS FROM {_validate_ident(table)}")
+            return [
+                row[0] for row in cursor.fetchall()
+                if row[1] and "vector" not in row[1].lower()
+            ]
+        finally:
+            cursor.close()
+
     def search(
         self, table: str, query_vec: list[float],
         top_k: int = 5, context_window: int = 0,
@@ -237,12 +326,15 @@ class MariaDBVectorStore:
         """
         t = _validate_ident(table)
         qb = _vec_bytes(query_vec)
-        where_clause = f"WHERE {where}" if where else ""
+        validated_where = _validate_where_clause(where) if where else ""
+        where_clause = f"WHERE {validated_where}" if validated_where else ""
         with self._get_conn() as conn:
+            cols = self._get_non_vector_columns(conn, t)
+            col_list = ", ".join(cols)
             cursor = conn.cursor(dictionary=True)
             try:
                 cursor.execute("SET mhnsw_ef_search = 100")
-                if context_window > 0:
+                if context_window > 0 and "document_id" in cols and "chunk_order" in cols:
                     cursor.execute(
                         f"""
                         WITH closest AS (
@@ -265,7 +357,7 @@ class MariaDBVectorStore:
                 else:
                     cursor.execute(
                         f"""
-                        SELECT id, content,
+                        SELECT {col_list},
                             VEC_DISTANCE_COSINE(embedding, ?) AS distance
                         FROM {t} {where_clause}
                         ORDER BY distance, id LIMIT ?
@@ -277,15 +369,17 @@ class MariaDBVectorStore:
                 cursor.close()
 
     def get_new_rows(
-        self, table: str, text_column: str, last_id: int,
+        self, table: str, text_columns: str | list[str], last_id: int,
     ) -> list[dict]:
         t = _validate_ident(table)
-        col = _validate_ident(text_column)
+        if isinstance(text_columns, str):
+            text_columns = [text_columns]
+        cols = ", ".join(_validate_ident(c) for c in text_columns)
         with self._get_conn() as conn:
             cursor = conn.cursor(dictionary=True)
             try:
                 cursor.execute(
-                    f"SELECT id, {col} FROM {t} WHERE id > ?"
+                    f"SELECT id, {cols} FROM {t} WHERE id > ?"
                     " ORDER BY id",
                     (last_id,),
                 )
@@ -308,19 +402,11 @@ class MariaDBVectorStore:
     def execute_query(self, sql: str) -> list[dict]:
         """Execute a read-only SELECT query and return dict rows.
 
-        Uses regex-based validation that catches write operations even
-        inside subqueries, CTEs, and string-like patterns. Blocks:
-        INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE,
-        GRANT, REVOKE, EXECUTE, CALL, LOAD, INTO OUTFILE/DUMPFILE.
+        Uses sqlglot AST parsing to validate the query structurally.
+        Rejects anything that is not a pure SELECT — writes, DDL,
+        and dangerous functions are blocked even inside subqueries.
         """
-        stripped = sql.strip()
-        if not stripped.upper().startswith("SELECT"):
-            raise ValueError("Only SELECT queries are allowed")
-        if _FORBIDDEN_RE.search(stripped):
-            match = _FORBIDDEN_RE.search(stripped)
-            raise ValueError(
-                f"Query contains disallowed operation: {match.group()}"
-            )
+        stripped = _validate_select_query(sql)
         with self._get_conn() as conn:
             cursor = conn.cursor(dictionary=True)
             try:

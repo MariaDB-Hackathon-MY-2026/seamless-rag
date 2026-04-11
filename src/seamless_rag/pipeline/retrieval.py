@@ -127,7 +127,16 @@ def mmr_search(
         return candidates
 
     # Re-embed candidates for MMR diversity calculation
-    texts = [c.get("content", str(c)) for c in candidates]
+    # Use 'content' if present (default chunks table), otherwise concatenate all text values
+    def _candidate_text(c: dict) -> str:
+        if "content" in c:
+            return c["content"]
+        # For custom tables: join all non-numeric, non-id string values
+        parts = [str(v) for k, v in c.items()
+                 if k not in ("id", "distance", "embedding") and v is not None]
+        return " — ".join(parts) if parts else str(c)
+
+    texts = [_candidate_text(c) for c in candidates]
     candidate_vecs = provider.embed_batch(texts)
 
     return mmr(query_vec, candidates, candidate_vecs, k=top_k, lambda_mult=lambda_mult)
