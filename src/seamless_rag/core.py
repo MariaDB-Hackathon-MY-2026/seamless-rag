@@ -64,8 +64,7 @@ class SeamlessRAG:
         self._table = table
         self._settings = settings or Settings()
         # Thread model param through to settings if caller overrode it
-        is_default = self._settings.embedding_model == "BAAI/bge-small-en-v1.5"
-        if model != "all-MiniLM-L6-v2" and is_default:
+        if model != "all-MiniLM-L6-v2":
             self._settings.embedding_model = model
         self._store = MariaDBVectorStore(
             host=host, port=port, user=user, password=password, database=database,

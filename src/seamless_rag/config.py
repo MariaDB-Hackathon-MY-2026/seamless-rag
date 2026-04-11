@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # Default is local so judges need zero API keys
     # For dev/demo: set EMBEDDING_PROVIDER=gemini in .env for best quality
     embedding_provider: str = Field(default="sentence-transformers", alias="EMBEDDING_PROVIDER")
-    embedding_model: str = Field(default="BAAI/bge-small-en-v1.5", alias="EMBEDDING_MODEL")
+    embedding_model: str = Field(default="all-MiniLM-L6-v2", alias="EMBEDDING_MODEL")
     embedding_dimensions: int = Field(default=384, alias="EMBEDDING_DIMENSIONS")
     embedding_api_key: str = Field(default="", alias="EMBEDDING_API_KEY")
 

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 _GEMINI_DEFAULTS = {"model": "gemini-embedding-001", "dimensions": 768}
 _OPENAI_DEFAULTS = {"model": "text-embedding-3-large", "dimensions": 3072}
-_LOCAL_MODEL = "BAAI/bge-small-en-v1.5"
+_LOCAL_MODELS = {"BAAI/bge-small-en-v1.5", "all-MiniLM-L6-v2"}
 _LOCAL_DIMENSIONS = 384
 
 # Prefixes that identify each provider's models
@@ -50,7 +50,7 @@ def create_embedding_provider(settings: Settings) -> EmbeddingProvider:
         return SentenceTransformersProvider(model_name=model)
 
     # Detect if user left everything at local defaults (no explicit config)
-    is_unconfigured = model == _LOCAL_MODEL and dims == _LOCAL_DIMENSIONS
+    is_unconfigured = model in _LOCAL_MODELS and dims == _LOCAL_DIMENSIONS
 
     if provider == "gemini":
         from seamless_rag.providers.gemini import GeminiEmbeddingProvider
