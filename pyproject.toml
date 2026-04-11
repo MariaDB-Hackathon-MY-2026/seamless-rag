@@ -18,9 +18,10 @@ dependencies = [
 mariadb = ["mariadb>=1.1.14"]
 embeddings = ["sentence-transformers>=5.0"]
 ollama = ["ollama>=0.1"]
+gemini = ["google-genai>=1.0"]
 openai = ["openai>=1.0"]
 web = ["gradio>=4.0"]
-all = ["seamless-rag[mariadb,embeddings,ollama,openai,web]"]
+all = ["seamless-rag[mariadb,embeddings,ollama,gemini,openai,web]"]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",

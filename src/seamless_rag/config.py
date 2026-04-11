@@ -40,4 +40,4 @@ class Settings(BaseSettings):
     # OpenAI (secondary — for token counting and optional generation)
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "populate_by_name": True}

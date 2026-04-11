@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 
+from seamless_rag.config import Settings
 from seamless_rag.pipeline.embedder import AutoEmbedder
 from seamless_rag.pipeline.rag import RAGEngine, RAGResult
 from seamless_rag.storage.mariadb import MariaDBVectorStore
@@ -20,10 +21,18 @@ from seamless_rag.toon.encoder import encode_tabular
 logger = logging.getLogger(__name__)
 
 
-def _make_provider(model_name: str):
+def _make_provider(settings: Settings):
     """Lazy-load embedding provider to avoid slow import at CLI --help time."""
-    from seamless_rag.providers.sentence_transformers import SentenceTransformersProvider
-    return SentenceTransformersProvider(model_name=model_name)
+    from seamless_rag.providers.factory import create_embedding_provider
+
+    return create_embedding_provider(settings)
+
+
+def _make_llm(settings: Settings):
+    """Lazy-load LLM provider."""
+    from seamless_rag.llm.factory import create_llm_provider
+
+    return create_llm_provider(settings)
 
 
 class SeamlessRAG:
@@ -38,19 +47,21 @@ class SeamlessRAG:
         database: str = "seamless_rag",
         model: str = "all-MiniLM-L6-v2",
         table: str = "chunks",
+        settings: Settings | None = None,
     ) -> None:
         self._table = table
-        self._model_name = model
+        self._settings = settings or Settings()
         self._store = MariaDBVectorStore(
             host=host, port=port, user=user, password=password, database=database,
         )
         self._provider = None  # lazy
+        self._llm = None  # lazy
         self._embedder = None
         self._rag = None
 
     def _ensure_provider(self):
         if self._provider is None:
-            self._provider = _make_provider(self._model_name)
+            self._provider = _make_provider(self._settings)
         return self._provider
 
     def _ensure_embedder(self):
@@ -60,11 +71,20 @@ class SeamlessRAG:
             )
         return self._embedder
 
+    def _ensure_llm(self):
+        if self._llm is None:
+            try:
+                self._llm = _make_llm(self._settings)
+            except (ValueError, Exception) as e:
+                logger.warning("LLM provider not available: %s", e)
+                self._llm = None
+        return self._llm
+
     def _ensure_rag(self):
         if self._rag is None:
             self._rag = RAGEngine(
                 provider=self._ensure_provider(), storage=self._store,
-                table=self._table,
+                table=self._table, llm=self._ensure_llm(),
             )
         return self._rag
 

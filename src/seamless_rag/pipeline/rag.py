@@ -35,11 +35,18 @@ class RAGEngine:
     JSON vs TOON token counts without extra API calls.
     """
 
-    def __init__(self, provider: object, storage: object, table: str = "chunks") -> None:
+    def __init__(
+        self,
+        provider: object,
+        storage: object,
+        table: str = "chunks",
+        llm: object | None = None,
+    ) -> None:
         self._provider = provider
         self._storage = storage
         self._table = table
         self._benchmark = TokenBenchmark()
+        self._llm = llm
 
     def ask(
         self, question: str, top_k: int = 5, context_window: int = 0,
@@ -69,8 +76,13 @@ class RAGEngine:
         # 4. Token benchmark (observation layer)
         bench = self._benchmark.compare(results)
 
+        # 5. Generate answer via LLM (if available)
+        answer = ""
+        if self._llm is not None and hasattr(self._llm, "generate"):
+            answer = self._llm.generate(question, context_toon)
+
         return RAGResult(
-            answer="",
+            answer=answer,
             context_toon=context_toon,
             context_json=context_json,
             json_tokens=bench.json_tokens,
