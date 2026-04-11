@@ -199,7 +199,18 @@ class MariaDBVectorStore:
             cursor.close()
 
     def execute_query(self, sql: str) -> list[dict]:
-        """Execute arbitrary SELECT and return dict rows."""
+        """Execute a read-only SELECT query and return dict rows.
+
+        Only SELECT statements are allowed — any other SQL statement type
+        (INSERT, UPDATE, DELETE, DROP, etc.) is rejected for safety.
+        """
+        normalized = sql.strip().upper()
+        if not normalized.startswith("SELECT"):
+            raise ValueError("Only SELECT queries are allowed in execute_query")
+        # Block dangerous patterns even within SELECT
+        for keyword in ("INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE"):
+            if f" {keyword} " in f" {normalized} ":
+                raise ValueError(f"Query contains disallowed keyword: {keyword}")
         cursor = self._dict_cursor()
         try:
             cursor.execute(sql)

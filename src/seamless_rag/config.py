@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     watch_max_retries: int = Field(default=3, alias="WATCH_MAX_RETRIES")
 
     # LLM for RAG answer generation
-    # Providers: "ollama" (local default), "gemini", "openai", "groq"
+    # Providers: "ollama" (local default), "gemini", "openai"
     # Default is Ollama so judges need zero API keys
     # For development/demo: set LLM_PROVIDER=gemini in .env
     llm_provider: str = Field(default="ollama", alias="LLM_PROVIDER")

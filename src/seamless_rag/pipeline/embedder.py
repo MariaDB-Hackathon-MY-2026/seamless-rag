@@ -10,6 +10,10 @@ from __future__ import annotations
 
 import logging
 import time
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from seamless_rag.providers.protocol import EmbeddingProvider
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +21,7 @@ logger = logging.getLogger(__name__)
 class AutoEmbedder:
     """Auto-embedding pipeline with watch and batch modes."""
 
-    def __init__(self, provider: object, store: object) -> None:
+    def __init__(self, provider: EmbeddingProvider, store: object) -> None:
         self._provider = provider
         self._store = store
 

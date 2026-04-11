@@ -4,27 +4,35 @@
 
 > Automatically embed your MariaDB tables and query them with RAG — results formatted in TOON v3 for 30-58% token savings over JSON.
 
-[![Tests](https://img.shields.io/badge/tests-432%2F434%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-489%2F491%20passing-brightgreen)]()
 [![TOON Spec](https://img.shields.io/badge/TOON%20v3-166%2F166%20conformance-blue)]()
 [![Python](https://img.shields.io/badge/python-3.12-blue)]()
 
 ## What It Does
 
-1. **Auto-Embed**: Point it at any MariaDB table → it embeds text columns using sentence-transformers
+1. **Auto-Embed**: Point it at any MariaDB table → it embeds text columns (local or cloud models)
 2. **Watch Mode**: Polls for new inserts and auto-embeds them in real-time
 3. **RAG Query**: Ask questions → vector search → TOON-formatted context → LLM answer
 4. **Token Savings**: Every query reports JSON vs TOON token comparison — live proof of savings
+5. **Model-Agnostic**: Swap embedding/LLM providers (SentenceTransformers, Gemini, OpenAI, Ollama) via config
 
 ## Architecture
 
 ```
 SeamlessRAG (facade)
-├── SentenceTransformersProvider  ← all-MiniLM-L6-v2 (384d, local, free)
-├── MariaDBVectorStore            ← VECTOR columns + HNSW cosine search
-├── AutoEmbedder                  ← watch + batch with retry & isolation
-├── RAGEngine                     ← search → TOON → benchmark → answer
-├── TOONEncoder                   ← full v3 spec (166/166 conformance)
-└── TokenBenchmark                ← tiktoken cl100k_base comparison
+├── EmbeddingProvider (Protocol)     ← pluggable
+│   ├── SentenceTransformersProvider ← local, free (384d)
+│   ├── GeminiEmbeddingProvider      ← google-genai SDK (768d)
+│   └── OpenAIEmbeddingProvider      ← openai SDK (3072d)
+├── LLMProvider (Protocol)           ← pluggable
+│   ├── OllamaLLMProvider            ← local REST (default)
+│   ├── GeminiLLMProvider            ← gemini-2.5-flash
+│   └── OpenAILLMProvider            ← gpt-4o
+├── MariaDBVectorStore               ← VECTOR + HNSW cosine search
+├── AutoEmbedder                     ← watch + batch with retry
+├── RAGEngine                        ← search → TOON → LLM → benchmark
+├── TOONEncoder                      ← full v3 spec (166/166)
+└── TokenBenchmark                   ← tiktoken cl100k_base
 ```
 
 ## Quick Start
@@ -50,17 +58,23 @@ docker compose up -d
 ### Usage
 
 ```bash
-# Bulk-embed a table
-seamless-rag embed articles --column content
+# Initialize database schema
+seamless-rag init
 
-# Watch for new rows
-seamless-rag watch articles --column content --interval 2
+# Ingest text files (auto-chunks and embeds)
+seamless-rag ingest ./data/articles/
 
-# Ask a question (with token benchmark)
+# Watch for new rows and auto-embed
+seamless-rag watch --table articles --column content --interval 2
+
+# Ask a question (with token benchmark + LLM answer)
 seamless-rag ask "What are the key findings on climate change?"
 
 # Export SQL results as TOON
 seamless-rag export "SELECT id, title, content FROM articles LIMIT 10"
+
+# Run the full end-to-end demo
+seamless-rag demo
 ```
 
 ### Python API
@@ -108,12 +122,13 @@ Field names appear once in the header. Values are comma-separated without quotes
 ## Test Results
 
 ```
-Overall: 99.5% (432/434 passed)
-  lint:  100%  ✓
-  unit:  99.6% (253/254)
-  spec:  100%  (166/166) — full TOON v3 conformance
-  props: 91.7% (11/12) — hypothesis property tests
-  eval:  100%  ✓
+Overall: 99.6% (489/491 passed)
+  lint:        100%  ✓
+  unit:        99.7% (298/299) — includes provider + LLM factory tests
+  spec:        100%  (166/166) — full TOON v3 conformance
+  props:       91.7% (11/12) — hypothesis property tests
+  integration: 100%  (17/17) — MariaDB + API providers
+  eval:        100%  ✓
 ```
 
 Run tests:
@@ -136,20 +151,29 @@ make score            # quality score dashboard
 ```
 src/seamless_rag/
 ├── toon/
-│   └── encoder.py        # TOON v3 encoder (full spec)
+│   └── encoder.py           # TOON v3 encoder (full spec)
 ├── benchmark/
-│   └── compare.py        # Token comparison (tiktoken)
+│   └── compare.py           # Token comparison (tiktoken)
 ├── providers/
-│   ├── protocol.py       # EmbeddingProvider protocol
-│   └── sentence_transformers.py
+│   ├── protocol.py          # EmbeddingProvider protocol
+│   ├── sentence_transformers.py
+│   ├── gemini.py            # Gemini via google-genai SDK
+│   ├── openai_provider.py   # OpenAI via openai SDK
+│   └── factory.py           # Auto-select from settings
+├── llm/
+│   ├── protocol.py          # LLMProvider protocol
+│   ├── gemini.py            # Gemini LLM
+│   ├── openai_provider.py   # OpenAI LLM
+│   ├── ollama.py            # Ollama REST API
+│   └── factory.py           # Auto-select from settings
 ├── storage/
-│   └── mariadb.py        # VectorStore with HNSW
+│   └── mariadb.py           # VectorStore with HNSW
 ├── pipeline/
-│   ├── embedder.py       # Auto-embed (batch + watch)
-│   └── rag.py            # RAG engine with benchmark
-├── core.py               # SeamlessRAG facade
-├── cli.py                # Typer CLI
-└── config.py             # Pydantic Settings
+│   ├── embedder.py          # Auto-embed (batch + watch)
+│   └── rag.py               # RAG engine + benchmark + LLM
+├── core.py                  # SeamlessRAG facade
+├── cli.py                   # Typer CLI
+└── config.py                # Pydantic Settings
 ```
 
 ## License

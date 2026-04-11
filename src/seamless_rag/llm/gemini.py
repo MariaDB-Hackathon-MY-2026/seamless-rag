@@ -5,13 +5,9 @@ import logging
 
 from google import genai
 
-logger = logging.getLogger(__name__)
+from seamless_rag.llm import RAG_SYSTEM_PROMPT
 
-_SYSTEM_PROMPT = (
-    "You are a helpful assistant. Answer the user's question based on the provided context. "
-    "The context is in TOON format (a compact tabular notation). "
-    "If the context doesn't contain enough information, say so honestly."
-)
+logger = logging.getLogger(__name__)
 
 
 class GeminiLLMProvider:
@@ -27,7 +23,7 @@ class GeminiLLMProvider:
             response = self._client.models.generate_content(
                 model=self._model,
                 contents=user_message,
-                config={"system_instruction": _SYSTEM_PROMPT},
+                config={"system_instruction": RAG_SYSTEM_PROMPT},
             )
         except Exception as e:
             logger.error("Gemini generate_content failed: %s", e)

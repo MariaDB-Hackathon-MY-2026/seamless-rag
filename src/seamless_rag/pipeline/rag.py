@@ -11,9 +11,14 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from seamless_rag.benchmark.compare import TokenBenchmark
 from seamless_rag.toon.encoder import encode_tabular
+
+if TYPE_CHECKING:
+    from seamless_rag.llm.protocol import LLMProvider
+    from seamless_rag.providers.protocol import EmbeddingProvider
 
 logger = logging.getLogger(__name__)
 
@@ -40,10 +45,10 @@ class RAGEngine:
 
     def __init__(
         self,
-        provider: object,
+        provider: EmbeddingProvider,
         storage: object,
         table: str = "chunks",
-        llm: object | None = None,
+        llm: LLMProvider | None = None,
     ) -> None:
         self._provider = provider
         self._storage = storage

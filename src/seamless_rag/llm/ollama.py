@@ -6,13 +6,9 @@ import logging
 import urllib.error
 import urllib.request
 
-logger = logging.getLogger(__name__)
+from seamless_rag.llm import RAG_SYSTEM_PROMPT
 
-_SYSTEM_PROMPT = (
-    "You are a helpful assistant. Answer the user's question based on the provided context. "
-    "The context is in TOON format (a compact tabular notation). "
-    "If the context doesn't contain enough information, say so honestly."
-)
+logger = logging.getLogger(__name__)
 
 
 class OllamaLLMProvider:
@@ -34,7 +30,7 @@ class OllamaLLMProvider:
         user_message = f"Context:\n{context}\n\nQuestion: {prompt}"
         payload = json.dumps({
             "model": self._model,
-            "system": _SYSTEM_PROMPT,
+            "system": RAG_SYSTEM_PROMPT,
             "prompt": user_message,
             "stream": False,
         }).encode("utf-8")

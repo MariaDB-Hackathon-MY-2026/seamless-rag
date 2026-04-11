@@ -5,13 +5,9 @@ import logging
 
 from openai import OpenAI
 
-logger = logging.getLogger(__name__)
+from seamless_rag.llm import RAG_SYSTEM_PROMPT
 
-_SYSTEM_PROMPT = (
-    "You are a helpful assistant. Answer the user's question based on the provided context. "
-    "The context is in TOON format (a compact tabular notation). "
-    "If the context doesn't contain enough information, say so honestly."
-)
+logger = logging.getLogger(__name__)
 
 
 class OpenAILLMProvider:
@@ -26,7 +22,7 @@ class OpenAILLMProvider:
             response = self._client.chat.completions.create(
                 model=self._model,
                 messages=[
-                    {"role": "system", "content": _SYSTEM_PROMPT},
+                    {"role": "system", "content": RAG_SYSTEM_PROMPT},
                     {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {prompt}"},
                 ],
             )

@@ -93,13 +93,15 @@ class SeamlessRAG:
                 provider=self._ensure_provider(), storage=self._store,
                 table=self._table, llm=self._get_llm(),
             )
-        elif self._rag._llm is None and self._get_llm() is not None:
-            # LLM became available after initial RAG creation
-            self._rag._llm = self._llm
         return self._rag
 
-    def init(self, dimensions: int = 384) -> None:
-        """Create schema (documents + chunks tables) if not exists."""
+    def init(self, dimensions: int | None = None) -> None:
+        """Create schema (documents + chunks tables) if not exists.
+
+        If dimensions is not specified, uses the embedding provider's dimensions.
+        """
+        if dimensions is None:
+            dimensions = self._ensure_provider().dimensions
         self._store.init_schema(dimensions=dimensions)
         logger.info("Schema initialized (dimensions=%d)", dimensions)
 
