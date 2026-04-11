@@ -14,10 +14,14 @@ class Settings(BaseSettings):
     mariadb_password: str = Field(default="seamless", alias="MARIADB_PASSWORD")
     mariadb_database: str = Field(default="seamless_rag", alias="MARIADB_DATABASE")
 
-    # Embedding (bge-small-en-v1.5: 25% better retrieval than MiniLM, same 384d)
+    # Embedding — provider-agnostic
+    # Providers: "sentence-transformers" (local default), "gemini", "openai"
+    # Default is local so judges need zero API keys
+    # For dev/demo: set EMBEDDING_PROVIDER=gemini in .env for best quality
     embedding_provider: str = Field(default="sentence-transformers", alias="EMBEDDING_PROVIDER")
     embedding_model: str = Field(default="BAAI/bge-small-en-v1.5", alias="EMBEDDING_MODEL")
     embedding_dimensions: int = Field(default=384, alias="EMBEDDING_DIMENSIONS")
+    embedding_api_key: str = Field(default="", alias="EMBEDDING_API_KEY")
 
     # Watch mode
     watch_interval: float = Field(default=2.0, alias="WATCH_INTERVAL")
