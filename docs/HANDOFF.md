@@ -6,19 +6,22 @@
 ## Current State
 
 - **Phase**: P0-P2 Complete, P3 in progress
-- **Tests**: 442/444 passing (99.5%)
+- **Tests**: 489/491 passing (99.6%)
 - **Repo**: https://github.com/SunflowersLwtech/seamless-rag
 
 ## What's Ready
 
 - TOON v3 encoder with 166/166 spec conformance
 - Token benchmark with tiktoken (30%+ savings demonstrated)
-- SentenceTransformers embedding provider (384d, local)
+- **Model-agnostic embedding providers**: SentenceTransformers (local), Gemini, OpenAI
+- **Model-agnostic LLM providers**: Ollama (local), Gemini, OpenAI
+- Factory pattern with foreign model auto-correction
 - MariaDB VectorStore with HNSW search and CTE context window
 - AutoEmbedder with batch + watch modes (retry, error isolation)
-- RAG engine with integrated token benchmark observation layer
+- RAG engine with integrated token benchmark + optional LLM answer generation
 - SeamlessRAG facade and Typer CLI (embed, watch, ask, export)
 - Integration tests passing with Docker MariaDB 11.8
+- End-to-end verified: Gemini and OpenAI paths both working
 - Judge-facing README and testing guide
 - Dockerfile for containerized deployment
 
@@ -28,7 +31,9 @@
 |----------|--------|-----------|
 | Approach | Option C: Python + TOON | Organizer alignment, 95% completion confidence |
 | TOON impl | Custom encoder | Official Python SDK deprecated; focused on tabular |
-| Embedding | all-MiniLM-L6-v2 (384d) | Local, free, no API key, all winners used it |
+| Embedding default | all-MiniLM-L6-v2 (384d) | Local, free, no API key for judges |
+| Embedding API | Gemini/OpenAI via factory | Model-agnostic, auto-corrects foreign models |
+| LLM | Ollama/Gemini/OpenAI | Local default, cloud providers via factory |
 | Architecture | typing.Protocol DI | Winner pattern, enables mock testing |
 | CLI | Typer | Winner pattern, auto-generates help |
 | Setup | Docker Compose | Every winner had one-command setup |
