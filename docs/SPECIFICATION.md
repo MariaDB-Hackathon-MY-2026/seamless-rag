@@ -3,18 +3,25 @@
 > This document is LIVE — it reflects the current state of the implementation.
 > Last updated: 2026-04-11
 
-## Status: P0 COMPLETE, P1/P2 IMPLEMENTED — 99.5% test pass rate
+## Status: P0/P1/P2 COMPLETE — 99.7% test pass rate (298/299 unit)
 
-All core modules implemented. 432/434 tests passing.
+All core modules + multi-provider architecture implemented. 488/491 total tests passing.
 
 ## Architecture
 
 ```
-SeamlessRAG (core.py)              ← facade: holds all dependencies
-├── SentenceTransformersProvider   ← all-MiniLM-L6-v2 (384d, local)
+SeamlessRAG (core.py)              ← facade: uses factory pattern
+├── EmbeddingProvider (Protocol)   ← pluggable interface
+│   ├── SentenceTransformersProvider ← local, free (384d)
+│   ├── GeminiEmbeddingProvider    ← google-genai SDK (768d)
+│   └── OpenAIEmbeddingProvider    ← openai SDK (3072d)
+├── LLMProvider (Protocol)         ← pluggable interface
+│   ├── GeminiLLMProvider          ← gemini-2.5-flash
+│   ├── OpenAILLMProvider          ← gpt-4o
+│   └── OllamaLLMProvider          ← local REST API
 ├── MariaDBVectorStore             ← VECTOR columns + HNSW search
 ├── AutoEmbedder (pipeline/)       ← watch mode + batch mode
-├── RAGEngine (pipeline/)          ← search + TOON format + token benchmark
+├── RAGEngine (pipeline/)          ← search + TOON + LLM answer + benchmark
 ├── TOONEncoder (toon/)            ← full v3 spec encoder
 └── TokenBenchmark (benchmark/)    ← JSON vs TOON token comparison
 ```
@@ -37,13 +44,24 @@ SeamlessRAG (core.py)              ← facade: holds all dependencies
 - JSON vs TOON token and byte comparison
 - 30%+ savings for 3-row tabular, 40%+ for 100-row
 
-### Embedding Provider
-- SentenceTransformers with all-MiniLM-L6-v2 (384 dimensions)
-- Single and batch embedding
-- Protocol-based: any provider satisfying EmbeddingProvider works
+### Embedding Providers (Model-Agnostic)
+- **SentenceTransformers** (default): all-MiniLM-L6-v2, 384d, local, free
+- **Gemini**: gemini-embedding-001, configurable dims (768 default), google-genai SDK
+- **OpenAI**: text-embedding-3-large, configurable dims (3072 default), openai SDK
+- Factory pattern: `create_embedding_provider(settings)` auto-selects
+- Foreign model auto-correction: switching providers auto-fixes model names
+- Protocol-based: any class satisfying EmbeddingProvider works
+
+### LLM Providers (Model-Agnostic)
+- **Ollama** (default): local qwen3:8b, no API key needed
+- **Gemini**: gemini-2.5-flash, google-genai SDK
+- **OpenAI**: gpt-4o, openai SDK
+- Factory pattern: `create_llm_provider(settings)` auto-selects
+- Foreign model auto-correction for cross-provider switching
 
 ### RAG Engine
-- Embed question → vector search → TOON format → token metrics
+- Embed question → vector search → TOON format → LLM answer → token metrics
+- LLM integration is optional (backward compatible without LLM)
 - Observation layer: every query produces benchmark data
 - Configurable top_k and context window
 
@@ -68,11 +86,12 @@ SeamlessRAG (core.py)              ← facade: holds all dependencies
 ## Test Results
 
 ```
-Overall: 99.5% (432/434 passed)
-  lint:  100% (1/1)
-  unit:  99.6% (253/254)
+Overall: 99.7% (298/299 unit, 488/491 total)
+  lint:  100% (src/seamless_rag/)
+  unit:  99.7% (298/299)
   spec:  100% (166/166)
   props: 91.7% (11/12)
+  integration: 100% (17/17)
   eval:  100% (1/1)
 ```
 

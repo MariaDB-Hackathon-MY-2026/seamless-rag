@@ -9,10 +9,13 @@ automatically produces token comparison data (per Judge Directive 2).
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 
 from seamless_rag.benchmark.compare import TokenBenchmark
 from seamless_rag.toon.encoder import encode_tabular
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -79,7 +82,10 @@ class RAGEngine:
         # 5. Generate answer via LLM (if available)
         answer = ""
         if self._llm is not None and hasattr(self._llm, "generate"):
-            answer = self._llm.generate(question, context_toon)
+            try:
+                answer = self._llm.generate(question, context_toon)
+            except Exception:
+                logger.exception("LLM generation failed, returning context without answer")
 
         return RAGResult(
             answer=answer,

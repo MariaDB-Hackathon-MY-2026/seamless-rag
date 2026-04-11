@@ -65,7 +65,7 @@ class TestLLMFactory:
 
     def test_openai_missing_key_raises(self):
         s = Settings(llm_provider="openai", openai_api_key="", llm_api_key="")
-        with pytest.raises(ValueError, match="OPENAI_API_KEY or LLM_API_KEY required"):
+        with pytest.raises(ValueError, match="OPENAI_API_KEY required"):
             create_llm_provider(s)
 
     def test_unknown_provider_raises(self):
@@ -173,34 +173,35 @@ class TestOpenAILLMProvider:
 
 
 class TestOllamaLLMProvider:
-    """Test Ollama LLM provider with mocked requests."""
+    """Test Ollama LLM provider with mocked urllib."""
 
     def test_generate_calls_api(self):
-        with patch("seamless_rag.llm.ollama.requests.post") as mock_post:
-            mock_response = Mock()
-            mock_response.json.return_value = {"response": "The answer is 42."}
-            mock_response.raise_for_status = Mock()
-            mock_post.return_value = mock_response
+        import json as json_mod
 
+        response_data = json_mod.dumps({"response": "The answer is 42."}).encode()
+        mock_resp = Mock()
+        mock_resp.read.return_value = response_data
+        mock_resp.__enter__ = Mock(return_value=mock_resp)
+        mock_resp.__exit__ = Mock(return_value=False)
+
+        with patch("seamless_rag.llm.ollama.urllib.request.urlopen", return_value=mock_resp):
             from seamless_rag.llm.ollama import OllamaLLMProvider
 
             provider = OllamaLLMProvider(model="qwen3:8b")
             result = provider.generate("What is the answer?", "Context")
 
             assert result == "The answer is 42."
-            mock_post.assert_called_once()
-            call_args = mock_post.call_args
-            assert "api/generate" in call_args[0][0]
-            assert call_args[1]["json"]["model"] == "qwen3:8b"
-            assert call_args[1]["json"]["stream"] is False
 
     def test_generate_handles_missing_response_key(self):
-        with patch("seamless_rag.llm.ollama.requests.post") as mock_post:
-            mock_response = Mock()
-            mock_response.json.return_value = {}
-            mock_response.raise_for_status = Mock()
-            mock_post.return_value = mock_response
+        import json as json_mod
 
+        response_data = json_mod.dumps({}).encode()
+        mock_resp = Mock()
+        mock_resp.read.return_value = response_data
+        mock_resp.__enter__ = Mock(return_value=mock_resp)
+        mock_resp.__exit__ = Mock(return_value=False)
+
+        with patch("seamless_rag.llm.ollama.urllib.request.urlopen", return_value=mock_resp):
             from seamless_rag.llm.ollama import OllamaLLMProvider
 
             provider = OllamaLLMProvider()

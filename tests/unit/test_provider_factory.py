@@ -64,7 +64,7 @@ class TestEmbeddingProviderFactory:
             openai_api_key="",
             embedding_api_key="",
         )
-        with pytest.raises(ValueError, match="OPENAI_API_KEY or EMBEDDING_API_KEY required"):
+        with pytest.raises(ValueError, match="OPENAI_API_KEY required"):
             create_embedding_provider(s)
 
     def test_unknown_provider_raises(self):

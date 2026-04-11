@@ -38,6 +38,8 @@ def _make_llm(settings: Settings):
 class SeamlessRAG:
     """Top-level facade for Seamless-RAG toolkit."""
 
+    _NO_LLM = object()  # sentinel: distinguishes "not tried" from "tried, unavailable"
+
     def __init__(
         self,
         host: str = "127.0.0.1",
@@ -51,11 +53,15 @@ class SeamlessRAG:
     ) -> None:
         self._table = table
         self._settings = settings or Settings()
+        # Thread model param through to settings if caller overrode it
+        default_model = self._settings.embedding_model == "BAAI/bge-small-en-v1.5"
+        if model != "all-MiniLM-L6-v2" and default_model:
+            self._settings.embedding_model = model
         self._store = MariaDBVectorStore(
             host=host, port=port, user=user, password=password, database=database,
         )
         self._provider = None  # lazy
-        self._llm = None  # lazy
+        self._llm = self._NO_LLM  # lazy, sentinel = not yet attempted
         self._embedder = None
         self._rag = None
 
@@ -71,11 +77,12 @@ class SeamlessRAG:
             )
         return self._embedder
 
-    def _ensure_llm(self):
-        if self._llm is None:
+    def _get_llm(self):
+        """Get LLM provider, creating it on first call. Returns None if unavailable."""
+        if self._llm is self._NO_LLM:
             try:
                 self._llm = _make_llm(self._settings)
-            except (ValueError, Exception) as e:
+            except (ValueError, ImportError) as e:
                 logger.warning("LLM provider not available: %s", e)
                 self._llm = None
         return self._llm
@@ -84,8 +91,11 @@ class SeamlessRAG:
         if self._rag is None:
             self._rag = RAGEngine(
                 provider=self._ensure_provider(), storage=self._store,
-                table=self._table, llm=self._ensure_llm(),
+                table=self._table, llm=self._get_llm(),
             )
+        elif self._rag._llm is None and self._get_llm() is not None:
+            # LLM became available after initial RAG creation
+            self._rag._llm = self._llm
         return self._rag
 
     def init(self, dimensions: int = 384) -> None:

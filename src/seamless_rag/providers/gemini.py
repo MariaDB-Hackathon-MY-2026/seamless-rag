@@ -32,11 +32,20 @@ class GeminiEmbeddingProvider:
             contents=text,
             config=self._config,
         )
-        return list(result.embeddings[0].values)
+        if not result.embeddings:
+            raise RuntimeError("Gemini returned empty embeddings response")
+        vec = list(result.embeddings[0].values)
+        if len(vec) != self._dimensions:
+            raise RuntimeError(
+                f"Gemini returned {len(vec)} dims, expected {self._dimensions}"
+            )
+        return vec
 
     def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         if not texts:
             return []
+        if batch_size < 1:
+            raise ValueError("batch_size must be >= 1")
         all_embeddings: list[list[float]] = []
         for i in range(0, len(texts), batch_size):
             chunk = texts[i : i + batch_size]
@@ -45,6 +54,16 @@ class GeminiEmbeddingProvider:
                 contents=chunk,
                 config=self._config,
             )
+            if len(result.embeddings) != len(chunk):
+                raise RuntimeError(
+                    f"Gemini returned {len(result.embeddings)} embeddings "
+                    f"for {len(chunk)} inputs"
+                )
             for emb in result.embeddings:
-                all_embeddings.append(list(emb.values))
+                vec = list(emb.values)
+                if len(vec) != self._dimensions:
+                    raise RuntimeError(
+                        f"Gemini returned {len(vec)} dims, expected {self._dimensions}"
+                    )
+                all_embeddings.append(vec)
         return all_embeddings

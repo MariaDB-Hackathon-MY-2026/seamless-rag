@@ -30,11 +30,20 @@ class OpenAIEmbeddingProvider:
             input=text,
             dimensions=self._dimensions,
         )
-        return list(response.data[0].embedding)
+        if not response.data:
+            raise RuntimeError("OpenAI returned empty embeddings response")
+        vec = list(response.data[0].embedding)
+        if len(vec) != self._dimensions:
+            raise RuntimeError(
+                f"OpenAI returned {len(vec)} dims, expected {self._dimensions}"
+            )
+        return vec
 
     def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         if not texts:
             return []
+        if batch_size < 1:
+            raise ValueError("batch_size must be >= 1")
         all_embeddings: list[list[float]] = []
         for i in range(0, len(texts), batch_size):
             chunk = texts[i : i + batch_size]
@@ -43,6 +52,16 @@ class OpenAIEmbeddingProvider:
                 input=chunk,
                 dimensions=self._dimensions,
             )
+            if len(response.data) != len(chunk):
+                raise RuntimeError(
+                    f"OpenAI returned {len(response.data)} embeddings "
+                    f"for {len(chunk)} inputs"
+                )
             for item in response.data:
-                all_embeddings.append(list(item.embedding))
+                vec = list(item.embedding)
+                if len(vec) != self._dimensions:
+                    raise RuntimeError(
+                        f"OpenAI returned {len(vec)} dims, expected {self._dimensions}"
+                    )
+                all_embeddings.append(vec)
         return all_embeddings
