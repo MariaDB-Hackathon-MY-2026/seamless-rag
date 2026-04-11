@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     mariadb_password: str = Field(default="seamless", alias="MARIADB_PASSWORD")
     mariadb_database: str = Field(default="seamless_rag", alias="MARIADB_DATABASE")
 
-    # Embedding
+    # Embedding (bge-small-en-v1.5: 25% better retrieval than MiniLM, same 384d)
     embedding_provider: str = Field(default="sentence-transformers", alias="EMBEDDING_PROVIDER")
-    embedding_model: str = Field(default="all-MiniLM-L6-v2", alias="EMBEDDING_MODEL")
+    embedding_model: str = Field(default="BAAI/bge-small-en-v1.5", alias="EMBEDDING_MODEL")
     embedding_dimensions: int = Field(default=384, alias="EMBEDDING_DIMENSIONS")
 
     # Watch mode
@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     watch_batch_size: int = Field(default=64, alias="WATCH_BATCH_SIZE")
     watch_max_retries: int = Field(default=3, alias="WATCH_MAX_RETRIES")
 
-    # LLM (for RAG answer generation)
+    # LLM — local via Ollama (Qwen3 8B: best instruction following in 8B class)
     llm_provider: str = Field(default="ollama", alias="LLM_PROVIDER")
-    llm_model: str = Field(default="llama3", alias="LLM_MODEL")
+    llm_model: str = Field(default="qwen3:8b", alias="LLM_MODEL")
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
