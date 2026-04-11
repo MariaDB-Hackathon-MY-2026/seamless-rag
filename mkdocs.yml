@@ -1,0 +1,45 @@
+site_name: Seamless-RAG
+site_description: TOON-Native Auto-Embedding & RAG Toolkit for MariaDB
+repo_url: https://github.com/SunflowersLwtech/seamless-rag
+repo_name: SunflowersLwtech/seamless-rag
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep-orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: deep-orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.sections
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture: ARCHITECTURE.md
+  - API Reference: api-reference.md
+  - Providers: providers.md
+  - TOON Format: toon-format.md
+  - Contributing: contributing.md

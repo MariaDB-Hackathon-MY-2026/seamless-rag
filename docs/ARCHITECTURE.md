@@ -1,41 +1,47 @@
-# Seamless-RAG — Architecture Decisions
+# Architecture
 
-> Log of key design decisions. Updated as decisions are made during development.
+Seamless-RAG follows a layered architecture with pluggable protocols at each boundary.
 
-## ADR-001: Facade Pattern for Public API (2026-04-11)
+![Pipeline](assets/architecture.svg)
 
-**Decision:** Add `SeamlessRAG` class in `core.py` as the single entry point.
+## Pipeline Flow
 
-**Context:** Judge Directive 1 requires a "pip-installable toolkit other developers can use."
-A facade class provides a clean API: `rag = SeamlessRAG(...); rag.ask(...)`.
+1. **MariaDB** -- Source tables with text data stored alongside VECTOR columns
+2. **Embedding** -- Text is embedded using a configurable provider (local or cloud)
+3. **Vector Search** -- HNSW cosine similarity retrieves the top-K relevant rows
+4. **TOON Format** -- Results are serialized using TOON v3 tabular encoding
+5. **LLM** -- TOON context is sent to a language model for answer generation
+6. **Answer** -- The response includes the answer, TOON context, and token benchmarks
 
-**Alternatives considered:** Flat module functions, factory pattern.
+## Component Overview
 
----
+```
+SeamlessRAG (facade)
++-- EmbeddingProvider (Protocol)     <- pluggable
+|   +-- SentenceTransformersProvider <- local, free (384d)
+|   +-- GeminiEmbeddingProvider      <- google-genai SDK (768d)
+|   +-- OpenAIEmbeddingProvider      <- openai SDK (3072d)
++-- LLMProvider (Protocol)           <- pluggable
+|   +-- OllamaLLMProvider            <- local REST (default)
+|   +-- GeminiLLMProvider            <- gemini-2.5-flash
+|   +-- OpenAILLMProvider            <- gpt-4o
++-- MariaDBVectorStore               <- VECTOR + HNSW cosine search
++-- AutoEmbedder                     <- watch + batch with retry
++-- RAGEngine                        <- search -> TOON -> LLM -> benchmark
++-- TOONEncoder                      <- full v3 spec (166/166)
++-- TokenBenchmark                   <- tiktoken cl100k_base
+```
 
-## ADR-002: VectorStore Protocol Abstraction (2026-04-11)
+## Protocol-Based Design
 
-**Decision:** Abstract all MariaDB vector operations behind a `VectorStore` Protocol.
+Both `EmbeddingProvider` and `LLMProvider` are defined as `typing.Protocol` classes. Any object that implements the required methods works -- no inheritance needed.
 
-**Context:** Both RAG engine and Watch mode need vector operations. Without abstraction,
-SQL would be duplicated. The Protocol also enables in-memory mocks for CI.
+This means you can add a new provider by writing a class with the right method signatures and registering it in the factory.
 
----
+## Storage Layer
 
-## ADR-003: Token Benchmark as RAG Observation Layer (2026-04-11)
+`MariaDBVectorStore` uses MariaDB's native VECTOR column type with HNSW indexing for cosine similarity search. Embeddings are stored as binary arrays using `array.array('f', ...)` for efficient transfer over the native protocol.
 
-**Decision:** Embed token comparison into RAG engine, not as a standalone module.
+## TOON Encoder
 
-**Context:** Judge Directive 2 requires "live token comparison with every ask."
-Making benchmark an observation layer (not a peer module) means every query
-automatically produces comparison data.
-
----
-
-## ADR-004: Polling over Binlog for Watch Mode (2026-04-11)
-
-**Decision:** Use polling (MAX(id) high-water mark) instead of MariaDB binlog.
-
-**Context:** Binlog requires SUPER privilege and adds deployment complexity.
-Polling is simpler, works with any MariaDB setup, and is sufficient for demo.
-Added checkpoint + retry for reliability (Judge Directive 3).
+The TOON v3 tabular encoder converts structured query results into a compact text format. Field names appear once in a header row, and data rows contain only values. This eliminates the per-row key repetition found in JSON, saving 30-58% of tokens depending on the number of rows.
