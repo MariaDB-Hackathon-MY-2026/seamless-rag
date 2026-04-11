@@ -54,12 +54,46 @@ def init() -> None:
     rag.close()
 
 
+def _chunk_text(text: str, size: int, overlap: int) -> list[str]:
+    """Split text into chunks at sentence boundaries with overlap."""
+    import re as _re
+
+    sentences = _re.split(r"(?<=[.!?])\s+", text.strip())
+    chunks: list[str] = []
+    current: list[str] = []
+    current_len = 0
+
+    for sent in sentences:
+        sent = sent.strip()
+        if not sent:
+            continue
+        if current_len + len(sent) > size and current:
+            chunks.append(" ".join(current))
+            # Keep overlap: retain last N chars worth of sentences
+            kept: list[str] = []
+            kept_len = 0
+            for s in reversed(current):
+                if kept_len + len(s) > overlap:
+                    break
+                kept.insert(0, s)
+                kept_len += len(s) + 1
+            current = kept
+            current_len = kept_len
+        current.append(sent)
+        current_len += len(sent) + 1
+
+    if current:
+        chunks.append(" ".join(current))
+    return chunks if chunks else [text.strip()]
+
+
 @app.command()
 def ingest(
     path: Path = typer.Argument(..., help="Text file or directory to ingest"),
-    chunk_size: int = typer.Option(500, "--chunk-size", help="Characters per chunk"),
+    chunk_size: int = typer.Option(500, "--chunk-size", help="Chars per chunk"),
+    overlap: int = typer.Option(50, "--overlap", help="Overlap between chunks"),
 ) -> None:
-    """Ingest text files into the database with automatic embedding."""
+    """Ingest text files with sentence-boundary chunking and overlap."""
     rag = _get_rag()
     rag.init()
 
@@ -68,16 +102,13 @@ def ingest(
 
     for f in files:
         text = f.read_text(encoding="utf-8")
-        chunks = []
+        # Split by paragraphs first, then chunk within paragraphs
+        chunks: list[str] = []
         for para in text.split("\n\n"):
             para = para.strip()
             if not para:
                 continue
-            if len(para) <= chunk_size:
-                chunks.append(para)
-            else:
-                for i in range(0, len(para), chunk_size):
-                    chunks.append(para[i : i + chunk_size])
+            chunks.extend(_chunk_text(para, chunk_size, overlap))
         if chunks:
             rag.ingest(f.name, chunks)
             total_chunks += len(chunks)

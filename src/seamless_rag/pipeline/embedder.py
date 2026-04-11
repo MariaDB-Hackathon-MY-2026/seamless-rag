@@ -113,21 +113,35 @@ class AutoEmbedder:
 
                         if rows:
                             retries = 0
-                            status = f"Embedding {len(rows)} new rows..."
+                            n = len(rows)
+                            status = f"Embedding {n} new rows (batch)..."
                             live.update(_make_table())
 
-                            for row in rows:
-                                try:
-                                    emb = self._provider.embed(row[text_column])
-                                    self._store.insert_embedding(table, row["id"], emb)
+                            # Batch embed for efficiency
+                            texts = [r[text_column] for r in rows]
+                            ids = [r["id"] for r in rows]
+                            try:
+                                embs = self._provider.embed_batch(texts)
+                                self._store.insert_embeddings_batch(
+                                    table, ids, embs,
+                                )
+                                embedded_total += n
+                                high_water = ids[-1]
+                            except Exception:
+                                logger.warning("Batch failed, row-by-row fallback")
+                                for row in rows:
+                                    try:
+                                        emb = self._provider.embed(row[text_column])
+                                        self._store.insert_embedding(
+                                            table, row["id"], emb,
+                                        )
+                                        embedded_total += 1
+                                    except Exception:
+                                        logger.exception("Failed row %d", row["id"])
+                                        failed_total += 1
                                     high_water = row["id"]
-                                    embedded_total += 1
-                                except Exception:
-                                    logger.exception("Failed row %d", row["id"])
-                                    high_water = row["id"]
-                                    failed_total += 1
 
-                            status = f"Done — embedded {len(rows)} rows"
+                            status = f"Done — embedded {n} rows"
                             live.update(_make_table())
                         else:
                             status = "Waiting..."
