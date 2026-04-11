@@ -132,15 +132,26 @@ class SeamlessRAG:
         return doc_id
 
     def embed_table(
-        self, table: str | None = None, text_column: str = "content", batch_size: int = 64,
+        self,
+        table: str | None = None,
+        text_column: str | list[str] = "content",
+        batch_size: int = 64,
     ) -> dict:
-        """Bulk-embed all rows in a table that lack embeddings."""
+        """Bulk-embed all rows in a table that lack embeddings.
+
+        Args:
+            text_column: Single column name or list of columns to concatenate
+                for richer semantic embeddings (e.g. ["name", "category", "price"]).
+        """
         return self._ensure_embedder().batch_embed(
             table or self._table, text_column, batch_size=batch_size,
         )
 
     def watch(
-        self, table: str | None = None, text_column: str = "content", interval: float = 2.0,
+        self,
+        table: str | None = None,
+        text_column: str | list[str] = "content",
+        interval: float = 2.0,
     ) -> None:
         """Watch a table for new inserts and auto-embed them."""
         self._ensure_embedder().watch(table or self._table, text_column, interval=interval)
@@ -152,6 +163,7 @@ class SeamlessRAG:
         where: str = "",
         mmr: bool = False,
         mmr_lambda: float = 0.5,
+        context_window: int = 0,
     ) -> RAGResult:
         """RAG query: embed → search → TOON → LLM → benchmark.
 
@@ -161,10 +173,12 @@ class SeamlessRAG:
             where: SQL WHERE filter for hybrid search (e.g. "price < 50").
             mmr: Apply MMR diversity selection.
             mmr_lambda: Relevance/diversity trade-off (0=diverse, 1=relevant).
+            context_window: Include neighboring chunks (0=disabled).
         """
         return self._ensure_rag().ask(
             question, top_k=top_k, where=where,
             mmr=mmr, mmr_lambda=mmr_lambda,
+            context_window=context_window,
         )
 
     def export(self, query: str) -> str:

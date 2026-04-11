@@ -384,10 +384,9 @@ def create_app() -> gr.Blocks:
                     )
 
                 # Tacit: the raw formats, for those who want to dwell deeper
-                with gr.Accordion("Context: TOON vs JSON", open=False):
-                    with gr.Row():
-                        ask_toon = gr.Code(label="TOON", language=None, interactive=False)
-                        ask_json = gr.Code(label="JSON", language="json", interactive=False)
+                with gr.Accordion("Context: TOON vs JSON", open=False), gr.Row():
+                    ask_toon = gr.Code(label="TOON", language=None, interactive=False)
+                    ask_json = gr.Code(label="JSON", language="json", interactive=False)
 
                 with gr.Accordion("Sources", open=False):
                     ask_sources = gr.Textbox(label="Retrieved", lines=6, interactive=False)

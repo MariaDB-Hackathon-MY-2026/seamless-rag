@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -22,6 +23,10 @@ if TYPE_CHECKING:
     from seamless_rag.storage.protocol import VectorStore
 
 logger = logging.getLogger(__name__)
+
+# Max context chars sent to LLM to avoid token limit errors
+_MAX_CONTEXT_CHARS = 20_000
+_LLM_MAX_RETRIES = 2
 
 
 @dataclass
@@ -108,19 +113,55 @@ class RAGEngine:
             )
 
         # 3. Format as JSON and TOON
-        context_json = json.dumps(results)
+        context_json = json.dumps(results, separators=(",", ":"), ensure_ascii=False)
         context_toon = encode_tabular(results) if results else "[0,]:"
 
         # 4. Token benchmark (observation layer)
         bench = self._benchmark.compare(results)
 
-        # 5. Generate answer via LLM (if available)
+        # 5. Generate answer via LLM (if available) with retry
         answer = ""
         if self._llm is not None and hasattr(self._llm, "generate"):
-            try:
-                answer = self._llm.generate(question, context_toon)
-            except Exception:
-                logger.exception("LLM generation failed, returning context without answer")
+            # Truncate context to avoid exceeding model token limits
+            llm_context = context_toon[:_MAX_CONTEXT_CHARS]
+            for attempt in range(_LLM_MAX_RETRIES + 1):
+                try:
+                    answer = self._llm.generate(question, llm_context)
+                    break
+                except (ConnectionError, TimeoutError, OSError) as e:
+                    if attempt < _LLM_MAX_RETRIES:
+                        # Add jitter to avoid thundering herd
+                        import random
+                        wait = (2 ** attempt) + random.uniform(0, 0.5)
+                        logger.warning(
+                            "LLM call failed (attempt %d), retrying in %.1fs: %s",
+                            attempt + 1, wait, e,
+                        )
+                        time.sleep(wait)
+                    else:
+                        logger.error(
+                            "LLM generation failed after %d attempts: %s",
+                            _LLM_MAX_RETRIES + 1, e,
+                        )
+                except RuntimeError as e:
+                    # Provider wrappers raise RuntimeError — check if transient
+                    err_msg = str(e).lower()
+                    is_transient = any(
+                        tok in err_msg
+                        for tok in ("rate", "429", "too many", "throttl", "overload", "503")
+                    )
+                    if is_transient and attempt < _LLM_MAX_RETRIES:
+                        import random
+                        wait = (2 ** (attempt + 1)) + random.uniform(0, 1)
+                        logger.warning("Rate limited, retrying in %.1fs", wait)
+                        time.sleep(wait)
+                    else:
+                        logger.error("LLM generation failed: %s", e)
+                        break
+                except ValueError as e:
+                    # Deterministic errors — don't retry
+                    logger.error("LLM generation failed (non-retryable): %s", e)
+                    break
 
         return RAGResult(
             answer=answer,

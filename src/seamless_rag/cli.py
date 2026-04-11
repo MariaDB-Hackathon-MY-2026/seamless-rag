@@ -127,16 +127,39 @@ def ingest(
         rprint(f"[green]Ingested {len(files)} files, {total_chunks} chunks total.[/green]")
 
 
+def _parse_columns(column: str, columns: str) -> str | list[str]:
+    """Parse --column / --columns into a single string or list.
+
+    --columns takes precedence over --column when specified.
+    Examples:
+        --columns "name,category,price"  → ["name", "category", "price"]
+        --column content                 → "content"
+    """
+    if columns:
+        cols = [c.strip() for c in columns.split(",") if c.strip()]
+        return cols if len(cols) > 1 else cols[0]
+    return column
+
+
 @app.command()
 def embed(
     table: str = typer.Option("chunks", "--table", "-t"),
-    column: str = typer.Option("content", "--column", "-c"),
+    column: str = typer.Option("content", "--column", "-c", help="Single text column"),
+    columns: str = typer.Option(
+        "", "--columns", help="Comma-separated columns to concatenate (e.g. name,category,price)",
+    ),
     batch_size: int = typer.Option(64, "--batch-size", "-b"),
 ) -> None:
-    """Bulk-embed all rows in a table that lack embeddings."""
+    """Bulk-embed all rows in a table that lack embeddings.
+
+    Use --columns to embed multiple columns concatenated together
+    for richer semantic search (e.g. --columns "name,category,price").
+    """
+    text_col = _parse_columns(column, columns)
+    col_display = ", ".join(text_col) if isinstance(text_col, list) else text_col
     with _get_rag() as rag:
-        rprint(f"[blue]Embedding {table}.{column} (batch_size={batch_size})...[/blue]")
-        result = rag.embed_table(table, text_column=column, batch_size=batch_size)
+        rprint(f"[blue]Embedding {table}.({col_display}) (batch_size={batch_size})...[/blue]")
+        result = rag.embed_table(table, text_column=text_col, batch_size=batch_size)
         rprint(
             f"[green]Done.[/green] "
             f"Embedded: {result['embedded']}, Failed: {result['failed']}, "
@@ -147,14 +170,22 @@ def embed(
 @app.command()
 def watch(
     table: str = typer.Option("chunks", "--table", "-t"),
-    column: str = typer.Option("content", "--column", "-c"),
+    column: str = typer.Option("content", "--column", "-c", help="Single text column"),
+    columns: str = typer.Option(
+        "", "--columns", help="Comma-separated columns to concatenate",
+    ),
     interval: float = typer.Option(2.0, "--interval", "-i"),
 ) -> None:
-    """Watch a table for new inserts and auto-embed."""
+    """Watch a table for new inserts and auto-embed.
+
+    Use --columns for multi-column embedding (e.g. --columns "name,description").
+    """
+    text_col = _parse_columns(column, columns)
+    col_display = ", ".join(text_col) if isinstance(text_col, list) else text_col
     with _get_rag() as rag:
-        rprint(f"[blue]Watching {table}.{column} every {interval}s (Ctrl+C to stop)[/blue]")
+        rprint(f"[blue]Watching {table}.({col_display}) every {interval}s (Ctrl+C to stop)[/blue]")
         try:
-            rag.watch(table, text_column=column, interval=interval)
+            rag.watch(table, text_column=text_col, interval=interval)
         except KeyboardInterrupt:
             rprint("\n[yellow]Watch stopped.[/yellow]")
 
@@ -173,6 +204,7 @@ def ask(
         result = rag.ask(
             question, top_k=top_k, where=where,
             mmr=use_mmr, mmr_lambda=mmr_lambda,
+            context_window=context_window,
         )
         if result.sources:
             if result.answer:
@@ -252,11 +284,19 @@ def web(
     share: bool = typer.Option(False, "--share", help="Create public link"),
 ) -> None:
     """Launch Gradio web UI in browser."""
-    from seamless_rag.web import create_app
+    from seamless_rag.web import _get_auth, create_app
 
+    auth = _get_auth()
+    if share and auth is None:
+        rprint(
+            "[red]Error:[/red] --share requires authentication. "
+            "Set SEAMLESS_WEB_USER and SEAMLESS_WEB_PASSWORD environment variables."
+        )
+        raise typer.Exit(1)
+    bind = "0.0.0.0" if share else "127.0.0.1"
     rprint(f"[blue]Launching web UI on http://localhost:{port}[/blue]")
     app = create_app()
-    app.launch(server_name="0.0.0.0", server_port=port, share=share)
+    app.launch(server_name=bind, server_port=port, share=share, auth=auth)
 
 
 @app.command()

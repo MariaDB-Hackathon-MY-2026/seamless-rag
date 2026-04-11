@@ -12,6 +12,7 @@ dependencies = [
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
     "tiktoken>=0.7.0",
+    "sqlglot>=26.0",
 ]
 
 [project.optional-dependencies]

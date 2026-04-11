@@ -31,26 +31,57 @@ class AutoEmbedder:
         self._provider = provider
         self._store = store
 
+    @staticmethod
+    def _row_text(row: dict, text_columns: list[str], separator: str = " — ") -> str:
+        """Concatenate multiple columns into a single text for embedding.
+
+        For single column, returns the value as-is. For multiple columns,
+        joins non-empty values with the separator for richer semantics.
+
+        Example:
+            columns=["name", "category", "price"]
+            → "Widget — Tools — 29.99"
+        """
+        if len(text_columns) == 1:
+            return str(row[text_columns[0]])
+        parts = []
+        for col in text_columns:
+            val = row.get(col)
+            if val is not None and str(val).strip():
+                parts.append(str(val))
+        return separator.join(parts)
+
     def batch_embed(
-        self, table: str, text_column: str = "content", batch_size: int = 64,
+        self,
+        table: str,
+        text_column: str | list[str] = "content",
+        batch_size: int = 64,
     ) -> dict:
         """Bulk-embed all rows lacking embeddings.
+
+        Args:
+            table: Table name.
+            text_column: Single column name or list of columns to concatenate.
+                When multiple columns are given, values are joined with " — "
+                for richer semantic embeddings.
+            batch_size: Number of rows per embedding batch.
 
         Returns:
             dict with keys: embedded, failed, total
         """
+        text_columns = [text_column] if isinstance(text_column, str) else list(text_column)
         last_id = 0
         embedded = 0
         failed = 0
 
         while True:
-            rows = self._store.get_new_rows(table, text_column, last_id)
+            rows = self._store.get_new_rows(table, text_columns, last_id)
             if not rows:
                 break
 
             for i in range(0, len(rows), batch_size):
                 batch = rows[i : i + batch_size]
-                texts = [r[text_column] for r in batch]
+                texts = [self._row_text(r, text_columns) for r in batch]
                 ids = [r["id"] for r in batch]
 
                 try:
@@ -61,7 +92,8 @@ class AutoEmbedder:
                     logger.exception("Batch failed, falling back to row-by-row")
                     for row in batch:
                         try:
-                            emb = self._provider.embed(row[text_column])
+                            text = self._row_text(row, text_columns)
+                            emb = self._provider.embed(text)
                             self._store.insert_embedding(table, row["id"], emb)
                             embedded += 1
                         except Exception:
@@ -75,11 +107,14 @@ class AutoEmbedder:
     def watch(
         self,
         table: str,
-        text_column: str = "content",
+        text_column: str | list[str] = "content",
         interval: float = 2.0,
         max_retries: int = 3,
     ) -> None:
         """Watch for new inserts and auto-embed with Rich live display.
+
+        Args:
+            text_column: Single column name or list of columns to concatenate.
 
         Features:
         - Checkpoint: tracks MAX(id) as high-water mark
@@ -87,6 +122,8 @@ class AutoEmbedder:
         - Isolation: failed rows are logged and skipped
         - Rich live table showing status, embedded count, errors
         """
+        text_columns = [text_column] if isinstance(text_column, str) else list(text_column)
+        col_display = ", ".join(text_columns)
         high_water = self._store.get_max_id(table)
         retries = 0
         embedded_total = 0
@@ -94,7 +131,7 @@ class AutoEmbedder:
         status = "Waiting..."
 
         def _make_table() -> Table:
-            t = Table(title=f"Watching {table}.{text_column}", show_header=True)
+            t = Table(title=f"Watching {table}.{col_display}", show_header=True)
             t.add_column("Metric", style="cyan")
             t.add_column("Value", justify="right")
             t.add_row("Status", status)
@@ -109,7 +146,7 @@ class AutoEmbedder:
             with Live(_make_table(), console=_console, refresh_per_second=2) as live:
                 while True:
                     try:
-                        rows = self._store.get_new_rows(table, text_column, high_water)
+                        rows = self._store.get_new_rows(table, text_columns, high_water)
 
                         if rows:
                             retries = 0
@@ -118,7 +155,7 @@ class AutoEmbedder:
                             live.update(_make_table())
 
                             # Batch embed for efficiency
-                            texts = [r[text_column] for r in rows]
+                            texts = [self._row_text(r, text_columns) for r in rows]
                             ids = [r["id"] for r in rows]
                             try:
                                 embs = self._provider.embed_batch(texts)
@@ -131,7 +168,8 @@ class AutoEmbedder:
                                 logger.warning("Batch failed, row-by-row fallback")
                                 for row in rows:
                                     try:
-                                        emb = self._provider.embed(row[text_column])
+                                        text = self._row_text(row, text_columns)
+                                        emb = self._provider.embed(text)
                                         self._store.insert_embedding(
                                             table, row["id"], emb,
                                         )

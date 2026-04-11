@@ -36,7 +36,7 @@ class TokenBenchmark:
         return len(self._enc.encode(text))
 
     def compare(self, data: list[dict]) -> BenchmarkResult:
-        json_str = json.dumps(data)
+        json_str = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
         toon_str = encode_tabular(data)
 
         json_bytes = len(json_str.encode("utf-8"))

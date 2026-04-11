@@ -50,8 +50,14 @@ class VectorStore(Protocol):
         """Update multiple rows with their embedding vectors in a batch."""
         ...
 
-    def get_new_rows(self, table: str, text_column: str, last_id: int) -> list[dict]:
-        """Fetch rows with id > last_id that need embedding."""
+    def get_new_rows(
+        self, table: str, text_columns: str | list[str], last_id: int,
+    ) -> list[dict]:
+        """Fetch rows with id > last_id that need embedding.
+
+        Args:
+            text_columns: Single column name or list of column names to fetch.
+        """
         ...
 
     def get_max_id(self, table: str) -> int:
