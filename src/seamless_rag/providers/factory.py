@@ -35,6 +35,7 @@ def create_embedding_provider(settings: Settings) -> EmbeddingProvider:
 
     Supported providers:
         - "sentence-transformers": Local model (default, no API key needed)
+        - "ollama": Local Ollama server (no API key needed)
         - "gemini": Google Gemini via google-genai SDK
         - "openai": OpenAI via openai SDK
     """
@@ -48,6 +49,17 @@ def create_embedding_provider(settings: Settings) -> EmbeddingProvider:
         if _is_foreign_model(model, provider):
             model = "BAAI/bge-small-en-v1.5"
         return SentenceTransformersProvider(model_name=model)
+
+    if provider == "ollama":
+        from seamless_rag.providers.ollama import OllamaEmbeddingProvider
+
+        if model in _LOCAL_MODELS:
+            model = "nomic-embed-text"
+            dims = 768
+        return OllamaEmbeddingProvider(
+            model=model, dimensions=dims,
+            base_url=settings.llm_base_url or "http://localhost:11434",
+        )
 
     # Detect if user left everything at local defaults (no explicit config)
     is_unconfigured = model in _LOCAL_MODELS and dims == _LOCAL_DIMENSIONS
@@ -79,5 +91,5 @@ def create_embedding_provider(settings: Settings) -> EmbeddingProvider:
 
     raise ValueError(
         f"Unknown embedding provider: {provider!r}. "
-        f"Supported: sentence-transformers, gemini, openai"
+        f"Supported: sentence-transformers, ollama, gemini, openai"
     )
