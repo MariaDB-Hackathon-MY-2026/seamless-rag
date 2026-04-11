@@ -110,7 +110,9 @@ class TestAskCommand:
         """ask command passes --top-k to rag.ask()."""
         with patch("seamless_rag.cli._get_rag", return_value=mock_rag):
             runner.invoke(app, ["ask", "question", "--top-k", "3"])
-        mock_rag.ask.assert_called_once_with("question", top_k=3)
+        mock_rag.ask.assert_called_once()
+        call_kwargs = mock_rag.ask.call_args
+        assert call_kwargs[1]["top_k"] == 3 or call_kwargs[0][1] == 3
 
     def test_ask_calls_close(self, mock_rag):
         """ask command calls rag.close() for cleanup."""

@@ -163,11 +163,17 @@ def watch(
 def ask(
     question: str = typer.Argument(..., help="Question to ask"),
     top_k: int = typer.Option(5, "--top-k", "-k"),
-    context_window: int = typer.Option(0, "--context-window", "-w", help="Neighboring chunks"),
+    context_window: int = typer.Option(0, "--context-window", "-w"),
+    where: str = typer.Option("", "--where", help="SQL WHERE filter"),
+    use_mmr: bool = typer.Option(False, "--mmr", help="MMR diversity"),
+    mmr_lambda: float = typer.Option(0.5, "--mmr-lambda"),
 ) -> None:
     """Ask a question using RAG with token benchmarking."""
     with _get_rag() as rag:
-        result = rag.ask(question, top_k=top_k)
+        result = rag.ask(
+            question, top_k=top_k, where=where,
+            mmr=use_mmr, mmr_lambda=mmr_lambda,
+        )
         if result.sources:
             if result.answer:
                 rprint(f"\n[bold green]Answer:[/bold green] {result.answer}\n")

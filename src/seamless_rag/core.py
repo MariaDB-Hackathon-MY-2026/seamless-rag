@@ -145,9 +145,27 @@ class SeamlessRAG:
         """Watch a table for new inserts and auto-embed them."""
         self._ensure_embedder().watch(table or self._table, text_column, interval=interval)
 
-    def ask(self, question: str, top_k: int = 5) -> RAGResult:
-        """RAG query: embed question -> search -> TOON format -> answer."""
-        return self._ensure_rag().ask(question, top_k=top_k)
+    def ask(
+        self,
+        question: str,
+        top_k: int = 5,
+        where: str = "",
+        mmr: bool = False,
+        mmr_lambda: float = 0.5,
+    ) -> RAGResult:
+        """RAG query: embed → search → TOON → LLM → benchmark.
+
+        Args:
+            question: Natural language query.
+            top_k: Number of results.
+            where: SQL WHERE filter for hybrid search (e.g. "price < 50").
+            mmr: Apply MMR diversity selection.
+            mmr_lambda: Relevance/diversity trade-off (0=diverse, 1=relevant).
+        """
+        return self._ensure_rag().ask(
+            question, top_k=top_k, where=where,
+            mmr=mmr, mmr_lambda=mmr_lambda,
+        )
 
     def export(self, query: str) -> str:
         """Export a SQL query's results as TOON format."""

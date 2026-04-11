@@ -31,8 +31,13 @@ class VectorStore(Protocol):
         query_vec: list[float],
         top_k: int = 5,
         context_window: int = 0,
+        where: str = "",
     ) -> list[dict]:
-        """Search for nearest vectors, returning results as list[dict]."""
+        """Search for nearest vectors with optional SQL filter.
+
+        Args:
+            where: SQL WHERE clause for hybrid filter+vector search.
+        """
         ...
 
     def insert_embedding(self, table: str, row_id: int, embedding: list[float]) -> None:

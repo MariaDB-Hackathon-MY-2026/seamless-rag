@@ -61,7 +61,14 @@ class RAGEngine:
         self._llm = llm
 
     def ask(
-        self, question: str, top_k: int = 5, context_window: int = 0,
+        self,
+        question: str,
+        top_k: int = 5,
+        context_window: int = 0,
+        where: str = "",
+        mmr: bool = False,
+        mmr_fetch_k: int = 20,
+        mmr_lambda: float = 0.5,
     ) -> RAGResult:
         """Execute retrieval query with automatic token benchmarking.
 
@@ -69,6 +76,10 @@ class RAGEngine:
             question: Natural language query.
             top_k: Number of top results to retrieve.
             context_window: Number of neighboring chunks to include (0=disabled).
+            where: SQL WHERE clause for hybrid filter+vector search.
+            mmr: If True, apply MMR diversity selection.
+            mmr_fetch_k: Candidates to fetch before MMR filtering.
+            mmr_lambda: MMR relevance/diversity trade-off (0=diverse, 1=relevant).
 
         Returns:
             RAGResult with TOON context, token counts, and source rows.
@@ -76,10 +87,25 @@ class RAGEngine:
         # 1. Embed question
         query_vec = self._provider.embed(question)
 
-        # 2. Vector search (with context window if requested)
-        results = self._storage.search(
-            self._table, query_vec, top_k, context_window=context_window,
-        )
+        # 2. Vector search — with optional filter and MMR
+        if mmr:
+            from seamless_rag.pipeline.retrieval import mmr_search
+
+            results = mmr_search(
+                provider=self._provider,
+                storage=self._storage,
+                table=self._table,
+                question=question,
+                top_k=top_k,
+                fetch_k=mmr_fetch_k,
+                lambda_mult=mmr_lambda,
+                where=where,
+            )
+        else:
+            results = self._storage.search(
+                self._table, query_vec, top_k,
+                context_window=context_window, where=where,
+            )
 
         # 3. Format as JSON and TOON
         context_json = json.dumps(results)

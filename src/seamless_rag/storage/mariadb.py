@@ -222,9 +222,22 @@ class MariaDBVectorStore:
     def search(
         self, table: str, query_vec: list[float],
         top_k: int = 5, context_window: int = 0,
+        where: str = "",
     ) -> list[dict]:
+        """Vector similarity search with optional SQL filter.
+
+        Args:
+            table: Table name containing embedding column.
+            query_vec: Query vector for cosine similarity.
+            top_k: Number of results to return.
+            context_window: Include neighboring chunks (0=disabled).
+            where: Optional SQL WHERE clause (e.g. "price < 50 AND category = 'tools'").
+                   Values should use the column names directly — this is appended
+                   to the query as-is after a "WHERE" keyword.
+        """
         t = _validate_ident(table)
         qb = _vec_bytes(query_vec)
+        where_clause = f"WHERE {where}" if where else ""
         with self._get_conn() as conn:
             cursor = conn.cursor(dictionary=True)
             try:
@@ -235,7 +248,8 @@ class MariaDBVectorStore:
                         WITH closest AS (
                             SELECT id, document_id, chunk_order,
                                 VEC_DISTANCE_COSINE(embedding, ?) AS distance
-                            FROM {t} ORDER BY distance LIMIT ?
+                            FROM {t} {where_clause}
+                            ORDER BY distance LIMIT ?
                         )
                         SELECT DISTINCT c.id, c.content, c.chunk_order,
                             c.document_id, closest.distance
@@ -253,7 +267,8 @@ class MariaDBVectorStore:
                         f"""
                         SELECT id, content,
                             VEC_DISTANCE_COSINE(embedding, ?) AS distance
-                        FROM {t} ORDER BY distance, id LIMIT ?
+                        FROM {t} {where_clause}
+                        ORDER BY distance, id LIMIT ?
                         """,
                         (qb, top_k),
                     )
