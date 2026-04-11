@@ -87,7 +87,10 @@ def _encode_string_value(value: str, delimiter: str) -> str:
 
 
 def _encode_number(value: int | float) -> str:
-    """Canonical number encoding per Section 2."""
+    """Canonical number encoding per Section 2.
+
+    Uses Decimal for exact IEEE 754 → non-scientific decimal conversion.
+    """
     if isinstance(value, float):
         if math.isnan(value) or math.isinf(value):
             return "null"
@@ -96,15 +99,19 @@ def _encode_number(value: int | float) -> str:
         # Check if it's a whole number
         if value == int(value) and abs(value) < 1e20:
             return str(int(value))
-        # Use repr for full precision, then strip trailing zeros
+        # Use repr for shortest round-trip form
         s = repr(value)
-        # repr may use scientific notation for very small/large floats
-        if "e" in s or "E" in s:
-            s = f"{value:.20f}".rstrip("0").rstrip(".")
-            if "." not in s:
-                return s
+        if "e" not in s and "E" not in s:
             return s
-        return s
+        # Scientific notation → exact decimal via Decimal
+        from decimal import Decimal
+        d = Decimal(s)
+        # Format as fixed-point, strip trailing zeros
+        fixed = format(d, "f")
+        # Strip trailing zeros after decimal point
+        if "." in fixed:
+            fixed = fixed.rstrip("0").rstrip(".")
+        return fixed
     # int
     return str(value)
 
@@ -162,8 +169,11 @@ def _all_primitives(arr: list) -> bool:
     return all(_is_primitive(v) for v in arr)
 
 
-def _all_arrays(arr: list) -> bool:
-    return all(isinstance(v, list) for v in arr)
+def _all_primitive_arrays(arr: list) -> bool:
+    """Check if all elements are lists of primitives (Section 9.2)."""
+    return all(
+        isinstance(v, list) and _all_primitives(v) for v in arr
+    )
 
 
 def _is_tabular(arr: list) -> bool:
@@ -294,13 +304,15 @@ def _encode_object_lines(
         return ""
 
     lines: list[str] = []
+    # Collision detection uses THIS object's sibling keys, not ancestor's
+    sibling_keys = set(data.keys())
 
     for k, v in data.items():
         # Key folding (safe mode)
         if key_folding == "safe" and isinstance(v, dict) and len(v) == 1:
             folded = _try_fold(
                 k, v, delimiter=delimiter, indent=indent, depth=depth,
-                flatten_depth=flatten_depth, parent_keys=parent_keys or set(data.keys()),
+                flatten_depth=flatten_depth, parent_keys=sibling_keys,
                 key_folding=key_folding,
             )
             if folded is not None:
@@ -477,7 +489,7 @@ def _encode_array_field(
         )
 
     # All arrays → array of arrays
-    if _all_arrays(arr):
+    if _all_primitive_arrays(arr):
         header = f"{prefix}{ek}[{n}{dsuf}]:"
         lines = [header]
         item_prefix = " " * (indent * (depth + 1))
@@ -635,7 +647,7 @@ def _encode_first_list_field(
                 )
                 result.append(f"{row_prefix}{vals}")
             return result
-        if _all_arrays(value):
+        if _all_primitive_arrays(value):
             header = f"{item_prefix}- {ek}[{n}{dsuf}]:"
             result = [header]
             sub_prefix = " " * (indent * sub_depth)
