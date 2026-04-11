@@ -24,8 +24,12 @@ class Settings(BaseSettings):
     watch_batch_size: int = Field(default=64, alias="WATCH_BATCH_SIZE")
     watch_max_retries: int = Field(default=3, alias="WATCH_MAX_RETRIES")
 
-    # LLM — local via Ollama (Qwen3 8B: best instruction following in 8B class)
+    # LLM for RAG answer generation
+    # Providers: "ollama" (local default), "gemini", "openai", "groq"
+    # Default is Ollama so judges need zero API keys
     llm_provider: str = Field(default="ollama", alias="LLM_PROVIDER")
     llm_model: str = Field(default="qwen3:8b", alias="LLM_MODEL")
+    llm_api_key: str = Field(default="", alias="LLM_API_KEY")
+    llm_base_url: str = Field(default="", alias="LLM_BASE_URL")
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
