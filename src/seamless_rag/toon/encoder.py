@@ -153,11 +153,24 @@ def _encode_primitive(value: Any, delimiter: str) -> str:
         return _encode_number(value)
     if isinstance(value, str):
         return _encode_string_value(value, delimiter)
+    # Handle database types: Decimal, date, datetime, timedelta, etc.
+    import decimal
+    if isinstance(value, decimal.Decimal):
+        # Convert to int if whole number, else float
+        if value == int(value):
+            return _encode_number(int(value))
+        return _encode_number(float(value))
+    # Fallback: convert to string (dates, timedelta, etc.)
+    if hasattr(value, "isoformat"):
+        return _encode_string_value(value.isoformat(), delimiter)
     raise TypeError(f"Cannot encode {type(value).__name__} as TOON primitive")
 
 
 def _is_primitive(value: Any) -> bool:
-    return value is None or isinstance(value, (bool, int, float, str))
+    import decimal
+    return (value is None
+            or isinstance(value, (bool, int, float, str, decimal.Decimal))
+            or hasattr(value, "isoformat"))
 
 
 # ============================================================

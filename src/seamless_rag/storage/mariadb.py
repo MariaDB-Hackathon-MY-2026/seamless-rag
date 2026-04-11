@@ -77,8 +77,9 @@ def _validate_select_query(sql: str) -> str:
     except sqlglot.errors.ParseError as e:
         raise ValueError(f"Invalid SQL query: {e}") from e
 
-    # Top-level must be a SELECT
-    if not isinstance(parsed, sqlglot_exp.Select):
+    # Top-level must be a SELECT or UNION of SELECTs
+    allowed_top = (sqlglot_exp.Select, sqlglot_exp.Union, sqlglot_exp.Intersect, sqlglot_exp.Except)
+    if not isinstance(parsed, allowed_top):
         raise ValueError("Only SELECT queries are allowed")
 
     # Walk AST — reject dangerous nodes anywhere
