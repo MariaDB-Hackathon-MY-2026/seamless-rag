@@ -208,6 +208,19 @@ def benchmark(
 
 
 @app.command()
+def web(
+    port: int = typer.Option(7860, "--port", "-p", help="Server port"),
+    share: bool = typer.Option(False, "--share", help="Create public link"),
+) -> None:
+    """Launch Gradio web UI in browser."""
+    from seamless_rag.web import create_app
+
+    rprint(f"[blue]Launching web UI on http://localhost:{port}[/blue]")
+    app = create_app()
+    app.launch(server_name="0.0.0.0", server_port=port, share=share)
+
+
+@app.command()
 def demo(
 ) -> None:
     """Run end-to-end demo: init -> seed data -> ask question -> show benchmark."""
