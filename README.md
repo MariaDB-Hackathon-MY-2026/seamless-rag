@@ -42,6 +42,33 @@ TOON tabular writes field names once, values as compact rows:
 
 TOON is not magic — it shines on **structured tabular data**, which is exactly what comes out of database queries.
 
+## Where It Fits
+
+For structured database data, the industry uses two retrieval approaches. Seamless-RAG bridges both to LLMs:
+
+```
+"Q3 revenue by region?"           "Find products similar to X"
+        │                                    │
+   Text-to-SQL                        Vector Search
+   (LLM generates SQL)              (cosine similarity)
+        │                                    │
+        └──────────┬─────────────────────────┘
+                   ▼
+           MariaDB executes
+                   ▼
+           list[dict] results
+                   ▼
+        Seamless-RAG → TOON format     ← saves 30-68% tokens
+                   ▼
+           LLM / Agent consumes
+```
+
+- **Precise queries** ("revenue > 1M"): write SQL directly, use `seamless-rag export` to TOON-format the results
+- **Semantic queries** ("similar products"): use `seamless-rag ask` for vector search on text columns
+- **Hybrid** ("waterproof watches under $50"): `seamless-rag ask --where "price < 50"` combines both
+
+Seamless-RAG is a **format + embedding bridge**, not a replacement for SQL.
+
 ## Quick Start
 
 Your data is already in MariaDB. Seamless-RAG adds vectors and TOON.
