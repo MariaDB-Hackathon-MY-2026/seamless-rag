@@ -27,9 +27,13 @@ class Settings(BaseSettings):
     # LLM for RAG answer generation
     # Providers: "ollama" (local default), "gemini", "openai", "groq"
     # Default is Ollama so judges need zero API keys
+    # For development/demo: set LLM_PROVIDER=gemini in .env
     llm_provider: str = Field(default="ollama", alias="LLM_PROVIDER")
     llm_model: str = Field(default="qwen3:8b", alias="LLM_MODEL")
     llm_api_key: str = Field(default="", alias="LLM_API_KEY")
     llm_base_url: str = Field(default="", alias="LLM_BASE_URL")
+
+    # OpenAI (secondary — for token counting and optional generation)
+    openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
