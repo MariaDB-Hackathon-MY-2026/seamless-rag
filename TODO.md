@@ -14,17 +14,19 @@
 - [x] MariaDB VectorStore (`src/seamless_rag/storage/mariadb.py`)
 - [x] Auto-embedder watch + batch (`src/seamless_rag/pipeline/embedder.py`)
 - [x] RAG engine with token observation (`src/seamless_rag/pipeline/rag.py`)
-- [ ] Integration tests (needs Docker MariaDB)
+- [x] Integration tests — 10/10 passing with Docker MariaDB 11.8
 
 ## P2 — User Interface
 - [x] SeamlessRAG facade (`src/seamless_rag/core.py`)
 - [x] Typer CLI (`src/seamless_rag/cli.py`)
-- [ ] Docker Compose end-to-end
-- [ ] Dockerfile
+- [x] Docker Compose end-to-end
+- [x] Dockerfile
 
 ## P3 — Polish & Delivery
-- [ ] README.md (judge-facing)
-- [ ] JUDGES_TESTING_GUIDE.md
+- [x] README.md (judge-facing)
+- [x] JUDGES_TESTING_GUIDE.md
+- [x] docs/HANDOFF.md
+- [x] docs/SPECIFICATION.md
 - [ ] Demo script (2-4 min)
 - [ ] Demo video recording
 - [ ] Performance benchmarks with charts
