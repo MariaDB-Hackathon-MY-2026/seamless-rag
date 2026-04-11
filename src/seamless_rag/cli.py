@@ -96,7 +96,10 @@ def ask(
     result = rag.ask(question, top_k=top_k)
 
     if result.sources:
-        rprint(f"\n[bold]Context (TOON — {result.toon_tokens} tokens):[/bold]")
+        if result.answer:
+            rprint(f"\n[bold green]Answer:[/bold green] {result.answer}\n")
+
+        rprint(f"[bold]Context (TOON — {result.toon_tokens} tokens):[/bold]")
         rprint(result.context_toon)
 
         table = Table(title="\nToken Benchmark")
@@ -205,6 +208,9 @@ def demo(
     for q in questions:
         rprint(f"[bold]3. Asking:[/bold] {q}")
         result = rag.ask(q, top_k=3)
+
+        if result.answer:
+            rprint(f"\n   [bold green]Answer:[/bold green] {result.answer}")
 
         rprint(f"\n   [bold]TOON Context ({result.toon_tokens} tokens):[/bold]")
         for line in result.context_toon.split("\n"):
