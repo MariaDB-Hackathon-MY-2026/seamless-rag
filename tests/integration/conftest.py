@@ -14,6 +14,13 @@ except ImportError:
     pytest.skip("mariadb connector not installed", allow_module_level=True)
 
 
+def _convert_params(params):
+    """Convert array.array params to bytes for VEC_DISTANCE_COSINE compatibility."""
+    if params is None:
+        return None
+    return tuple(p.tobytes() if isinstance(p, array.array) else p for p in params)
+
+
 def _get_db_config():
     """Get database config from environment or defaults."""
     import os
@@ -75,11 +82,25 @@ def db_connection():
     conn.close()
 
 
+class _VectorCursor:
+    """Cursor wrapper that auto-converts array.array to bytes for VECTOR params."""
+
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def execute(self, stmt, params=None):
+        return self._cursor.execute(stmt, _convert_params(params))
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+
 @pytest.fixture
 def db_cursor(db_connection):
     """Fresh cursor, cleans up test data after each test."""
     cursor = db_connection.cursor()
-    yield cursor
+    wrapped = _VectorCursor(cursor)
+    yield wrapped
     # Clean test data
     cursor.execute("DELETE FROM test_chunks")
     cursor.execute("DELETE FROM test_documents")
@@ -90,7 +111,8 @@ def db_cursor(db_connection):
 def dict_cursor(db_connection):
     """Dictionary cursor for TOON-ready output."""
     cursor = db_connection.cursor(dictionary=True)
-    yield cursor
+    wrapped = _VectorCursor(cursor)
+    yield wrapped
     cursor.execute("DELETE FROM test_chunks")
     cursor.execute("DELETE FROM test_documents")
     cursor.close()
