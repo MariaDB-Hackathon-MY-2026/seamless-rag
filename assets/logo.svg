@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+  <defs>
+    <linearGradient id="dbGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00546B"/>
+      <stop offset="100%" stop-color="#003545"/>
+    </linearGradient>
+  </defs>
+  <!-- Database cylinder -->
+  <g transform="translate(8, 5)">
+    <!-- Cylinder body -->
+    <rect x="4" y="10" width="28" height="22" rx="1" fill="url(#dbGrad)"/>
+    <!-- Top ellipse -->
+    <ellipse cx="18" cy="10" rx="14" ry="5" fill="#00546B" stroke="#003545" stroke-width="0.5"/>
+    <!-- Bottom ellipse -->
+    <ellipse cx="18" cy="32" rx="14" ry="5" fill="#003545"/>
+    <!-- Middle line -->
+    <ellipse cx="18" cy="21" rx="14" ry="4" fill="none" stroke="#C0765A" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.6"/>
+    <!-- Search magnifier overlay -->
+    <circle cx="28" cy="26" r="7" fill="none" stroke="#C0765A" stroke-width="2"/>
+    <line x1="33" y1="31" x2="38" y2="36" stroke="#C0765A" stroke-width="2" stroke-linecap="round"/>
+    <!-- Vector dots inside magnifier -->
+    <circle cx="26" cy="24" r="1" fill="#C0765A"/>
+    <circle cx="30" cy="25" r="1" fill="#C0765A"/>
+    <circle cx="28" cy="28" r="1" fill="#C0765A"/>
+  </g>
+  <!-- Text -->
+  <text x="54" y="22" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#003545" letter-spacing="-0.3">Seamless-RAG</text>
+  <text x="54" y="36" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="7.5" fill="#C0765A" letter-spacing="0.5">TOON-Native RAG for MariaDB</text>
+</svg>
