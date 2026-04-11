@@ -29,5 +29,5 @@ eval/results.tsv
 # Playwright MCP cache
 .playwright-mcp/
 
-# Web UI screenshots
-web-*.png
+# Screenshots (Playwright MCP testing)
+screenshots/
