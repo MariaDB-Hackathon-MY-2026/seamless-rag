@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
 _GEMINI_DEFAULTS = {"model": "gemini-embedding-001", "dimensions": 768}
 _OPENAI_DEFAULTS = {"model": "text-embedding-3-large", "dimensions": 3072}
+_LOCAL_MODEL = "BAAI/bge-small-en-v1.5"
+_LOCAL_DIMENSIONS = 384
 
 # Prefixes that identify each provider's models
 _GEMINI_PREFIXES = ("gemini-",)
@@ -47,15 +49,16 @@ def create_embedding_provider(settings: Settings) -> EmbeddingProvider:
             model = "BAAI/bge-small-en-v1.5"
         return SentenceTransformersProvider(model_name=model)
 
+    # Detect if user left everything at local defaults (no explicit config)
+    is_unconfigured = model == _LOCAL_MODEL and dims == _LOCAL_DIMENSIONS
+
     if provider == "gemini":
         from seamless_rag.providers.gemini import GeminiEmbeddingProvider
 
         if not settings.embedding_api_key:
             raise ValueError("EMBEDDING_API_KEY required for Gemini provider")
-        if _is_foreign_model(model, provider):
+        if _is_foreign_model(model, provider) or is_unconfigured:
             model = _GEMINI_DEFAULTS["model"]
-            dims = _GEMINI_DEFAULTS["dimensions"]
-        elif dims == 384:
             dims = _GEMINI_DEFAULTS["dimensions"]
         return GeminiEmbeddingProvider(
             api_key=settings.embedding_api_key, model=model, dimensions=dims,
@@ -67,10 +70,8 @@ def create_embedding_provider(settings: Settings) -> EmbeddingProvider:
         api_key = settings.openai_api_key
         if not api_key:
             raise ValueError("OPENAI_API_KEY required for OpenAI embedding provider")
-        if _is_foreign_model(model, provider):
+        if _is_foreign_model(model, provider) or is_unconfigured:
             model = _OPENAI_DEFAULTS["model"]
-            dims = _OPENAI_DEFAULTS["dimensions"]
-        elif dims == 384:
             dims = _OPENAI_DEFAULTS["dimensions"]
         return OpenAIEmbeddingProvider(
             api_key=api_key, model=model, dimensions=dims,

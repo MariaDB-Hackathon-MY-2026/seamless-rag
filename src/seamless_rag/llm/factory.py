@@ -10,21 +10,21 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# Prefixes that identify each provider's models
-_GEMINI_PREFIXES = ("gemini-",)
-_OPENAI_PREFIXES = ("gpt-", "o1", "o3", "o4")
-_OLLAMA_PREFIXES = ("qwen", "llama", "mistral", "deepseek", "phi", "codellama")
+# Known model prefixes per provider (anchored with separator)
+_GEMINI_MODELS = {"gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"}
+_OPENAI_MODELS = {"gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "o1", "o1-mini", "o3-mini"}
+_OLLAMA_DEFAULT = "qwen3:8b"
 
 
 def _is_foreign_model(model: str, provider: str) -> bool:
     """Check if model name belongs to a different provider."""
     m = model.lower()
     if provider == "gemini":
-        return m.startswith(_OPENAI_PREFIXES + _OLLAMA_PREFIXES)
+        return m in _OPENAI_MODELS or m.startswith(("gpt-", "qwen", "llama", "mistral"))
     if provider == "openai":
-        return m.startswith(_GEMINI_PREFIXES + _OLLAMA_PREFIXES)
+        return m in _GEMINI_MODELS or m.startswith(("gemini-", "qwen", "llama", "mistral"))
     if provider == "ollama":
-        return m.startswith(_GEMINI_PREFIXES + _OPENAI_PREFIXES)
+        return m in _GEMINI_MODELS or m in _OPENAI_MODELS or m.startswith(("gemini-", "gpt-"))
     return False
 
 
