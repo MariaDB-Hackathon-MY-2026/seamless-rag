@@ -1,4 +1,12 @@
-"""Gradio Web UI — visual interface for Seamless-RAG.
+"""Gradio Web UI — Seamless-RAG.
+
+Design philosophy: Polanyi's Tacit Dimension.
+"We can know more than we can tell."
+
+The interface lets you FEEL the difference between JSON and TOON
+rather than just reading numbers. Focal awareness on your question
+and answer; subsidiary awareness on format efficiency; tacit
+understanding of the vector search mechanics underneath.
 
 Launch: seamless-rag web  OR  python -m seamless_rag.web
 """
@@ -6,7 +14,6 @@ from __future__ import annotations
 
 import json
 import logging
-import traceback
 
 import gradio as gr
 
@@ -30,51 +37,12 @@ def _get_benchmark():
     return TokenBenchmark()
 
 
-# ── Handler: Init DB ─────────────────────────────────────────
-
-def handle_init_db():
-    try:
-        rag = _get_rag()
-        rag.init()
-        return "Schema initialized successfully (documents + chunks tables created)."
-    except Exception as e:
-        return f"Error: {e}"
+def _safe_error(e: Exception) -> str:
+    logger.exception("Request failed: %s", type(e).__name__)
+    return "Request failed. Check server logs for details."
 
 
-# ── Handler: Ingest Text ─────────────────────────────────────
-
-def handle_ingest(title: str, text_content: str):
-    if not title.strip():
-        return "Please enter a document title."
-    if not text_content.strip():
-        return "Please enter text content."
-    try:
-        rag = _get_rag()
-        chunks = [p.strip() for p in text_content.split("\n\n") if p.strip()]
-        if not chunks:
-            chunks = [text_content.strip()]
-        doc_id = rag.ingest(title.strip(), chunks)
-        return f"Ingested '{title}' as document #{doc_id} with {len(chunks)} chunks."
-    except Exception as e:
-        return f"Error: {e}"
-
-
-# ── Handler: Embed Table ─────────────────────────────────────
-
-def handle_embed(table: str, column: str, batch_size: int):
-    try:
-        rag = _get_rag()
-        result = rag.embed_table(
-            table or "chunks", text_column=column or "content",
-            batch_size=batch_size,
-        )
-        e, f, t = result["embedded"], result["failed"], result["total"]
-        return f"Embedded: {e}, Failed: {f}, Total: {t}"
-    except Exception as e:
-        return f"Error: {e}"
-
-
-# ── Handler: RAG Ask ─────────────────────────────────────────
+# ── Handlers ─────────────────────────────────────────────────
 
 def handle_ask(question: str, top_k: int):
     if not question.strip():
@@ -83,41 +51,31 @@ def handle_ask(question: str, top_k: int):
         rag = _get_rag()
         r = rag.ask(question.strip(), top_k=int(top_k))
 
-        answer = r.answer if r.answer else "(No LLM configured — showing retrieval only)"
+        answer = r.answer if r.answer else "(No LLM configured — retrieval only)"
 
-        savings_text = (
-            f"JSON: {r.json_tokens} tokens (${r.json_cost_usd:.6f})\n"
-            f"TOON: {r.toon_tokens} tokens (${r.toon_cost_usd:.6f})\n"
-            f"Savings: {r.savings_pct:.1f}% (${r.savings_cost_usd:.6f}/query)\n"
-            f"At 1K queries/day: ${r.savings_cost_usd * 1000 * 30:.2f}/month saved"
+        # Subsidiary: savings felt as a quiet ratio, not a shout
+        savings = (
+            f"JSON {r.json_tokens} tok → TOON {r.toon_tokens} tok\n"
+            f"{r.savings_pct:.1f}% fewer tokens  ·  "
+            f"${r.savings_cost_usd:.5f}/query saved"
         )
 
-        sources_text = ""
+        sources = ""
         for i, src in enumerate(r.sources, 1):
-            content = src.get("content", str(src))
+            content = src.get("content", "")
+            if not content:
+                # Custom table: show all non-meta fields
+                content = " · ".join(
+                    str(v) for k, v in src.items()
+                    if k not in ("id", "distance", "embedding") and v is not None
+                )
             dist = src.get("distance", "?")
-            sources_text += f"#{i} (distance: {dist}): {content[:120]}...\n\n"
+            sources += f"#{i}  dist={dist:.4f}\n{content[:150]}\n\n"
 
-        return answer, r.context_toon, r.context_json, savings_text, sources_text, f"{r.savings_pct:.1f}%"
+        return answer, r.context_toon, r.context_json, savings, sources, f"{r.savings_pct:.1f}%"
     except Exception as e:
-        err = f"Error: {e}\n{traceback.format_exc()}"
-        return err, "", "", "", "", ""
+        return _safe_error(e), "", "", "", "", ""
 
-
-# ── Handler: Export SQL ──────────────────────────────────────
-
-def handle_export(sql: str):
-    if not sql.strip():
-        return "Please enter a SELECT query."
-    try:
-        rag = _get_rag()
-        toon = rag.export(sql.strip())
-        return toon
-    except Exception as e:
-        return f"Error: {e}"
-
-
-# ── Handler: Benchmark ───────────────────────────────────────
 
 def handle_benchmark(rows: int, cols: int):
     try:
@@ -135,24 +93,21 @@ def handle_benchmark(rows: int, cols: int):
             preview += f"\n  ... ({int(rows) - 5} more rows)"
 
         stats = (
-            f"Rows: {int(rows)}, Columns: {int(cols)}\n\n"
-            f"JSON: {r.json_tokens} tokens, {r.json_bytes} bytes (${r.json_cost_usd:.6f})\n"
-            f"TOON: {r.toon_tokens} tokens, {r.toon_bytes} bytes (${r.toon_cost_usd:.6f})\n\n"
-            f"Token savings: {r.savings_pct:.1f}%\n"
-            f"Cost savings: ${r.savings_cost_usd:.6f}/query\n\n"
-            f"At 1K queries/day:  ${r.savings_cost_usd * 1000 * 30:.2f}/month\n"
-            f"At 10K queries/day: ${r.savings_cost_usd * 10000 * 30:.2f}/month"
+            f"Rows: {int(rows)},  Columns: {int(cols)}\n\n"
+            f"JSON   {r.json_tokens:>5} tokens   {r.json_bytes:>5} bytes\n"
+            f"TOON   {r.toon_tokens:>5} tokens   {r.toon_bytes:>5} bytes\n\n"
+            f"Savings  {r.savings_pct:.1f}%  ·  ${r.savings_cost_usd:.5f}/query\n\n"
+            f"At 1K queries/day   ${r.savings_cost_usd * 1000 * 30:>8.2f}/month\n"
+            f"At 10K queries/day  ${r.savings_cost_usd * 10000 * 30:>8.2f}/month"
         )
         return preview, stats, f"{r.savings_pct:.1f}%"
     except Exception as e:
-        return f"Error: {e}", "", ""
+        return _safe_error(e), "", ""
 
-
-# ── Handler: JSON → TOON ─────────────────────────────────────
 
 def handle_json_to_toon(json_input: str):
     if not json_input.strip():
-        return "Paste JSON array of objects above.", ""
+        return "Paste a JSON array above.", ""
     try:
         from seamless_rag.toon.encoder import encode_tabular
         data = json.loads(json_input)
@@ -161,225 +116,411 @@ def handle_json_to_toon(json_input: str):
         toon = encode_tabular(data)
         bench = _get_benchmark()
         r = bench.compare(data)
-        stats = f"JSON: {r.json_tokens} tok → TOON: {r.toon_tokens} tok | Savings: {r.savings_pct:.1f}%"
+        stats = f"JSON {r.json_tokens} tok  →  TOON {r.toon_tokens} tok  ·  {r.savings_pct:.1f}% saved"
         return toon, stats
     except json.JSONDecodeError as e:
         return f"Invalid JSON: {e}", ""
     except Exception as e:
-        return f"Error: {e}", ""
+        return _safe_error(e), ""
 
 
-# ── Handler: Status ──────────────────────────────────────────
+def handle_export(sql: str):
+    if not sql.strip():
+        return "Enter a SELECT query."
+    try:
+        rag = _get_rag()
+        return rag.export(sql.strip())
+    except Exception as e:
+        return _safe_error(e)
+
+
+def handle_init_db():
+    try:
+        _get_rag().init()
+        return "Schema ready — documents + chunks tables created."
+    except Exception as e:
+        return _safe_error(e)
+
+
+def handle_ingest(title: str, text_content: str):
+    if not title.strip():
+        return "Provide a document title."
+    if not text_content.strip():
+        return "Enter text content."
+    try:
+        rag = _get_rag()
+        chunks = [p.strip() for p in text_content.split("\n\n") if p.strip()]
+        if not chunks:
+            chunks = [text_content.strip()]
+        doc_id = rag.ingest(title.strip(), chunks)
+        return f"'{title}' → document #{doc_id}, {len(chunks)} chunks."
+    except Exception as e:
+        return _safe_error(e)
+
+
+def handle_embed(table: str, column: str, batch_size: int):
+    try:
+        rag = _get_rag()
+        text_col: str | list[str] = column or "content"
+        if isinstance(text_col, str) and "," in text_col:
+            text_col = [c.strip() for c in text_col.split(",") if c.strip()]
+        result = rag.embed_table(table or "chunks", text_column=text_col, batch_size=batch_size)
+        e, f, t = result["embedded"], result["failed"], result["total"]
+        return f"Embedded {e}  ·  Failed {f}  ·  Total {t}"
+    except Exception as e:
+        return _safe_error(e)
+
 
 def handle_status():
     from seamless_rag.config import Settings
     try:
         s = Settings()
-        lines = [
-            "=== Connection ===",
-            f"Host: {s.mariadb_host}:{s.mariadb_port}",
-            f"Database: {s.mariadb_database}",
-            f"User: {s.mariadb_user}",
-            "",
-            "=== Embedding ===",
-            f"Provider: {s.embedding_provider}",
-            f"Model: {s.embedding_model}",
-            f"Dimensions: {s.embedding_dimensions}",
-            f"API Key: {'***' + s.embedding_api_key[-4:] if s.embedding_api_key else '(none)'}",
-            "",
-            "=== LLM ===",
-            f"Provider: {s.llm_provider}",
-            f"Model: {s.llm_model}",
-            f"API Key: {'***' + s.llm_api_key[-4:] if s.llm_api_key else '(none)'}",
-            f"OpenAI Key: {'***' + s.openai_api_key[-4:] if s.openai_api_key else '(none)'}",
-        ]
 
         # Test DB connection
+        db_status = "DISCONNECTED"
         try:
             rag = _get_rag()
-            rag._store._cursor().execute("SELECT 1")
-            lines.insert(0, "MariaDB: CONNECTED\n")
-        except Exception as e:
-            lines.insert(0, f"MariaDB: DISCONNECTED ({e})\n")
+            with rag._store._get_conn() as conn:
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("SELECT 1")
+                finally:
+                    cursor.close()
+            db_status = "CONNECTED"
+        except Exception:
+            pass
 
-        return "\n".join(lines)
-    except Exception as e:
-        return f"Error loading settings: {e}"
+        return (
+            f"MariaDB: {db_status}\n\n"
+            f"Connection\n"
+            f"  {s.mariadb_host}:{s.mariadb_port} / {s.mariadb_database}\n\n"
+            f"Embedding\n"
+            f"  {s.embedding_provider} · {s.embedding_model} · {s.embedding_dimensions}d\n"
+            f"  API key: {'configured' if s.embedding_api_key else '—'}\n\n"
+            f"LLM\n"
+            f"  {s.llm_provider} · {s.llm_model}\n"
+            f"  API key: {'configured' if s.llm_api_key else '—'}"
+        )
+    except Exception:
+        logger.exception("Status check failed")
+        return "Error loading settings."
 
 
-# ── Build UI ─────────────────────────────────────────────────
+# ── Theme: MariaDB palette + Polanyi principles ─────────────
+#
+# MariaDB brand: deep teal #003545, seal brown #C0A27A
+# Polanyi: warmth (personal knowledge), depth (tacit dimension),
+#          quiet confidence (subsidiary awareness)
 
 THEME = gr.themes.Base(
     primary_hue=gr.themes.Color(
-        c50="#f0fdf4", c100="#dcfce7", c200="#bbf7d0", c300="#86efac",
-        c400="#4ade80", c500="#22c55e", c600="#16a34a", c700="#15803d",
-        c800="#166534", c900="#14532d", c950="#052e16",
+        c50="#f0f7fa", c100="#d6eaf0", c200="#aed5e2", c300="#7dbdd1",
+        c400="#4da3bf", c500="#1a7a94", c600="#0d6070", c700="#094d5a",
+        c800="#003545", c900="#002a38", c950="#001d27",
+    ),
+    secondary_hue=gr.themes.Color(
+        c50="#faf6f0", c100="#f0e8d8", c200="#e2d1b3", c300="#d4ba8e",
+        c400="#c0a27a", c500="#a88a62", c600="#8d7050", c700="#725a3e",
+        c800="#5a462f", c900="#433322", c950="#2e2318",
+    ),
+    neutral_hue=gr.themes.Color(
+        c50="#f8f7f5", c100="#f0eeea", c200="#e2dfda", c300="#ccc7bf",
+        c400="#b0a99e", c500="#8a8279", c600="#6b6358", c700="#524b42",
+        c800="#3a342d", c900="#252119", c950="#171410",
     ),
     font=["IBM Plex Sans", "system-ui", "sans-serif"],
-    font_mono=["IBM Plex Mono", "monospace"],
+    font_mono=["IBM Plex Mono", "Menlo", "monospace"],
 )
 
+# Polanyi CSS: the interface should feel like a well-worn research notebook.
+# Focal elements are warm and present; subsidiary elements recede but remain.
 CSS = """
-.main-title { text-align: center; margin-bottom: 0; }
-.main-title h1 { font-size: 1.8rem; font-weight: 700; color: #166534; }
-.main-title p { color: #6b7280; font-size: 0.9rem; }
-.savings-badge { font-size: 2rem; font-weight: 800; color: #16a34a;
-                 text-align: center; padding: 1rem; }
+/* ── Layout: breathing room for indwelling ── */
+.gradio-container { max-width: 960px !important; }
 footer { display: none !important; }
+
+/* ── Header: quiet authority ── */
+.polanyi-header {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+    border-bottom: 2px solid #c0a27a;
+    margin-bottom: 0.5rem;
+}
+.polanyi-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #003545;
+    letter-spacing: 0.02em;
+    margin: 0;
+}
+.polanyi-header .subtitle {
+    color: #8a8279;
+    font-size: 0.82rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+/* ── Focal: the answer draws the eye ── */
+.focal-answer textarea {
+    font-size: 1.05rem !important;
+    line-height: 1.6 !important;
+    color: #252119 !important;
+    background: #faf6f0 !important;
+    border-left: 3px solid #003545 !important;
+    padding-left: 1rem !important;
+}
+
+/* ── Subsidiary: savings bar — felt, not stared at ── */
+.savings-quiet textarea {
+    font-size: 0.85rem !important;
+    color: #6b6358 !important;
+    background: transparent !important;
+    border: none !important;
+}
+.savings-pill textarea {
+    text-align: center !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #003545 !important;
+    background: linear-gradient(135deg, #d6eaf0 0%, #f0e8d8 100%) !important;
+    border: 1px solid #aed5e2 !important;
+    border-radius: 8px !important;
+    padding: 0.5rem !important;
+}
+
+/* ── Tacit: code blocks feel like notebook margins ── */
+.gradio-code textarea, .gradio-code pre {
+    font-size: 0.82rem !important;
+    background: #f8f7f5 !important;
+}
+
+/* ── Tabs: understated navigation ── */
+.tab-nav button {
+    font-size: 0.85rem !important;
+    color: #6b6358 !important;
+}
+.tab-nav button.selected {
+    color: #003545 !important;
+    border-bottom-color: #c0a27a !important;
+}
+
+/* ── Buttons: warm action ── */
+button.primary {
+    background: #003545 !important;
+    border: none !important;
+    color: #f0e8d8 !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+}
+button.primary:hover {
+    background: #094d5a !important;
+}
+button.secondary {
+    background: #c0a27a !important;
+    border: none !important;
+    color: #252119 !important;
+}
+
+/* ── Polanyi epigraph ── */
+.polanyi-quote {
+    text-align: center;
+    padding: 0.6rem 0;
+    font-size: 0.75rem;
+    color: #b0a99e;
+    font-style: italic;
+    border-top: 1px solid #e2dfda;
+    margin-top: 1rem;
+}
 """
 
 
 def create_app() -> gr.Blocks:
     with gr.Blocks(theme=THEME, css=CSS, title="Seamless-RAG") as app:
 
-        # ── Header ──
+        # ── Header: quiet authority, not shouting ──
         gr.HTML(
-            '<div class="main-title">'
+            '<div class="polanyi-header">'
             "<h1>Seamless-RAG</h1>"
-            "<p>TOON-Native Auto-Embedding &amp; RAG Toolkit for MariaDB</p>"
-            "</div>"
+            '<div class="subtitle">'
+            "Vector Search &amp; TOON Format for MariaDB"
+            "</div></div>"
         )
 
         with gr.Tabs():
 
-            # ══════════ Tab 1: RAG Query ══════════
-            with gr.Tab("RAG Query", id="rag"):
-                gr.Markdown("Ask a question — retrieves context from MariaDB, formats as TOON, generates answer.")
+            # ═══════ Ask — the focal experience ═══════
+            with gr.Tab("Ask", id="rag"):
+                gr.Markdown(
+                    "*Ask a question. Context is retrieved from MariaDB, "
+                    "compressed into TOON format, and interpreted by the LLM.*"
+                )
                 with gr.Row():
-                    with gr.Column(scale=3):
+                    with gr.Column(scale=4):
                         ask_input = gr.Textbox(
                             label="Question",
                             placeholder="What are the effects of climate change on ecosystems?",
                             lines=2,
                         )
                     with gr.Column(scale=1):
-                        ask_topk = gr.Slider(1, 20, value=5, step=1, label="Top-K results")
+                        ask_topk = gr.Slider(1, 20, value=5, step=1, label="Depth")
                 ask_btn = gr.Button("Ask", variant="primary", size="lg")
 
-                ask_answer = gr.Textbox(label="Answer", lines=4, interactive=False)
+                # Focal: the answer
+                ask_answer = gr.Textbox(
+                    label="Answer",
+                    lines=4, interactive=False,
+                    elem_classes=["focal-answer"],
+                )
 
+                # Subsidiary: savings — present but not dominant
                 with gr.Row():
-                    ask_savings_badge = gr.Textbox(label="Token Savings", interactive=False, elem_classes=["savings-badge"])
-                    ask_savings = gr.Textbox(label="Cost Comparison", lines=5, interactive=False)
+                    ask_savings_pill = gr.Textbox(
+                        label="Token Compression",
+                        interactive=False, elem_classes=["savings-pill"],
+                    )
+                    ask_savings = gr.Textbox(
+                        label="", lines=3, interactive=False,
+                        elem_classes=["savings-quiet"],
+                    )
 
-                with gr.Accordion("Context: TOON vs JSON", open=False), gr.Row():
-                    ask_toon = gr.Code(label="TOON Context", language=None, interactive=False)
-                    ask_json = gr.Code(label="JSON Context", language="json", interactive=False)
+                # Tacit: the raw formats, for those who want to dwell deeper
+                with gr.Accordion("Context: TOON vs JSON", open=False):
+                    with gr.Row():
+                        ask_toon = gr.Code(label="TOON", language=None, interactive=False)
+                        ask_json = gr.Code(label="JSON", language="json", interactive=False)
 
-                with gr.Accordion("Source Documents", open=False):
-                    ask_sources = gr.Textbox(label="Retrieved Sources", lines=6, interactive=False)
+                with gr.Accordion("Sources", open=False):
+                    ask_sources = gr.Textbox(label="Retrieved", lines=6, interactive=False)
 
                 ask_btn.click(
                     fn=handle_ask,
                     inputs=[ask_input, ask_topk],
-                    outputs=[ask_answer, ask_toon, ask_json, ask_savings, ask_sources, ask_savings_badge],
+                    outputs=[ask_answer, ask_toon, ask_json, ask_savings, ask_sources, ask_savings_pill],
                 )
 
-            # ══════════ Tab 2: Benchmark ══════════
+            # ═══════ Benchmark — the experiment ═══════
             with gr.Tab("Benchmark", id="bench"):
-                gr.Markdown("Run token benchmark: compare JSON vs TOON on generated sample data.")
+                gr.Markdown("*Adjust rows and columns. Feel how the savings change.*")
                 with gr.Row():
                     bench_rows = gr.Slider(5, 500, value=50, step=5, label="Rows")
                     bench_cols = gr.Slider(2, 16, value=6, step=1, label="Columns")
-                bench_btn = gr.Button("Run Benchmark", variant="primary")
+                bench_btn = gr.Button("Run", variant="primary")
 
-                bench_savings_badge = gr.Textbox(label="Savings", interactive=False, elem_classes=["savings-badge"])
-
+                bench_pill = gr.Textbox(
+                    label="Token Compression",
+                    interactive=False, elem_classes=["savings-pill"],
+                )
                 with gr.Row():
-                    bench_preview = gr.Code(label="TOON Output (preview)", language=None, interactive=False)
+                    bench_preview = gr.Code(label="TOON Output", language=None, interactive=False)
                     bench_stats = gr.Textbox(label="Statistics", lines=10, interactive=False)
 
                 bench_btn.click(
                     fn=handle_benchmark,
                     inputs=[bench_rows, bench_cols],
-                    outputs=[bench_preview, bench_stats, bench_savings_badge],
+                    outputs=[bench_preview, bench_stats, bench_pill],
                 )
 
-            # ══════════ Tab 3: JSON → TOON ══════════
+            # ═══════ Convert — the direct experience ═══════
             with gr.Tab("JSON → TOON", id="convert"):
-                gr.Markdown("Paste any JSON array of objects to convert to TOON tabular format.")
+                gr.Markdown("*Paste JSON. See TOON. Feel the difference.*")
                 json_input = gr.Code(
-                    label="JSON Input",
+                    label="JSON",
                     language="json",
-                    value='[\n  {"id": 1, "name": "Ada", "score": 95},\n  {"id": 2, "name": "Bob", "score": 87},\n  {"id": 3, "name": "Eve", "score": 91}\n]',
-                    lines=8,
+                    value=(
+                        '[\n'
+                        '  {"id": 1, "name": "Ada Lovelace", "field": "Computing", "year": 1843},\n'
+                        '  {"id": 2, "name": "Michael Polanyi", "field": "Philosophy", "year": 1966},\n'
+                        '  {"id": 3, "name": "Marie Curie", "field": "Physics", "year": 1903}\n'
+                        ']'
+                    ),
+                    lines=7,
                 )
-                convert_btn = gr.Button("Convert to TOON", variant="primary")
-                toon_output = gr.Code(label="TOON Output", language=None, interactive=False)
-                convert_stats = gr.Textbox(label="Token Comparison", interactive=False)
-
+                convert_btn = gr.Button("Convert", variant="primary")
+                toon_output = gr.Code(label="TOON", language=None, interactive=False)
+                convert_stats = gr.Textbox(
+                    label="", interactive=False,
+                    elem_classes=["savings-quiet"],
+                )
                 convert_btn.click(
                     fn=handle_json_to_toon,
                     inputs=[json_input],
                     outputs=[toon_output, convert_stats],
                 )
 
-            # ══════════ Tab 4: Data ══════════
-            with gr.Tab("Data", id="data"):
-                gr.Markdown("Manage data: initialize schema, ingest documents, embed tables.")
-
-                with gr.Accordion("Initialize Database", open=True):
-                    init_btn = gr.Button("Initialize Schema", variant="primary")
-                    init_output = gr.Textbox(label="Result", interactive=False)
-                    init_btn.click(fn=handle_init_db, outputs=[init_output])
-
-                with gr.Accordion("Ingest Document", open=True):
-                    with gr.Row():
-                        ingest_title = gr.Textbox(label="Document Title", placeholder="My Research Paper")
-                    ingest_text = gr.Textbox(
-                        label="Text Content (separate chunks with blank lines)",
-                        placeholder="First paragraph...\n\nSecond paragraph...",
-                        lines=6,
-                    )
-                    ingest_btn = gr.Button("Ingest", variant="primary")
-                    ingest_output = gr.Textbox(label="Result", interactive=False)
-                    ingest_btn.click(
-                        fn=handle_ingest,
-                        inputs=[ingest_title, ingest_text],
-                        outputs=[ingest_output],
-                    )
-
-                with gr.Accordion("Embed Table", open=False):
-                    with gr.Row():
-                        embed_table = gr.Textbox(label="Table", value="chunks")
-                        embed_col = gr.Textbox(label="Text Column", value="content")
-                        embed_batch = gr.Slider(8, 256, value=64, step=8, label="Batch Size")
-                    embed_btn = gr.Button("Embed", variant="primary")
-                    embed_output = gr.Textbox(label="Result", interactive=False)
-                    embed_btn.click(
-                        fn=handle_embed,
-                        inputs=[embed_table, embed_col, embed_batch],
-                        outputs=[embed_output],
-                    )
-
-            # ══════════ Tab 5: SQL Export ══════════
+            # ═══════ Export — SQL to TOON bridge ═══════
             with gr.Tab("SQL Export", id="export"):
-                gr.Markdown("Run a SELECT query against MariaDB and export results as TOON.")
+                gr.Markdown("*Run any SELECT. Results come back as TOON.*")
                 sql_input = gr.Code(
-                    label="SQL Query (SELECT only)",
+                    label="SQL (SELECT only)",
                     language="sql",
                     value="SELECT id, content, embedding IS NOT NULL AS has_embedding FROM chunks LIMIT 10",
                     lines=3,
                 )
-                export_btn = gr.Button("Export as TOON", variant="primary")
+                export_btn = gr.Button("Export", variant="primary")
                 export_output = gr.Code(label="TOON Output", language=None, interactive=False)
                 export_btn.click(fn=handle_export, inputs=[sql_input], outputs=[export_output])
 
-            # ══════════ Tab 6: Status ══════════
+            # ═══════ Data — quiet infrastructure ═══════
+            with gr.Tab("Data", id="data"):
+                gr.Markdown("*Initialize, ingest, embed. The substrate for search.*")
+
+                with gr.Accordion("Schema", open=True):
+                    init_btn = gr.Button("Initialize", variant="secondary")
+                    init_out = gr.Textbox(label="", interactive=False, elem_classes=["savings-quiet"])
+                    init_btn.click(fn=handle_init_db, outputs=[init_out])
+
+                with gr.Accordion("Ingest", open=True):
+                    ingest_title = gr.Textbox(label="Title", placeholder="Document name")
+                    ingest_text = gr.Textbox(
+                        label="Text (blank lines separate chunks)",
+                        placeholder="First paragraph...\n\nSecond paragraph...",
+                        lines=5,
+                    )
+                    ingest_btn = gr.Button("Ingest", variant="primary")
+                    ingest_out = gr.Textbox(label="", interactive=False, elem_classes=["savings-quiet"])
+                    ingest_btn.click(fn=handle_ingest, inputs=[ingest_title, ingest_text], outputs=[ingest_out])
+
+                with gr.Accordion("Embed", open=False):
+                    with gr.Row():
+                        embed_table = gr.Textbox(label="Table", value="chunks")
+                        embed_col = gr.Textbox(label="Column(s)", value="content")
+                        embed_batch = gr.Slider(8, 256, value=64, step=8, label="Batch")
+                    embed_btn = gr.Button("Embed", variant="primary")
+                    embed_out = gr.Textbox(label="", interactive=False, elem_classes=["savings-quiet"])
+                    embed_btn.click(fn=handle_embed, inputs=[embed_table, embed_col, embed_batch], outputs=[embed_out])
+
+            # ═══════ Status — the tacit substrate ═══════
             with gr.Tab("Status", id="status"):
-                gr.Markdown("System status: MariaDB connection, provider configuration.")
-                status_btn = gr.Button("Refresh Status", variant="secondary")
-                status_output = gr.Textbox(label="System Status", lines=18, interactive=False)
-                status_btn.click(fn=handle_status, outputs=[status_output])
+                gr.Markdown("*What's running underneath.*")
+                status_btn = gr.Button("Refresh", variant="secondary")
+                status_out = gr.Textbox(label="System", lines=14, interactive=False)
+                status_btn.click(fn=handle_status, outputs=[status_out])
+
+        # ── Polanyi epigraph ──
+        gr.HTML(
+            '<div class="polanyi-quote">'
+            '"We can know more than we can tell." — Michael Polanyi, '
+            "<em>The Tacit Dimension</em> (1966)"
+            "</div>"
+        )
 
     return app
 
 
 # ── Entry point ──────────────────────────────────────────────
 
+def _get_auth() -> tuple[str, str] | None:
+    import os
+    user = os.environ.get("SEAMLESS_WEB_USER", "")
+    pwd = os.environ.get("SEAMLESS_WEB_PASSWORD", "")
+    if user and pwd:
+        return (user, pwd)
+    return None
+
+
 def main():
     app = create_app()
-    app.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    app.launch(server_name="127.0.0.1", server_port=7860, share=False, auth=_get_auth())
 
 
 if __name__ == "__main__":
