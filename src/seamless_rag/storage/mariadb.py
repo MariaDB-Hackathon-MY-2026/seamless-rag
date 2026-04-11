@@ -104,18 +104,6 @@ class MariaDBVectorStore:
         finally:
             conn.close()  # returns to pool
 
-    def _cursor(self):
-        """Get a plain cursor from a pooled connection."""
-        conn = self._pool.get_connection()
-        conn.autocommit = True
-        return conn.cursor()
-
-    def _dict_cursor(self):
-        """Get a dictionary cursor from a pooled connection."""
-        conn = self._pool.get_connection()
-        conn.autocommit = True
-        return conn.cursor(dictionary=True)
-
     # ── Schema ─────────────────────────────────────────────────
 
     def _check_version(self) -> None:

@@ -19,6 +19,8 @@ runner = CliRunner()
 def mock_rag():
     """Mock SeamlessRAG instance for CLI tests."""
     rag = MagicMock()
+    rag.__enter__ = MagicMock(return_value=rag)
+    rag.__exit__ = MagicMock(return_value=False)
     rag.ask.return_value = RAGResult(
         answer="Test answer",
         context_toon="[1,]{id,content}:\n  1,test content",
@@ -54,7 +56,7 @@ class TestInitCommand:
         """init command calls rag.close() for cleanup."""
         with patch("seamless_rag.cli._get_rag", return_value=mock_rag):
             runner.invoke(app, ["init"])
-        mock_rag.close.assert_called_once()
+        mock_rag.__exit__.assert_called_once()
 
 
 class TestAskCommand:
@@ -114,7 +116,7 @@ class TestAskCommand:
         """ask command calls rag.close() for cleanup."""
         with patch("seamless_rag.cli._get_rag", return_value=mock_rag):
             runner.invoke(app, ["ask", "question"])
-        mock_rag.close.assert_called_once()
+        mock_rag.__exit__.assert_called_once()
 
 
 class TestExportCommand:
@@ -136,4 +138,4 @@ class TestExportCommand:
         """export command calls rag.close() for cleanup."""
         with patch("seamless_rag.cli._get_rag", return_value=mock_rag):
             runner.invoke(app, ["export", "SELECT 1"])
-        mock_rag.close.assert_called_once()
+        mock_rag.__exit__.assert_called_once()

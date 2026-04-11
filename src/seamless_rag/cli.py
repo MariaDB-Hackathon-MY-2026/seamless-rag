@@ -58,10 +58,9 @@ def _get_rag(**extra):
 @app.command()
 def init() -> None:
     """Initialize database schema (documents + chunks tables)."""
-    rag = _get_rag()
-    rag.init()
-    rprint("[green]Schema initialized.[/green]")
-    rag.close()
+    with _get_rag() as rag:
+        rag.init()
+        rprint("[green]Schema initialized.[/green]")
 
 
 def _chunk_text(text: str, size: int, overlap: int) -> list[str]:
@@ -104,28 +103,23 @@ def ingest(
     overlap: int = typer.Option(50, "--overlap", help="Overlap between chunks"),
 ) -> None:
     """Ingest text files with sentence-boundary chunking and overlap."""
-    rag = _get_rag()
-    rag.init()
-
-    files = list(path.glob("*.txt")) if path.is_dir() else [path]
-    total_chunks = 0
-
-    for f in files:
-        text = f.read_text(encoding="utf-8")
-        # Split by paragraphs first, then chunk within paragraphs
-        chunks: list[str] = []
-        for para in text.split("\n\n"):
-            para = para.strip()
-            if not para:
-                continue
-            chunks.extend(_chunk_text(para, chunk_size, overlap))
-        if chunks:
-            rag.ingest(f.name, chunks)
-            total_chunks += len(chunks)
-            rprint(f"  [cyan]{f.name}[/cyan]: {len(chunks)} chunks")
-
-    rprint(f"[green]Ingested {len(files)} files, {total_chunks} chunks total.[/green]")
-    rag.close()
+    with _get_rag() as rag:
+        rag.init()
+        files = list(path.glob("*.txt")) if path.is_dir() else [path]
+        total_chunks = 0
+        for f in files:
+            text = f.read_text(encoding="utf-8")
+            chunks: list[str] = []
+            for para in text.split("\n\n"):
+                para = para.strip()
+                if not para:
+                    continue
+                chunks.extend(_chunk_text(para, chunk_size, overlap))
+            if chunks:
+                rag.ingest(f.name, chunks)
+                total_chunks += len(chunks)
+                rprint(f"  [cyan]{f.name}[/cyan]: {len(chunks)} chunks")
+        rprint(f"[green]Ingested {len(files)} files, {total_chunks} chunks total.[/green]")
 
 
 @app.command()
@@ -135,15 +129,14 @@ def embed(
     batch_size: int = typer.Option(64, "--batch-size", "-b"),
 ) -> None:
     """Bulk-embed all rows in a table that lack embeddings."""
-    rag = _get_rag()
-    rprint(f"[blue]Embedding {table}.{column} (batch_size={batch_size})...[/blue]")
-    result = rag.embed_table(table, text_column=column, batch_size=batch_size)
-    rprint(
-        f"[green]Done.[/green] "
-        f"Embedded: {result['embedded']}, Failed: {result['failed']}, "
-        f"Total: {result['total']}"
-    )
-    rag.close()
+    with _get_rag() as rag:
+        rprint(f"[blue]Embedding {table}.{column} (batch_size={batch_size})...[/blue]")
+        result = rag.embed_table(table, text_column=column, batch_size=batch_size)
+        rprint(
+            f"[green]Done.[/green] "
+            f"Embedded: {result['embedded']}, Failed: {result['failed']}, "
+            f"Total: {result['total']}"
+        )
 
 
 @app.command()
@@ -153,13 +146,12 @@ def watch(
     interval: float = typer.Option(2.0, "--interval", "-i"),
 ) -> None:
     """Watch a table for new inserts and auto-embed."""
-    rag = _get_rag()
-    rprint(f"[blue]Watching {table}.{column} every {interval}s (Ctrl+C to stop)[/blue]")
-    try:
-        rag.watch(table, text_column=column, interval=interval)
-    except KeyboardInterrupt:
-        rprint("\n[yellow]Watch stopped.[/yellow]")
-    rag.close()
+    with _get_rag() as rag:
+        rprint(f"[blue]Watching {table}.{column} every {interval}s (Ctrl+C to stop)[/blue]")
+        try:
+            rag.watch(table, text_column=column, interval=interval)
+        except KeyboardInterrupt:
+            rprint("\n[yellow]Watch stopped.[/yellow]")
 
 
 @app.command()
@@ -169,23 +161,19 @@ def ask(
     context_window: int = typer.Option(0, "--context-window", "-w", help="Neighboring chunks"),
 ) -> None:
     """Ask a question using RAG with token benchmarking."""
-    rag = _get_rag()
-    result = rag.ask(question, top_k=top_k)
-
-    if result.sources:
-        if result.answer:
-            rprint(f"\n[bold green]Answer:[/bold green] {result.answer}\n")
-
-        rprint(f"[bold]Context (TOON — {result.toon_tokens} tokens):[/bold]")
-        rprint(result.context_toon)
-
-        _print_benchmark_table(result)
-    else:
-        rprint(
-            "[yellow]No results found. "
-            "Run 'seamless-rag init' and 'seamless-rag ingest' first.[/yellow]"
-        )
-    rag.close()
+    with _get_rag() as rag:
+        result = rag.ask(question, top_k=top_k)
+        if result.sources:
+            if result.answer:
+                rprint(f"\n[bold green]Answer:[/bold green] {result.answer}\n")
+            rprint(f"[bold]Context (TOON — {result.toon_tokens} tokens):[/bold]")
+            rprint(result.context_toon)
+            _print_benchmark_table(result)
+        else:
+            rprint(
+                "[yellow]No results found. "
+                "Run 'seamless-rag init' and 'seamless-rag ingest' first.[/yellow]"
+            )
 
 
 @app.command(name="export")
@@ -193,9 +181,8 @@ def export_cmd(
     query: str = typer.Argument(..., help="SQL SELECT query to export as TOON"),
 ) -> None:
     """Export SQL query results as TOON format."""
-    rag = _get_rag()
-    rprint(rag.export(query))
-    rag.close()
+    with _get_rag() as rag:
+        rprint(rag.export(query))
 
 
 @app.command()
@@ -265,7 +252,7 @@ def web(
 def demo(
 ) -> None:
     """Run end-to-end demo: init -> seed data -> ask question -> show benchmark."""
-    rag = _get_rag()
+    rag = _get_rag()  # demo manages its own lifecycle for Rich output
 
     rprint("\n[bold magenta]Seamless-RAG End-to-End Demo[/bold magenta]\n")
 
