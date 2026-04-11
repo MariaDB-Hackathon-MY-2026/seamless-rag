@@ -7,29 +7,12 @@ All unit tests must pass without:
 - API keys
 """
 import array
-from typing import Protocol, runtime_checkable
 from unittest.mock import Mock
 
 import pytest
 
-# ============================================================
-#  Protocol definitions (same as production code)
-# ============================================================
-
-@runtime_checkable
-class EmbeddingProvider(Protocol):
-    @property
-    def dimensions(self) -> int: ...
-    def embed(self, text: str) -> list[float]: ...
-    def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]: ...
-
-
-@runtime_checkable
-class StorageProtocol(Protocol):
-    def insert_embedding(self, table: str, row_id: int, embedding: list[float]) -> None: ...
-    def search(self, table: str, query_vec: list[float], top_k: int) -> list[dict]: ...
-    def get_new_rows(self, table: str, last_id: int) -> list[dict]: ...
-
+from seamless_rag.providers.protocol import EmbeddingProvider
+from seamless_rag.storage.protocol import VectorStore
 
 # ============================================================
 #  Mock fixtures
@@ -48,7 +31,7 @@ def mock_provider() -> Mock:
 @pytest.fixture
 def mock_storage() -> Mock:
     """Mock storage returning sample search results."""
-    storage = Mock(spec=StorageProtocol)
+    storage = Mock(spec=VectorStore)
     storage.search.return_value = [
         {"id": 1, "content": "Climate change affects biodiversity", "distance": 0.12},
         {"id": 2, "content": "Recent studies show temperature rise", "distance": 0.18},

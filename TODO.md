@@ -1,7 +1,7 @@
 # Seamless-RAG — TODO
 
 > Updated: 2026-04-11
-> Status: 488/491 tests passing (99.4%)
+> Status: 489/491 tests passing (99.6%)
 
 ## P0 — Core (unit tests) ✓
 - [x] TOON v3 tabular encoder (`src/seamless_rag/toon/encoder.py`) — 166/166 spec, 44/44 unit

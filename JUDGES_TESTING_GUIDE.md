@@ -82,6 +82,35 @@ print(encode_tabular(data))
 rag.close()
 ```
 
+## Tier 5: Multi-Provider Testing (5 minutes)
+
+Seamless-RAG supports pluggable embedding and LLM providers. To test with cloud providers, set env vars before running:
+
+```bash
+# Gemini (embedding + LLM)
+export EMBEDDING_PROVIDER=gemini
+export EMBEDDING_API_KEY=<your-gemini-key>
+export LLM_PROVIDER=gemini
+seamless-rag demo
+
+# OpenAI (embedding + LLM)
+export EMBEDDING_PROVIDER=openai
+export OPENAI_API_KEY=<your-openai-key>
+export LLM_PROVIDER=openai
+seamless-rag demo
+
+# Mix and match: Gemini embeddings + OpenAI LLM
+export EMBEDDING_PROVIDER=gemini
+export EMBEDDING_API_KEY=<your-gemini-key>
+export LLM_PROVIDER=openai
+export OPENAI_API_KEY=<your-openai-key>
+seamless-rag ask "What are the key findings?"
+```
+
+The factory auto-selects model names and dimensions per provider. Foreign model names (e.g. a Gemini model with the OpenAI provider) are auto-corrected.
+
+Without any env vars, the default path uses SentenceTransformers (local, free) + Ollama (local) — no API keys needed.
+
 ## What to Look For
 
 1. **TOON Spec Conformance**: `make test-spec` → 166/166 official fixtures
@@ -89,3 +118,4 @@ rag.close()
 3. **Watch Mode**: Auto-embeds new inserts with retry and error isolation
 4. **Vector Search**: HNSW cosine search with CTE context windowing
 5. **Clean Architecture**: Protocol-based providers, facade pattern, zero coupling
+6. **Multi-Provider**: Swap embedding/LLM providers via env vars, no code changes

@@ -45,13 +45,25 @@ def _vec_bytes(vec: list[float] | array.array) -> bytes:
 
 
 class MariaDBVectorStore:
-    """VectorStore backed by MariaDB with VECTOR columns and HNSW index."""
+    """VectorStore backed by MariaDB with VECTOR columns and HNSW index.
+
+    Supports context manager for automatic cleanup:
+
+        with MariaDBVectorStore(host="localhost", ...) as store:
+            store.init_schema()
+    """
 
     def __init__(self, host: str, port: int, user: str, password: str, database: str) -> None:
         self._conn = mariadb.connect(
             host=host, port=port, user=user, password=password, database=database,
         )
         self._conn.autocommit = True
+
+    def __enter__(self) -> MariaDBVectorStore:
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self.close()
 
     def _cursor(self) -> mariadb.Cursor:
         return self._conn.cursor()

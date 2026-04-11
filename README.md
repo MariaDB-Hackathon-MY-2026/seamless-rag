@@ -111,13 +111,48 @@ TOON v3 tabular format eliminates key repetition in structured data:
   2,Recent studies show temperature rise,0.18
 ```
 
-Field names appear once in the header. Values are comma-separated without quotes (unless needed). More rows = more savings.
+Field names appear once in the header. More rows = more savings:
 
-| Dataset Size | Token Savings |
-|-------------|---------------|
-| 3 rows      | ~34%          |
-| 10 rows     | ~42%          |
-| 100 rows    | ~52%          |
+| Queries/day | JSON tokens (GPT-4o) | TOON tokens | Monthly cost @ $2.50/1M | Monthly savings |
+|-------------|---------------------|-------------|-------------------------|-----------------|
+| 100         | 5,600               | 3,700       | $0.42 → $0.28          | $0.14 (34%)     |
+| 1,000       | 56,000              | 36,960      | $4.20 → $2.77          | $1.43 (34%)     |
+| 10,000      | 560,000             | 324,800     | $42.00 → $24.36        | $17.64 (42%)    |
+| 100,000     | 5,600,000           | 2,688,000   | $420 → $202            | $218 (52%)      |
+
+## Pluggable Provider Architecture
+
+Both embedding and LLM layers use `typing.Protocol` — implement the interface, and it works:
+
+```python
+from seamless_rag.providers.protocol import EmbeddingProvider
+
+class CohereProvider:  # no base class needed
+    @property
+    def dimensions(self) -> int:
+        return 1024
+
+    def embed(self, text: str) -> list[float]:
+        return cohere.Client(API_KEY).embed(texts=[text]).embeddings[0]
+
+    def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
+        return cohere.Client(API_KEY).embed(texts=texts).embeddings
+```
+
+LLM providers are even simpler — one method:
+
+```python
+from seamless_rag.llm.protocol import LLMProvider
+
+class AnthropicLLM:
+    def generate(self, prompt: str, context: str) -> str:
+        return anthropic.Anthropic().messages.create(
+            model="claude-sonnet-4-20250514", max_tokens=1024,
+            messages=[{"role": "user", "content": f"Context:\n{context}\n\nQuestion: {prompt}"}],
+        ).content[0].text
+```
+
+Pass your provider directly to the facade: `SeamlessRAG(embedding_provider=CohereProvider())`
 
 ## Test Results
 
@@ -138,39 +173,17 @@ make test-full        # all suites including integration
 make score            # quality score dashboard
 ```
 
-## Key Technical Decisions
-
-- **TOON tabular header**: `[N,]{field1,field2}:` — comma in brackets signals tabular mode
-- **Vector binary protocol**: `array.array('f', embedding)` for zero-copy insert
-- **HNSW tuning**: `SET mhnsw_ef_search = 100` for demo-quality recall
-- **CTE context window**: neighboring chunks via `JOIN ... BETWEEN` for better context
-- **Observation layer**: token benchmark woven into every RAG query, not bolted on
-
 ## Project Structure
 
 ```
 src/seamless_rag/
-├── toon/
-│   └── encoder.py           # TOON v3 encoder (full spec)
-├── benchmark/
-│   └── compare.py           # Token comparison (tiktoken)
-├── providers/
-│   ├── protocol.py          # EmbeddingProvider protocol
-│   ├── sentence_transformers.py
-│   ├── gemini.py            # Gemini via google-genai SDK
-│   ├── openai_provider.py   # OpenAI via openai SDK
-│   └── factory.py           # Auto-select from settings
-├── llm/
-│   ├── protocol.py          # LLMProvider protocol
-│   ├── gemini.py            # Gemini LLM
-│   ├── openai_provider.py   # OpenAI LLM
-│   ├── ollama.py            # Ollama REST API
-│   └── factory.py           # Auto-select from settings
-├── storage/
-│   └── mariadb.py           # VectorStore with HNSW
-├── pipeline/
-│   ├── embedder.py          # Auto-embed (batch + watch)
-│   └── rag.py               # RAG engine + benchmark + LLM
+├── toon/encoder.py          # TOON v3 encoder (166/166 spec)
+├── benchmark/compare.py     # Token comparison (tiktoken)
+├── providers/               # EmbeddingProvider: ST, Gemini, OpenAI + factory
+├── llm/                     # LLMProvider: Ollama, Gemini, OpenAI + factory
+├── storage/mariadb.py       # VectorStore with HNSW cosine search
+├── pipeline/embedder.py     # Auto-embed (batch + watch)
+├── pipeline/rag.py          # RAG engine + benchmark + LLM
 ├── core.py                  # SeamlessRAG facade
 ├── cli.py                   # Typer CLI
 └── config.py                # Pydantic Settings

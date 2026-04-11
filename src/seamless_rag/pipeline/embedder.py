@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from seamless_rag.providers.protocol import EmbeddingProvider
+    from seamless_rag.storage.protocol import VectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 class AutoEmbedder:
     """Auto-embedding pipeline with watch and batch modes."""
 
-    def __init__(self, provider: EmbeddingProvider, store: object) -> None:
+    def __init__(self, provider: EmbeddingProvider, store: VectorStore) -> None:
         self._provider = provider
         self._store = store
 

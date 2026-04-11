@@ -3,9 +3,9 @@
 > This document is LIVE — it reflects the current state of the implementation.
 > Last updated: 2026-04-11
 
-## Status: P0/P1/P2 COMPLETE — 99.7% test pass rate (298/299 unit)
+## Status: P0/P1/P2 COMPLETE — 99.6% test pass rate (489/491)
 
-All core modules + multi-provider architecture implemented. 488/491 total tests passing.
+All core modules + multi-provider architecture implemented. 489/491 total tests passing.
 
 ## Architecture
 
@@ -86,7 +86,7 @@ SeamlessRAG (core.py)              ← facade: uses factory pattern
 ## Test Results
 
 ```
-Overall: 99.7% (298/299 unit, 488/491 total)
+Overall: 99.6% (489/491 total)
   lint:  100% (src/seamless_rag/)
   unit:  99.7% (298/299)
   spec:  100% (166/166)
