@@ -42,4 +42,5 @@ nav:
   - API Reference: api-reference.md
   - Providers: providers.md
   - TOON Format: toon-format.md
+  - Benchmark: BENCHMARK_REAL_DATA.md
   - Contributing: contributing.md

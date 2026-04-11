@@ -1,41 +1,53 @@
 # Seamless-RAG
 
-**TOON-Native Auto-Embedding & RAG Toolkit for MariaDB**
+**Vector Search & TOON Format for MariaDB**
 
-Automatically embed your MariaDB tables and query them with RAG -- results formatted in TOON v3 for 30-58% token savings over JSON.
-
-![Architecture](assets/architecture.svg)
+Turn any MariaDB table into a searchable vector store. Query results come back in TOON v3 tabular format — a compact wire format that saves 20-40% of tokens when feeding structured data to LLMs or agents.
 
 ## Features
 
-- **Auto-Embed** -- Point at any MariaDB table, embed text columns with local or cloud models
-- **Watch Mode** -- Polls for new inserts and auto-embeds them in real time
-- **RAG Query** -- Vector search, TOON-formatted context, LLM answer in one call
-- **Token Savings** -- Every query reports JSON vs TOON token comparison
-- **Model-Agnostic** -- Swap embedding/LLM providers via config or environment variables
+- **Auto-Embed** — Point at any MariaDB table, embed single or multiple columns
+- **Watch Mode** — Polls for new inserts and auto-embeds them in real time
+- **RAG Query** — Vector search → TOON context → LLM answer in one call
+- **Hybrid Search** — Combine SQL filters (`WHERE price < 50`) with vector similarity
+- **MMR Diversity** — Maximal Marginal Relevance for diverse result sets
+- **Token Savings** — Every query reports JSON vs TOON token comparison
+- **Model-Agnostic** — Swap embedding/LLM providers via environment variables
+- **Web UI** — Gradio interface with 6 tabs for interactive exploration
 
 ## Quick Example
 
 ```python
 from seamless_rag import SeamlessRAG
 
-rag = SeamlessRAG(host="localhost", database="mydb", password="secret")
-rag.embed_table("articles", text_column="content")
+with SeamlessRAG(host="localhost", database="mydb") as rag:
+    # Embed multiple columns for richer semantics
+    rag.embed_table("products", text_column=["name", "category", "price"])
 
-result = rag.ask("What are the main topics?")
-print(result.context_toon)
-print(f"Tokens saved: {result.savings_pct:.1f}%")
+    # Hybrid search: semantic + SQL filter
+    result = rag.ask("affordable tools", where="price < 50", mmr=True)
+    print(result.answer)
+    print(result.context_toon)
+    print(f"Tokens saved: {result.savings_pct:.1f}%")
 ```
 
-## Token Savings
+## Real-World Token Savings
 
-![JSON vs TOON](assets/toon-comparison.svg)
+Measured on MovieLens (9,742 movies) and SF Restaurant Health Scores (53,973 inspections):
 
-TOON v3 tabular format eliminates key repetition in structured data. More rows means more savings -- up to 58% fewer tokens at scale.
+| Dataset | Rows | JSON Tokens | TOON Tokens | Savings |
+|---------|------|-------------|-------------|---------|
+| MovieLens (7 cols) | 100 | 6,540 | 5,019 | **23.3%** |
+| MovieLens metadata (4 cols) | 100 | 2,258 | 1,364 | **39.6%** |
+| Restaurant violations (9 cols) | 100 | 7,071 | 4,326 | **38.8%** |
+
+See [Benchmark Results](BENCHMARK_REAL_DATA.md) for the full analysis.
 
 ## Next Steps
 
-- [Getting Started](getting-started.md) -- Install and run your first query in 5 minutes
-- [Architecture](architecture.md) -- Understand the pipeline
-- [API Reference](api-reference.md) -- Full Python API
-- [Providers](providers.md) -- Configure embedding and LLM providers
+- [Getting Started](getting-started.md) — Install and run your first query in 5 minutes
+- [Architecture](ARCHITECTURE.md) — Understand the pipeline
+- [API Reference](api-reference.md) — Full Python API
+- [Providers](providers.md) — Configure embedding and LLM providers
+- [TOON Format](toon-format.md) — Understand the format specification
+- [Benchmark](BENCHMARK_REAL_DATA.md) — Real-world token savings data
