@@ -184,6 +184,24 @@ Contributions are welcome. Please:
 
 See the [Contributing guide](docs/contributing.md) for development setup details.
 
+## Built for the MariaDB Ecosystem
+
+<p align="center">
+  <img src="docs/assets/mariadb-logo.svg" alt="MariaDB Foundation" width="200"/>
+</p>
+
+Seamless-RAG is designed as a native extension to the MariaDB ecosystem, leveraging:
+
+- **VECTOR columns** and **HNSW indexes** (MariaDB 11.7+)
+- **VEC_DISTANCE_COSINE** for similarity search
+- **Native binary protocol** via `mariadb-connector-python`
+- **Connection pooling** for production workloads
+
 ## License
 
-[Apache-2.0](LICENSE)
+```
+Copyright 2026 LiuWei (SunflowersLwtech)
+Licensed under the Apache License, Version 2.0
+```
+
+See [LICENSE](LICENSE) for full text. | [CONTRIBUTING](CONTRIBUTING.md) for guidelines.

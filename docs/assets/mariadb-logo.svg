@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" width="200" height="40">
+  <!-- MariaDB official brand colors: #003545 (dark teal), #C0765A (seal brown) -->
+  <!-- Sea lion mark approximation -->
+  <g transform="translate(5, 2)">
+    <path d="M16 4C12 4 9 7 8 10C7 13 6 16 4 18C2 20 0 21 0 24C0 28 3 32 8 33C13 34 17 31 18 27C19 23 17 20 19 17C21 14 24 13 25 10C26 7 24 4 20 4C18 4 17 4 16 4Z" fill="#003545"/>
+    <circle cx="12" cy="15" r="2" fill="#C0765A"/>
+  </g>
+  <!-- MariaDB text -->
+  <text x="38" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#003545" letter-spacing="-0.5">MariaDB</text>
+  <!-- Foundation mark -->
+  <text x="126" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#C0765A" font-weight="500">Foundation</text>
+</svg>

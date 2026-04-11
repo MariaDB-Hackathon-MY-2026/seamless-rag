@@ -25,8 +25,10 @@ def main(
     host: str = typer.Option("127.0.0.1", envvar="MARIADB_HOST", help="MariaDB host"),
     port: int = typer.Option(3306, envvar="MARIADB_PORT", help="MariaDB port"),
     user: str = typer.Option("root", envvar="MARIADB_USER", help="MariaDB user"),
-    password: str = typer.Option("seamless", envvar="MARIADB_PASSWORD", help="MariaDB password"),
+    password: str = typer.Option("seamless", envvar="MARIADB_PASSWORD"),
     database: str = typer.Option("seamless_rag", envvar="MARIADB_DATABASE"),
+    provider: str = typer.Option("", "--provider", envvar="EMBEDDING_PROVIDER"),
+    model: str = typer.Option("", "--model", envvar="EMBEDDING_MODEL", help="Embedding model"),
     log_level: str = typer.Option("WARNING", "--log-level", envvar="LOG_LEVEL", help="Log level"),
 ) -> None:
     """TOON-Native Auto-Embedding & RAG Toolkit for MariaDB."""
@@ -34,6 +36,14 @@ def main(
     _state["db"] = {
         "host": host, "port": port, "user": user, "password": password, "database": database,
     }
+    # Override provider/model settings if specified via CLI
+    if provider or model:
+        import os
+
+        if provider:
+            os.environ["EMBEDDING_PROVIDER"] = provider
+        if model:
+            os.environ["EMBEDDING_MODEL"] = model
 
 
 def _get_rag(**extra):

@@ -17,10 +17,13 @@ _FORBIDDEN_RE = re.compile(
     re.IGNORECASE,
 )
 
+_MIN_MARIADB_VERSION = (11, 7, 2)
+
 _SCHEMA_SQL = [
     """CREATE TABLE IF NOT EXISTS documents (
         id INT AUTO_INCREMENT PRIMARY KEY,
         title VARCHAR(512) NOT NULL,
+        source VARCHAR(256) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )""",
     """CREATE TABLE IF NOT EXISTS chunks (
@@ -29,6 +32,7 @@ _SCHEMA_SQL = [
         chunk_order INT NOT NULL,
         content LONGTEXT NOT NULL,
         embedding VECTOR({dimensions}) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         VECTOR INDEX (embedding) DISTANCE=cosine,
         FOREIGN KEY (document_id) REFERENCES documents(id),
         INDEX idx_doc_order (document_id, chunk_order)
@@ -114,8 +118,30 @@ class MariaDBVectorStore:
 
     # ── Schema ─────────────────────────────────────────────────
 
+    def _check_version(self) -> None:
+        """Verify MariaDB version >= 11.7.2 (VECTOR support)."""
+        with self._get_conn() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("SELECT VERSION()")
+                ver_str = cursor.fetchone()[0]
+            finally:
+                cursor.close()
+        # Parse "11.8.1-MariaDB" or "11.7.2"
+        parts = ver_str.split("-")[0].split(".")
+        version = tuple(int(p) for p in parts[:3])
+        if version < _MIN_MARIADB_VERSION:
+            raise RuntimeError(
+                f"MariaDB {ver_str} is too old. "
+                f"VECTOR support requires >= {'.'.join(map(str, _MIN_MARIADB_VERSION))}"
+            )
+
     def init_schema(self, dimensions: int = 384) -> None:
-        """Create documents + chunks tables if they don't exist."""
+        """Create documents + chunks tables if they don't exist.
+
+        Also validates MariaDB version >= 11.7.2 for VECTOR support.
+        """
+        self._check_version()
         with self._get_conn() as conn:
             cursor = conn.cursor()
             try:
