@@ -130,6 +130,29 @@ def ask(
 
 
 @app.command()
+def embed(
+    table: str = typer.Option("chunks", "--table", "-t"),
+    column: str = typer.Option("content", "--column", "-c"),
+    batch_size: int = typer.Option(64, "--batch-size", "-b"),
+    host: str = typer.Option("127.0.0.1", envvar="MARIADB_HOST"),
+    port: int = typer.Option(3306, envvar="MARIADB_PORT"),
+    user: str = typer.Option("root", envvar="MARIADB_USER"),
+    password: str = typer.Option("seamless", envvar="MARIADB_PASSWORD"),
+    database: str = typer.Option("seamless_rag", envvar="MARIADB_DATABASE"),
+):
+    """Bulk-embed all rows in a table that lack embeddings."""
+    rag = _get_rag(**_db_kwargs(host, port, user, password, database))
+    rprint(f"[blue]Embedding {table}.{column} (batch_size={batch_size})...[/blue]")
+    result = rag.embed_table(table, text_column=column, batch_size=batch_size)
+    rprint(
+        f"[green]Done.[/green] "
+        f"Embedded: {result['embedded']}, Failed: {result['failed']}, "
+        f"Total: {result['total']}"
+    )
+    rag.close()
+
+
+@app.command()
 def watch(
     table: str = typer.Option("chunks", "--table", "-t"),
     column: str = typer.Option("content", "--column", "-c"),

@@ -37,8 +37,8 @@ make score
 docker compose up -d --wait
 
 # Bulk-embed a table
-seamless-rag embed articles --column content
-# → Shows: "Embedded N rows"
+seamless-rag embed --table articles --column content
+# → Shows: "Embedded: N, Failed: 0, Total: N"
 
 # Ask a question with token benchmark
 seamless-rag ask "What are the key findings on climate change?"

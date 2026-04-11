@@ -152,7 +152,7 @@ class AnthropicLLM:
         ).content[0].text
 ```
 
-Pass your provider directly to the facade: `SeamlessRAG(embedding_provider=CohereProvider())`
+Register in the factory or pass via `Settings(embedding_provider="cohere")`, then configure in `.env`.
 
 ## Test Results
 

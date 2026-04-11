@@ -137,11 +137,11 @@ class MariaDBVectorStore:
         self, table: str, row_ids: list[int], embeddings: list[list[float]],
     ) -> None:
         t = _validate_ident(table)
+        pairs = zip(row_ids, embeddings, strict=True)
+        params = [(array.array("f", emb), rid) for rid, emb in pairs]
         cursor = self._cursor()
         try:
-            for row_id, emb in zip(row_ids, embeddings, strict=True):
-                vec = array.array("f", emb)
-                cursor.execute(f"UPDATE {t} SET embedding = ? WHERE id = ?", (vec, row_id))
+            cursor.executemany(f"UPDATE {t} SET embedding = ? WHERE id = ?", params)
         finally:
             cursor.close()
 
