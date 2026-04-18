@@ -1,7 +1,7 @@
 site_name: Seamless-RAG
 site_description: TOON-Native Auto-Embedding & RAG Toolkit for MariaDB
-repo_url: https://github.com/SunflowersLwtech/seamless-rag
-repo_name: SunflowersLwtech/seamless-rag
+repo_url: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag
+repo_name: MariaDB-Hackathon-MY-2026/seamless-rag
 
 theme:
   name: material
@@ -42,5 +42,6 @@ nav:
   - API Reference: api-reference.md
   - Providers: providers.md
   - TOON Format: toon-format.md
-  - Benchmark: BENCHMARK_REAL_DATA.md
+  - Benchmark Data: BENCHMARK_REAL_DATA.md
+  - CLI Test Report: CLI_TEST_REPORT.md
   - Contributing: contributing.md

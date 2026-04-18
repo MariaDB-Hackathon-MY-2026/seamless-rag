@@ -31,3 +31,5 @@ eval/results.tsv
 
 # Screenshots (Playwright MCP testing)
 screenshots/
+site/
+.claude/settings.local.json
