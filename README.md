@@ -10,7 +10,26 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://python.org)
 [![TOON v3](https://img.shields.io/badge/TOON%20v3-166%2F166%20conformance-blue)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-538%2F538%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-525%2F525%20passing-brightgreen)]()
+
+---
+
+## Quick Start for Judges
+
+> Evaluating this submission? Start with **[JUDGES_TESTING_GUIDE.md](JUDGES_TESTING_GUIDE.md)** — four progressive paths from inspect-only (5 min, no install) to full test suite (15 min).
+
+90-second verification:
+
+```bash
+git clone https://github.com/SunflowersLwtech/seamless-rag.git
+cd seamless-rag
+docker compose up -d --wait
+docker compose exec app seamless-rag demo
+```
+
+A 90-second screencast of the same flow lives at [`docs/assets/demo.gif`](docs/assets/demo.gif) (also [demo.mp4](docs/assets/demo.mp4)):
+
+![Seamless-RAG demo](docs/assets/demo.gif)
 
 ---
 
