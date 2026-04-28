@@ -13,5 +13,21 @@ services:
       interval: 5s
       retries: 10
 
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MARIADB_HOST: db
+      MARIADB_PORT: "3306"
+      MARIADB_USER: root
+      MARIADB_PASSWORD: seamless
+      MARIADB_DATABASE: seamless_rag
+    # Keep container alive so judges can `docker compose exec app seamless-rag <cmd>`.
+    # The image's ENTRYPOINT is `seamless-rag`, so we override both here.
+    entrypoint: ["sh", "-c"]
+    command: ["seamless-rag init && tail -f /dev/null"]
+
 volumes:
   mariadb_data:
