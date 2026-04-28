@@ -99,7 +99,35 @@ def run_lint() -> SuiteResult:
         return SuiteResult("lint", 0, 0, 1, 1)
 
 
+def show_cached() -> int:
+    """Print the most recent cached scores without re-running tests."""
+    if not SCORE_FILE.exists():
+        print(f"No cached scores at {SCORE_FILE}. Run `python scripts/score.py` first.")
+        return 1
+    data = json.loads(SCORE_FILE.read_text())
+    print("=" * 50)
+    print("  Seamless-RAG Quality Score Dashboard (cached)")
+    print(f"  {data['timestamp']}")
+    print("=" * 50)
+    print()
+    print(f"Overall: {data['overall_pct']:.1f}% ({data['total_passed']}/{data['total_tests']} passed)")
+    print("-" * 50)
+    for name, suite in data["suites"].items():
+        pct = suite["pct"]
+        filled = int(pct / 5)
+        bar = "#" * filled + "." * (20 - filled)
+        status = "PASS" if pct == 100 else ("PARTIAL" if pct > 0 else "FAIL")
+        color = "\033[32m" if pct == 100 else ("\033[33m" if pct > 0 else "\033[31m")
+        print(f"  {name:15s} [{bar}] {color}{pct:5.1f}\033[0m% ({suite['passed']}/{suite['total']}) {status}")
+    print("-" * 50)
+    print("\n\033[32mAll targets met!\033[0m" if data["overall_pct"] >= 99 else "")
+    return 0
+
+
 def main():
+    if "--cached" in sys.argv:
+        sys.exit(show_cached())
+
     print("=" * 50)
     print("  Seamless-RAG Quality Score Dashboard")
     print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
