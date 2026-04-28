@@ -71,3 +71,17 @@ class TestTokenBenchmark:
         result = benchmark.compare([])
         assert result.json_tokens >= 0
         assert result.toon_tokens >= 0
+
+    def test_datetime_columns_serialize(self, benchmark):
+        """Dict-cursor rows from MariaDB include TIMESTAMP -> datetime; must not crash json.dumps."""
+        from datetime import datetime
+        from decimal import Decimal
+
+        rows = [
+            {"id": 1, "content": "doc one", "created_at": datetime(2026, 4, 29, 1, 0, 0), "score": Decimal("0.123")},
+            {"id": 2, "content": "doc two", "created_at": datetime(2026, 4, 29, 2, 0, 0), "score": Decimal("0.456")},
+        ]
+        result = benchmark.compare(rows)
+        assert result.json_tokens > 0
+        assert result.toon_tokens > 0
+        assert result.toon_tokens < result.json_tokens

@@ -69,3 +69,24 @@ class TestTokenBenchmarkInRAG:
         result = rag_engine.ask("test")
         expected = (result.json_tokens - result.toon_tokens) / result.json_tokens * 100
         assert abs(result.savings_pct - expected) < 0.1
+
+
+class TestRAGNonJSONNativeColumns:
+    """Real MariaDB dict cursors include datetime/Decimal — must not crash json.dumps."""
+
+    def test_ask_handles_datetime_column(self, mock_provider):
+        from datetime import datetime
+        from decimal import Decimal
+        from unittest.mock import Mock
+
+        from seamless_rag.storage.protocol import VectorStore
+
+        storage = Mock(spec=VectorStore)
+        storage.search.return_value = [
+            {"id": 1, "content": "doc one", "created_at": datetime(2026, 4, 29, 1, 0, 0), "score": Decimal("0.123")},
+            {"id": 2, "content": "doc two", "created_at": datetime(2026, 4, 29, 2, 0, 0), "score": Decimal("0.456")},
+        ]
+        engine = RAGEngine(provider=mock_provider, storage=storage)
+        result = engine.ask("test")  # would raise TypeError before the default=str fix
+        assert result.json_tokens > 0
+        assert "2026-04-29" in result.context_toon

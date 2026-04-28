@@ -113,7 +113,11 @@ class RAGEngine:
             )
 
         # 3. Format as JSON and TOON
-        context_json = json.dumps(results, separators=(",", ":"), ensure_ascii=False)
+        # default=str mirrors TOON's handling of datetime/Decimal so MariaDB
+        # dict-cursor rows (TIMESTAMP, DECIMAL) don't crash json.dumps.
+        context_json = json.dumps(
+            results, separators=(",", ":"), ensure_ascii=False, default=str,
+        )
         context_toon = encode_tabular(results) if results else "[0,]:"
 
         # 4. Token benchmark (observation layer)
