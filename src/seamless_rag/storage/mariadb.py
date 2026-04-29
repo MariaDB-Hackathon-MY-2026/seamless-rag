@@ -416,6 +416,61 @@ class MariaDBVectorStore:
             finally:
                 cursor.close()
 
+    def describe_schema(self, table: str) -> dict:
+        """Return the table DDL, indexes, and row count for a vector table.
+
+        Used by `seamless-rag schema` to surface MariaDB-specific features
+        (VECTOR(N) column type, VECTOR INDEX with DISTANCE=cosine, HNSW)
+        without making the user run raw SQL.
+        """
+        t = _validate_ident(table)
+        with self._get_conn() as conn:
+            cursor = conn.cursor(dictionary=True)
+            try:
+                cursor.execute(f"SHOW CREATE TABLE {t}")
+                row = cursor.fetchone()
+                ddl = row["Create Table"] if row else ""
+
+                cursor.execute(f"SHOW INDEX FROM {t}")
+                indexes = cursor.fetchall()
+
+                cursor.execute(f"SELECT COUNT(*) AS n FROM {t}")
+                row_count = cursor.fetchone()["n"]
+
+                return {"table": t, "ddl": ddl, "indexes": indexes, "row_count": row_count}
+            finally:
+                cursor.close()
+
+    def compare_vec_distance(
+        self, table: str, query_embedding: list[float], top_k: int = 3,
+    ) -> dict:
+        """Run bare VEC_DISTANCE() and explicit VEC_DISTANCE_COSINE() on the same query.
+
+        Returns {"auto": [{id, distance}, ...], "explicit": [...]}. Demonstrates
+        a MariaDB-only feature: bare VEC_DISTANCE() reads the index's configured
+        DISTANCE metric (cosine for our default schema) and applies it.
+        """
+        t = _validate_ident(table)
+        qbytes = array.array("f", query_embedding).tobytes()
+        with self._get_conn() as conn:
+            cursor = conn.cursor(dictionary=True)
+            try:
+                cursor.execute(
+                    f"SELECT id, VEC_DISTANCE(embedding, ?) AS distance "
+                    f"FROM {t} ORDER BY distance LIMIT ?",
+                    (qbytes, top_k),
+                )
+                auto = cursor.fetchall()
+                cursor.execute(
+                    f"SELECT id, VEC_DISTANCE_COSINE(embedding, ?) AS distance "
+                    f"FROM {t} ORDER BY distance LIMIT ?",
+                    (qbytes, top_k),
+                )
+                explicit = cursor.fetchall()
+            finally:
+                cursor.close()
+        return {"auto": auto, "explicit": explicit}
+
     def close(self) -> None:
         """Close the connection pool."""
         self._pool.close()

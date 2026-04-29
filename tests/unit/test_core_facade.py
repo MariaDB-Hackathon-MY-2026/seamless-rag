@@ -162,3 +162,43 @@ class TestExport:
         mock_store.execute_query.return_value = []
         result = rag_facade.export("SELECT id FROM chunks WHERE 1=0")
         assert result == "[0,]:"
+
+
+class TestSchemaIntrospection:
+    """Test SeamlessRAG.describe_schema() and compare_vec_distance() delegation."""
+
+    def test_describe_schema_returns_store_payload(self, rag_facade, mock_store):
+        """describe_schema() forwards to the store and returns its dict."""
+        mock_store.describe_schema.return_value = {
+            "table": "chunks",
+            "ddl": "CREATE TABLE chunks (...)",
+            "indexes": [{"Key_name": "embedding", "Index_type": "VECTOR"}],
+            "row_count": 42,
+        }
+        info = rag_facade.describe_schema("chunks")
+        mock_store.describe_schema.assert_called_once_with("chunks")
+        assert info["row_count"] == 42
+        assert info["indexes"][0]["Index_type"] == "VECTOR"
+
+    def test_describe_schema_default_table(self, rag_facade, mock_store):
+        """describe_schema() defaults to the facade's configured table."""
+        mock_store.describe_schema.return_value = {
+            "table": "chunks", "ddl": "", "indexes": [], "row_count": 0,
+        }
+        rag_facade.describe_schema()
+        mock_store.describe_schema.assert_called_once_with("chunks")
+
+    def test_compare_vec_distance_runs_both_queries(
+        self, rag_facade, mock_store, mock_emb_provider,
+    ):
+        """compare_vec_distance() embeds the query and asks the store for both forms."""
+        mock_store.compare_vec_distance.return_value = {
+            "auto":     [{"id": 1, "distance": 0.12}, {"id": 2, "distance": 0.18}],
+            "explicit": [{"id": 1, "distance": 0.12}, {"id": 2, "distance": 0.18}],
+        }
+        out = rag_facade.compare_vec_distance("chunks", query="climate", top_k=2)
+        mock_emb_provider.embed.assert_called_once_with("climate")
+        mock_store.compare_vec_distance.assert_called_once_with(
+            "chunks", [0.1] * 384, top_k=2,
+        )
+        assert out["auto"] == out["explicit"], "expected identical rankings on cosine-indexed table"

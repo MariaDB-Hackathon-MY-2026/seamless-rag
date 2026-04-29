@@ -103,6 +103,40 @@ class TestVectorSearch:
 
 
 @pytest.mark.integration
+class TestVecDistanceAutoDetect:
+    """MariaDB-only: bare VEC_DISTANCE() reads the index's DISTANCE setting."""
+
+    def test_bare_vec_distance_matches_explicit_cosine(
+        self, db_cursor, sample_doc_with_chunks,
+    ):
+        """`VEC_DISTANCE(...)` and `VEC_DISTANCE_COSINE(...)` must agree on
+        a cosine-indexed table — same ordering and same distances."""
+        query_vec = array.array("f", [0.1] * 384)
+
+        db_cursor.execute(
+            "SELECT id, VEC_DISTANCE(embedding, ?) AS d FROM test_chunks "
+            "ORDER BY d LIMIT 5",
+            (query_vec,),
+        )
+        auto = db_cursor.fetchall()
+
+        db_cursor.execute(
+            "SELECT id, VEC_DISTANCE_COSINE(embedding, ?) AS d FROM test_chunks "
+            "ORDER BY d LIMIT 5",
+            (query_vec,),
+        )
+        explicit = db_cursor.fetchall()
+
+        assert [r[0] for r in auto] == [r[0] for r in explicit], (
+            "auto-pick and explicit cosine produced different rankings"
+        )
+        for a, b in zip(auto, explicit, strict=True):
+            assert abs(a[1] - b[1]) < 1e-6, (
+                f"distance mismatch: auto={a[1]} explicit={b[1]}"
+            )
+
+
+@pytest.mark.integration
 class TestCTEContextWindow:
     """Test CTE-based context windowing for RAG."""
 

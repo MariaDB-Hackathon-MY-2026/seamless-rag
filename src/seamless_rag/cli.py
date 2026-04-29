@@ -63,6 +63,73 @@ def init() -> None:
         rprint("[green]Schema initialized.[/green]")
 
 
+@app.command()
+def schema(
+    table: str = typer.Option("chunks", "--table", "-t", help="Table to describe"),
+) -> None:
+    """Show MariaDB schema: VECTOR(N), HNSW index, and VEC_DISTANCE() auto-detect.
+
+    Prints SHOW CREATE TABLE plus the indexes for the chosen table so judges
+    can see the MariaDB 11.7+ vector features in use without running raw SQL.
+    If the table has rows, also runs a side-by-side query showing that bare
+    `VEC_DISTANCE()` (auto-picks distance from the index) gives identical
+    results to the explicit `VEC_DISTANCE_COSINE()` form — a MariaDB-only
+    feature.
+    """
+    from rich.panel import Panel
+    from rich.syntax import Syntax
+
+    with _get_rag() as rag:
+        info = rag.describe_schema(table)
+
+        console.print(Panel.fit(
+            Syntax(info["ddl"], "sql", theme="monokai", word_wrap=True),
+            title=f"[bold]SHOW CREATE TABLE {info['table']}[/bold]",
+            border_style="cyan",
+        ))
+
+        idx_table = Table(title=f"\nSHOW INDEX FROM {info['table']}", show_header=True)
+        idx_table.add_column("Key_name", style="cyan")
+        idx_table.add_column("Index_type", style="magenta")
+        idx_table.add_column("Column_name")
+        idx_table.add_column("Seq_in_index", justify="right")
+        for idx in info["indexes"]:
+            row_style = "bold yellow" if idx["Index_type"] == "VECTOR" else ""
+            idx_table.add_row(
+                str(idx["Key_name"]),
+                str(idx["Index_type"]),
+                str(idx["Column_name"]),
+                str(idx["Seq_in_index"]),
+                style=row_style,
+            )
+        console.print(idx_table)
+
+        rprint(f"\n[dim]Rows in {info['table']}: {info['row_count']}[/dim]")
+
+        if info["row_count"] >= 1:
+            rprint(
+                "\n[bold cyan]MariaDB-only:[/bold cyan] bare "
+                "[magenta]VEC_DISTANCE()[/magenta] auto-picks the distance metric "
+                "from the index's [magenta]DISTANCE=cosine[/magenta] setting."
+            )
+            comp = rag.compare_vec_distance(table, query="example", top_k=3)
+            cmp_table = Table(show_header=True, title="VEC_DISTANCE()  vs  VEC_DISTANCE_COSINE()")
+            cmp_table.add_column("rank", justify="right")
+            cmp_table.add_column("auto id", justify="right", style="cyan")
+            cmp_table.add_column("auto distance", justify="right")
+            cmp_table.add_column("explicit id", justify="right", style="cyan")
+            cmp_table.add_column("explicit distance", justify="right")
+            pairs = zip(comp["auto"], comp["explicit"], strict=True)
+            for i, (a, b) in enumerate(pairs, 1):
+                cmp_table.add_row(
+                    str(i), str(a["id"]), f"{a['distance']:.6f}",
+                    str(b["id"]), f"{b['distance']:.6f}",
+                )
+            console.print(cmp_table)
+            same_ids = [r["id"] for r in comp["auto"]] == [r["id"] for r in comp["explicit"]]
+            rprint(f"[green]Identical ranking: {same_ids}[/green]")
+
+
 def _chunk_text(text: str, size: int, overlap: int) -> list[str]:
     """Split text into chunks at sentence boundaries with overlap."""
     import re as _re

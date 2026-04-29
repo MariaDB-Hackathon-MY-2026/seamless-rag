@@ -186,6 +186,25 @@ class SeamlessRAG:
         rows = self._store.execute_query(query)
         return encode_tabular(rows) if rows else "[0,]:"
 
+    def describe_schema(self, table: str | None = None) -> dict:
+        """Return DDL + indexes + row_count for a vector table."""
+        return self._store.describe_schema(table or self._table)
+
+    def compare_vec_distance(
+        self, table: str | None = None, query: str = "", top_k: int = 3,
+    ) -> dict:
+        """Compare bare VEC_DISTANCE() (auto-pick) vs explicit VEC_DISTANCE_COSINE().
+
+        Demonstrates a MariaDB-only feature: VEC_DISTANCE() reads the index's
+        configured DISTANCE metric and applies it transparently. Returns
+        {"auto": [...], "explicit": [...]} where each list contains
+        dicts of {"id", "distance"} ordered by ascending distance.
+        """
+        embedding = self._ensure_provider().embed(query)
+        return self._store.compare_vec_distance(
+            table or self._table, embedding, top_k=top_k,
+        )
+
     def close(self) -> None:
         """Close the database connection."""
         self._store.close()
