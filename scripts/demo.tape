@@ -7,6 +7,8 @@
 #   - docker compose -f docker-compose.test.yml up -d --wait    (MariaDB 11.8 on :3306)
 #   - conda env `seamless-rag` exists with the package installed editable
 #   - all-MiniLM-L6-v2 already cached (rerun once non-recorded if first time)
+#   - test_seamless_rag DB freshly dropped+created so the schema demo lands
+#     on a clean state (the surrounding render script does this).
 
 Output docs/assets/demo.mp4
 Output docs/assets/demo.gif
@@ -16,7 +18,7 @@ Require docker
 Set Shell bash
 Set FontSize 16
 Set Width 1280
-Set Height 760
+Set Height 1000
 Set Padding 24
 Set Theme "Catppuccin Mocha"
 Set WindowBar Colorful
@@ -31,8 +33,7 @@ Type "export MARIADB_DATABASE=test_seamless_rag MARIADB_PASSWORD=seamless"
 Enter
 Type "export PS1='$ '"
 Enter
-Type "clear"
-Enter
+Ctrl+L
 Sleep 500ms
 Show
 
@@ -41,7 +42,7 @@ Type "echo 'Seamless-RAG  -  TOON-Native RAG Toolkit for MariaDB'"
 Sleep 300ms
 Enter
 Sleep 1500ms
-Type "echo '525 tests passing  |  MariaDB 11.8 VECTOR + HNSW  |  TOON v3 spec-conformant'"
+Type "echo '530 tests passing  |  MariaDB 11.8 VECTOR + HNSW  |  TOON v3 spec-conformant'"
 Enter
 Sleep 2500ms
 
@@ -51,8 +52,7 @@ Sleep 300ms
 Enter
 Sleep 5500ms
 
-Type "clear"
-Enter
+Ctrl+L
 Sleep 400ms
 
 # ── 2. Init schema in MariaDB ──────────────────────────────────────
@@ -61,40 +61,59 @@ Sleep 300ms
 Enter
 Sleep 12000ms
 
-Type "clear"
-Enter
+Ctrl+L
 Sleep 400ms
 
-# ── 3. Pure TOON-vs-JSON encoder ──────────────────────────────────
+# ── 3a. Ingest sample documents so schema has rows for VEC_DISTANCE ─
+Type "seamless-rag ingest /tmp/rag_e2e_docs 2>/dev/null | tail -4"
+Sleep 300ms
+Enter
+Sleep 8000ms
+
+# Clear so the schema panel starts at the top of the viewport, leaving
+# room for SHOW CREATE TABLE + SHOW INDEX + VEC_DISTANCE comparison.
+Ctrl+L
+Sleep 400ms
+
+# ── 3b. MariaDB schema proof: VECTOR(384) + HNSW + DISTANCE=cosine ──
+# Sleep covers: ~6s model load + ~2s schema queries + ~1s second embedding
+# for the VEC_DISTANCE comparison + ~7s of visible time for the comparison
+# table to be readable.
+Type "seamless-rag schema 2>/dev/null"
+Sleep 300ms
+Enter
+Sleep 18000ms
+
+Ctrl+L
+Sleep 400ms
+
+# ── 4. Pure TOON-vs-JSON encoder ──────────────────────────────────
 Type "python scripts/demo.py 2>&1 | head -30"
 Sleep 300ms
 Enter
 Sleep 6000ms
 
-Type "clear"
-Enter
+Ctrl+L
 Sleep 400ms
 
-# ── 4. End-to-end RAG against MariaDB (the headline) ──────────────
+# ── 5. End-to-end RAG against MariaDB (the headline) ──────────────
 Type "seamless-rag demo 2>/dev/null | tail -55"
 Sleep 300ms
 Enter
 Sleep 45000ms
 
-Type "clear"
-Enter
+Ctrl+L
 Sleep 400ms
 
-# ── 5. Real-data benchmark (50 rows, 6 cols) ──────────────────────
+# ── 6. Real-data benchmark (50 rows, 6 cols) ──────────────────────
 Type "seamless-rag benchmark 2>/dev/null | tail -22"
 Sleep 300ms
 Enter
 Sleep 9000ms
 
 # ── Outro ──────────────────────────────────────────────────────────
-Type "clear"
-Enter
+Ctrl+L
 Sleep 300ms
-Type "echo 'All five steps green.  See JUDGES_TESTING_GUIDE.md to reproduce.'"
+Type "echo 'All six steps green.  See JUDGES_TESTING_GUIDE.md to reproduce.'"
 Enter
 Sleep 4000ms
