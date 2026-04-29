@@ -4,6 +4,25 @@
 
 Turn any MariaDB table into a searchable vector store. Query results come back in TOON v3 tabular format — a compact wire format that saves 20-40% of tokens when feeding structured data to LLMs or agents.
 
+## Quick Start for Judges
+
+Evaluating this submission? Start with the **[Judges' Testing Guide](judges-testing-guide.md)** — four progressive paths from inspect-only (5 min, no install) to full test suite (15 min).
+
+90-second verification:
+
+```bash
+git clone https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag.git
+cd seamless-rag
+docker compose up -d --wait
+docker compose exec app seamless-rag demo
+```
+
+A 93-second screencast of the same flow:
+
+![Seamless-RAG demo](assets/demo.gif)
+
+---
+
 ## Features
 
 - **Auto-Embed** — Point at any MariaDB table, embed single or multiple columns
