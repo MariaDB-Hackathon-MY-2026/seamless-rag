@@ -8,6 +8,7 @@ Watch mode features (per Judge Directive 3 — "killer feature must be bulletpro
 """
 from __future__ import annotations
 
+import contextlib
 import logging
 import time
 from typing import TYPE_CHECKING
@@ -142,8 +143,28 @@ class AutoEmbedder:
             t.add_row("Poll interval", f"{interval}s")
             return t
 
+        # Rich Live's auto-refresh thread deadlocks live.update() when stdout is
+        # not a TTY (nohup, docker, pipes, &). Detect and use a no-op renderer
+        # that just logs each transition instead.
+        is_tty = _console.is_terminal
+
+        if is_tty:
+            live_ctx = Live(_make_table(), console=_console, refresh_per_second=2)
+            def _render() -> None:
+                live_ctx.update(_make_table())
+        else:
+            live_ctx = contextlib.nullcontext()
+            _last_status: list[str] = [""]
+            def _render() -> None:
+                if status != _last_status[0]:
+                    logger.info(
+                        "watch: status=%s high_water=%d embedded=%d failed=%d",
+                        status, high_water, embedded_total, failed_total,
+                    )
+                    _last_status[0] = status
+
         try:
-            with Live(_make_table(), console=_console, refresh_per_second=2) as live:
+            with live_ctx:
                 while True:
                     try:
                         rows = self._store.get_new_rows(table, text_columns, high_water)
@@ -152,7 +173,7 @@ class AutoEmbedder:
                             retries = 0
                             n = len(rows)
                             status = f"Embedding {n} new rows (batch)..."
-                            live.update(_make_table())
+                            _render()
 
                             # Batch embed for efficiency
                             texts = [self._row_text(r, text_columns) for r in rows]
@@ -180,10 +201,10 @@ class AutoEmbedder:
                                     high_water = row["id"]
 
                             status = f"Done — embedded {n} rows"
-                            live.update(_make_table())
+                            _render()
                         else:
                             status = "Waiting..."
-                            live.update(_make_table())
+                            _render()
 
                         time.sleep(interval)
 
@@ -193,16 +214,19 @@ class AutoEmbedder:
                         retries += 1
                         if retries > max_retries:
                             status = "Max retries exceeded"
-                            live.update(_make_table())
+                            _render()
                             raise
                         backoff = min(interval * (2**retries), 60)
                         status = f"Retry {retries}/{max_retries} (backoff {backoff:.0f}s)"
-                        live.update(_make_table())
+                        _render()
                         time.sleep(backoff)
 
         except KeyboardInterrupt:
-            _console.print(
-                f"\n[yellow]Watch stopped.[/yellow] "
-                f"Embedded: {embedded_total}, Failed: {failed_total}, "
-                f"Last ID: {high_water}"
+            msg = (
+                f"Watch stopped. Embedded: {embedded_total}, "
+                f"Failed: {failed_total}, Last ID: {high_water}"
             )
+            if is_tty:
+                _console.print(f"\n[yellow]{msg}[/yellow]")
+            else:
+                logger.info(msg)

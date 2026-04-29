@@ -231,3 +231,42 @@ class TestMultiColumnEmbed:
         row = {"a": "hello", "b": None, "c": "  ", "d": "world"}
         result = AutoEmbedder._row_text(row, ["a", "b", "c", "d"])
         assert result == "hello — world"
+
+
+class TestWatchNonTTYProgresses:
+    """Regression: Rich Live deadlocked watch loop when stdout was non-TTY."""
+
+    def test_watch_iterates_when_console_not_terminal(
+        self, monkeypatch, mock_provider, mock_storage,
+    ):
+        """Watch must complete >=2 poll iterations when stdout is not a TTY."""
+        from rich.console import Console
+
+        import seamless_rag.pipeline.embedder as embedder_mod
+
+        # Force non-TTY console — this is what `seamless-rag watch > log` looks like.
+        # is_terminal is a read-only property; replace the whole console.
+        monkeypatch.setattr(embedder_mod, "_console", Console(force_terminal=False, force_interactive=False))
+
+        mock_storage.insert_embeddings_batch = Mock()
+        mock_storage.get_max_id = Mock(return_value=10)
+        # First poll: one new row. Second poll: nothing. Third poll: stop.
+        new_rows_calls = [
+            [{"id": 11, "content": "salmon spawn upstream"}],
+            [],
+            KeyboardInterrupt(),
+        ]
+        def _get_new_rows(*_args, **_kwargs):
+            v = new_rows_calls.pop(0)
+            if isinstance(v, KeyboardInterrupt):
+                raise v
+            return v
+        mock_storage.get_new_rows = Mock(side_effect=_get_new_rows)
+
+        embedder = AutoEmbedder(provider=mock_provider, store=mock_storage)
+        embedder.watch(table="chunks", text_column="content", interval=0.01)
+
+        # All three iterations must have run. Pre-fix: deadlock after iter #1.
+        assert mock_storage.get_new_rows.call_count == 3
+        # The first iteration's row was embedded.
+        mock_storage.insert_embeddings_batch.assert_called_once()
