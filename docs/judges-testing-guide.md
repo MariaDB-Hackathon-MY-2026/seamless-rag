@@ -31,10 +31,10 @@ If you don't want to run anything, the repository ships with everything needed t
 
 | What to read | Why |
 |---|---|
-| [`README.md`](https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/blob/main/README.md) | One-page project overview, problem/solution, install matrix |
-| [`docs/BENCHMARK_REAL_DATA.md`](BENCHMARK_REAL_DATA.md) | TOON vs JSON token savings on **MovieLens** and **SF Restaurant** public datasets — not synthetic |
-| [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) | Component diagram, data flow, design decisions |
-| [`docs/CLI_TEST_REPORT.md`](CLI_TEST_REPORT.md) | Every CLI command exercised end-to-end with output |
+| [Project overview (this site's home page)](index.md) | One-page problem/solution, install matrix, MariaDB features used |
+| [Benchmark — real public datasets](BENCHMARK_REAL_DATA.md) | TOON vs JSON token savings on **MovieLens** and **SF Restaurant** — not synthetic |
+| [Architecture](ARCHITECTURE.md) | Component diagram, data flow, design decisions |
+| [CLI Test Report](CLI_TEST_REPORT.md) | Every CLI command exercised end-to-end with output |
 | [`eval/results.tsv`](https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/blob/main/eval/results.tsv) | Reproducible quality history — every score-run appended |
 | `tests/fixtures/toon_spec/` | 358 official TOON v3 conformance fixtures we pass |
 

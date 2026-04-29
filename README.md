@@ -16,7 +16,7 @@
 
 ## Quick Start for Judges
 
-> Evaluating this submission? Start with **[JUDGES_TESTING_GUIDE.md](JUDGES_TESTING_GUIDE.md)** — four progressive paths from inspect-only (5 min, no install) to full test suite (15 min).
+> Evaluating this submission? Start with the **[Judges' Testing Guide](https://mariadb-hackathon-my-2026.github.io/seamless-rag/judges-testing-guide/)** — four progressive paths from inspect-only (5 min, no install) to full test suite (15 min). The full docs site is at <https://mariadb-hackathon-my-2026.github.io/seamless-rag/>.
 
 90-second verification:
 
@@ -75,7 +75,7 @@ TOON tabular writes field names once, values as compact rows:
   2,Gadget,Tools,19.99,300,Acme,4.2
 ```
 
-**Measured on real public datasets** ([full benchmark](docs/BENCHMARK_REAL_DATA.md)):
+**Measured on real public datasets** ([full benchmark](https://mariadb-hackathon-my-2026.github.io/seamless-rag/BENCHMARK_REAL_DATA/)):
 
 | Dataset (query type) | Rows | JSON Tokens | TOON Tokens | Savings |
 |---------------------|------|-------------|-------------|---------|
@@ -227,7 +227,7 @@ Both embedding and LLM layers use `typing.Protocol` — no base class needed:
 
 Switch via env vars: `EMBEDDING_PROVIDER=gemini LLM_PROVIDER=openai seamless-rag ask "..."`
 
-See [Providers guide](docs/providers.md) for adding custom providers.
+See the [Providers guide](https://mariadb-hackathon-my-2026.github.io/seamless-rag/providers/) for adding custom providers.
 
 ## Architecture
 
@@ -280,4 +280,4 @@ Copyright 2026 LiuWei (SunflowersLwtech)
 Licensed under the Apache License, Version 2.0
 ```
 
-See [LICENSE](LICENSE) | [CONTRIBUTING](CONTRIBUTING.md) | [Documentation](https://sunflowerslwtech.github.io/seamless-rag/)
+See [LICENSE](LICENSE) | [CONTRIBUTING](CONTRIBUTING.md) | [Documentation](https://mariadb-hackathon-my-2026.github.io/seamless-rag/)

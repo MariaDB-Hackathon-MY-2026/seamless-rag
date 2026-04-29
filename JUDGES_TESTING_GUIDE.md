@@ -31,10 +31,10 @@ If you don't want to run anything, the repository ships with everything needed t
 
 | What to read | Why |
 |---|---|
-| [`README.md`](README.md) | One-page project overview, problem/solution, install matrix |
-| [`docs/BENCHMARK_REAL_DATA.md`](docs/BENCHMARK_REAL_DATA.md) | TOON vs JSON token savings on **MovieLens** and **SF Restaurant** public datasets — not synthetic |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Component diagram, data flow, design decisions |
-| [`docs/CLI_TEST_REPORT.md`](docs/CLI_TEST_REPORT.md) | Every CLI command exercised end-to-end with output |
+| [Project overview (rendered home page)](https://mariadb-hackathon-my-2026.github.io/seamless-rag/) | One-page problem/solution, install matrix, MariaDB features used |
+| [Benchmark — real public datasets](https://mariadb-hackathon-my-2026.github.io/seamless-rag/BENCHMARK_REAL_DATA/) | TOON vs JSON token savings on **MovieLens** and **SF Restaurant** — not synthetic |
+| [Architecture](https://mariadb-hackathon-my-2026.github.io/seamless-rag/ARCHITECTURE/) | Component diagram, data flow, design decisions |
+| [CLI Test Report](https://mariadb-hackathon-my-2026.github.io/seamless-rag/CLI_TEST_REPORT/) | Every CLI command exercised end-to-end with output |
 | [`eval/results.tsv`](eval/results.tsv) | Reproducible quality history — every score-run appended |
 | `tests/fixtures/toon_spec/` | 358 official TOON v3 conformance fixtures we pass |
 
