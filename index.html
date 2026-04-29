@@ -12,7 +12,7 @@
       
       
       
-        <link rel="next" href="getting-started/">
+        <link rel="next" href="judges-testing-guide/">
       
       
         
@@ -316,6 +316,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#quick-start-for-judges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start for Judges
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -363,6 +374,33 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="judges-testing-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    For Judges
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -610,6 +648,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#quick-start-for-judges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start for Judges
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#features" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -676,6 +725,17 @@
 <h1 id="seamless-rag">Seamless-RAG<a class="headerlink" href="#seamless-rag" title="Permanent link">&para;</a></h1>
 <p><strong>Vector Search &amp; TOON Format for MariaDB</strong></p>
 <p>Turn any MariaDB table into a searchable vector store. Query results come back in TOON v3 tabular format — a compact wire format that saves 20-40% of tokens when feeding structured data to LLMs or agents.</p>
+<h2 id="quick-start-for-judges">Quick Start for Judges<a class="headerlink" href="#quick-start-for-judges" title="Permanent link">&para;</a></h2>
+<p>Evaluating this submission? Start with the <strong><a href="judges-testing-guide/">Judges' Testing Guide</a></strong> — four progressive paths from inspect-only (5 min, no install) to full test suite (15 min).</p>
+<p>90-second verification:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag.git
+<span class="nb">cd</span><span class="w"> </span>seamless-rag
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--wait
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>app<span class="w"> </span>seamless-rag<span class="w"> </span>demo
+</code></pre></div>
+<p>A 93-second screencast of the same flow:</p>
+<p><img alt="Seamless-RAG demo" src="assets/demo.gif" /></p>
+<hr />
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Auto-Embed</strong> — Point at any MariaDB table, embed single or multiple columns</li>

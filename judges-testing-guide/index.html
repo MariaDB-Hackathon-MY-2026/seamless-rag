@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../judges-testing-guide/">
+        <link rel="prev" href="..">
       
       
-        <link rel="next" href="../ARCHITECTURE/">
+        <link rel="next" href="../getting-started/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Getting Started - Seamless-RAG</title>
+        <title>For Judges - Seamless-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#judges-testing-guide-seamless-rag" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              For Judges
             
           </span>
         </div>
@@ -282,33 +282,6 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../judges-testing-guide/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    For Judges
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
@@ -328,7 +301,7 @@
   <span class="md-ellipsis">
     
   
-    Getting Started
+    For Judges
   
 
     
@@ -346,7 +319,7 @@
   <span class="md-ellipsis">
     
   
-    Getting Started
+    For Judges
   
 
     
@@ -372,10 +345,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#tldr-quickest-verification-90-seconds-no-install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        TL;DR — Quickest Verification (90 seconds, no install)
       
     </span>
   </a>
@@ -383,10 +356,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#evaluation-path-1-inspect-only-no-setup-5-minutes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation
+        Evaluation Path 1 — Inspect-Only (no setup, 5 minutes)
       
     </span>
   </a>
@@ -394,10 +367,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#start-mariadb" class="md-nav__link">
+  <a href="#evaluation-path-2-docker-recommended-5-minutes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Start MariaDB
+        Evaluation Path 2 — Docker (recommended, 5 minutes)
       
     </span>
   </a>
@@ -405,10 +378,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#initialize-and-ingest" class="md-nav__link">
+  <a href="#evaluation-path-3-local-python-10-minutes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Initialize and Ingest
+        Evaluation Path 3 — Local Python (10 minutes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evaluation Path 3 — Local Python (10 minutes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3a-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3a. Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3b-start-mariadb-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3b. Start MariaDB only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3c-walk-the-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3c. Walk the CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-path-4-run-the-test-suite-15-minutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evaluation Path 4 — Run the test suite (15 minutes)
       
     </span>
   </a>
@@ -416,10 +439,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#your-first-query" class="md-nav__link">
+  <a href="#what-to-look-for-judging-rubric-alignment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First Query
+        What to Look For — Judging Rubric Alignment
       
     </span>
   </a>
@@ -427,10 +450,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#embed-existing-tables" class="md-nav__link">
+  <a href="#optional-live-llm-answers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Embed Existing Tables
+        Optional — Live LLM Answers
       
     </span>
   </a>
@@ -438,10 +461,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
+  <a href="#optional-web-ui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python API
+        Optional — Web UI
       
     </span>
   </a>
@@ -449,10 +472,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sql-export" class="md-nav__link">
+  <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SQL Export
+        Troubleshooting
       
     </span>
   </a>
@@ -460,10 +483,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#web-ui" class="md-nav__link">
+  <a href="#demo-video" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Web UI
+        Demo Video
       
     </span>
   </a>
@@ -471,32 +494,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#watch-mode" class="md-nav__link">
+  <a href="#contact" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Watch Mode
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running Tests
+        Contact
       
     </span>
   </a>
@@ -507,6 +508,33 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -727,10 +755,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#tldr-quickest-verification-90-seconds-no-install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        TL;DR — Quickest Verification (90 seconds, no install)
       
     </span>
   </a>
@@ -738,10 +766,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#evaluation-path-1-inspect-only-no-setup-5-minutes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation
+        Evaluation Path 1 — Inspect-Only (no setup, 5 minutes)
       
     </span>
   </a>
@@ -749,10 +777,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#start-mariadb" class="md-nav__link">
+  <a href="#evaluation-path-2-docker-recommended-5-minutes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Start MariaDB
+        Evaluation Path 2 — Docker (recommended, 5 minutes)
       
     </span>
   </a>
@@ -760,10 +788,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#initialize-and-ingest" class="md-nav__link">
+  <a href="#evaluation-path-3-local-python-10-minutes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Initialize and Ingest
+        Evaluation Path 3 — Local Python (10 minutes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evaluation Path 3 — Local Python (10 minutes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3a-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3a. Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3b-start-mariadb-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3b. Start MariaDB only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3c-walk-the-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3c. Walk the CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-path-4-run-the-test-suite-15-minutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evaluation Path 4 — Run the test suite (15 minutes)
       
     </span>
   </a>
@@ -771,10 +849,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#your-first-query" class="md-nav__link">
+  <a href="#what-to-look-for-judging-rubric-alignment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First Query
+        What to Look For — Judging Rubric Alignment
       
     </span>
   </a>
@@ -782,10 +860,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#embed-existing-tables" class="md-nav__link">
+  <a href="#optional-live-llm-answers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Embed Existing Tables
+        Optional — Live LLM Answers
       
     </span>
   </a>
@@ -793,10 +871,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
+  <a href="#optional-web-ui" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python API
+        Optional — Web UI
       
     </span>
   </a>
@@ -804,10 +882,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sql-export" class="md-nav__link">
+  <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SQL Export
+        Troubleshooting
       
     </span>
   </a>
@@ -815,10 +893,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#web-ui" class="md-nav__link">
+  <a href="#demo-video" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Web UI
+        Demo Video
       
     </span>
   </a>
@@ -826,32 +904,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#watch-mode" class="md-nav__link">
+  <a href="#contact" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Watch Mode
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running Tests
+        Contact
       
     </span>
   </a>
@@ -878,112 +934,267 @@
   
 
 
-<h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
-<p>Get Seamless-RAG running and execute your first query in under 5 minutes.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Python 3.12+</li>
-<li>Docker (for MariaDB)</li>
-<li>conda (recommended) or virtualenv</li>
-</ul>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<h1 id="judges-testing-guide-seamless-rag">Judges' Testing Guide — Seamless-RAG<a class="headerlink" href="#judges-testing-guide-seamless-rag" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>For evaluators of the MariaDB Hackathon MY 2026 Innovation Track submission.</strong>
+This guide gives you four progressively deeper ways to verify the project — pick the one that fits your time budget.</p>
+</blockquote>
+<p>If anything below fails, please open an issue or email <code>TP085412@mail.apu.edu.my</code> — we'll patch it within hours.</p>
+<hr />
+<h2 id="tldr-quickest-verification-90-seconds-no-install">TL;DR — Quickest Verification (90 seconds, no install)<a class="headerlink" href="#tldr-quickest-verification-90-seconds-no-install" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/SunflowersLwtech/seamless-rag.git
+<span class="nb">cd</span><span class="w"> </span>seamless-rag
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--wait
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>app<span class="w"> </span>seamless-rag<span class="w"> </span>demo
+</code></pre></div>
+<p>You will see (against a real MariaDB 11.8 container):
+- Schema initialised (documents + chunks + VECTOR(384) + HNSW index)
+- 3 sample documents embedded with a local sentence-transformers model
+- 3 RAG queries answered, each with a side-by-side <strong>JSON vs TOON token panel</strong></p>
+<p>No API keys required. Local model downloads on first run (~90 MB).</p>
+<hr />
+<h2 id="evaluation-path-1-inspect-only-no-setup-5-minutes">Evaluation Path 1 — Inspect-Only (no setup, 5 minutes)<a class="headerlink" href="#evaluation-path-1-inspect-only-no-setup-5-minutes" title="Permanent link">&para;</a></h2>
+<p>If you don't want to run anything, the repository ships with everything needed to verify our claims by reading.</p>
+<table>
+<thead>
+<tr>
+<th>What to read</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/blob/main/README.md"><code>README.md</code></a></td>
+<td>One-page project overview, problem/solution, install matrix</td>
+</tr>
+<tr>
+<td><a href="../BENCHMARK_REAL_DATA/"><code>docs/BENCHMARK_REAL_DATA.md</code></a></td>
+<td>TOON vs JSON token savings on <strong>MovieLens</strong> and <strong>SF Restaurant</strong> public datasets — not synthetic</td>
+</tr>
+<tr>
+<td><a href="../ARCHITECTURE/"><code>docs/ARCHITECTURE.md</code></a></td>
+<td>Component diagram, data flow, design decisions</td>
+</tr>
+<tr>
+<td><a href="../CLI_TEST_REPORT/"><code>docs/CLI_TEST_REPORT.md</code></a></td>
+<td>Every CLI command exercised end-to-end with output</td>
+</tr>
+<tr>
+<td><a href="https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/blob/main/eval/results.tsv"><code>eval/results.tsv</code></a></td>
+<td>Reproducible quality history — every score-run appended</td>
+</tr>
+<tr>
+<td><code>tests/fixtures/toon_spec/</code></td>
+<td>358 official TOON v3 conformance fixtures we pass</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="evaluation-path-2-docker-recommended-5-minutes">Evaluation Path 2 — Docker (recommended, 5 minutes)<a class="headerlink" href="#evaluation-path-2-docker-recommended-5-minutes" title="Permanent link">&para;</a></h2>
+<p><strong>Prerequisite:</strong> Docker Desktop (or Docker Engine + Compose v2). No Python install needed on the host.</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/SunflowersLwtech/seamless-rag.git
 <span class="nb">cd</span><span class="w"> </span>seamless-rag
 
-<span class="c1"># Create environment</span>
-conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>seamless-rag<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12<span class="w"> </span>-y
-conda<span class="w"> </span>activate<span class="w"> </span>seamless-rag
+<span class="c1"># Start MariaDB 11.8 + app container</span>
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--wait
 
-<span class="c1"># Install with all extras</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev,mariadb,embeddings]&quot;</span>
-</code></pre></div>
-<h2 id="start-mariadb">Start MariaDB<a class="headerlink" href="#start-mariadb" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</code></pre></div>
-<p>This starts MariaDB 11.8 with VECTOR support. Default credentials are in <code>docker-compose.yml</code>.</p>
-<h2 id="initialize-and-ingest">Initialize and Ingest<a class="headerlink" href="#initialize-and-ingest" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1"># Create the schema (documents + chunks tables with VECTOR columns)</span>
-seamless-rag<span class="w"> </span>init
+<span class="c1"># Sanity check — tables and connection</span>
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>app<span class="w"> </span>seamless-rag<span class="w"> </span>init
 
-<span class="c1"># Ingest text files — split at paragraph boundaries</span>
-seamless-rag<span class="w"> </span>ingest<span class="w"> </span>./data/articles/
+<span class="c1"># End-to-end demo: ingest → embed → ask → token panel</span>
+docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>app<span class="w"> </span>seamless-rag<span class="w"> </span>demo
 </code></pre></div>
-<h2 id="your-first-query">Your First Query<a class="headerlink" href="#your-first-query" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>seamless-rag<span class="w"> </span>ask<span class="w"> </span><span class="s2">&quot;What are the key findings?&quot;</span>
-</code></pre></div>
-<p>The output includes the LLM answer, TOON-formatted context, and a token comparison showing savings vs JSON.</p>
-<h2 id="embed-existing-tables">Embed Existing Tables<a class="headerlink" href="#embed-existing-tables" title="Permanent link">&para;</a></h2>
-<p>If your data is already in MariaDB, skip <code>ingest</code> and embed directly:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Single column (default)</span>
-seamless-rag<span class="w"> </span>embed<span class="w"> </span>--table<span class="w"> </span>products<span class="w"> </span>--column<span class="w"> </span>description
+<p><strong>Expected output highlights:</strong>
+<div class="highlight"><pre><span></span><code>Token &amp; Cost Comparison (GPT-4o pricing)
+┏━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Format  ┃ Tokens ┃       Est. Cost ┃
+┡━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ JSON    │    158 │       $0.000395 │
+│ TOON    │    137 │       $0.000343 │
+│ Savings │  13.3% │ $0.000052/query │
+└─────────┴────────┴─────────────────┘
+</code></pre></div></p>
+<p><strong>Tear-down:</strong>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v
+</code></pre></div></p>
+<hr />
+<h2 id="evaluation-path-3-local-python-10-minutes">Evaluation Path 3 — Local Python (10 minutes)<a class="headerlink" href="#evaluation-path-3-local-python-10-minutes" title="Permanent link">&para;</a></h2>
+<p>Use this if you want to step through the code or run individual CLI commands.</p>
+<h3 id="3a-install">3a. Install<a class="headerlink" href="#3a-install" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/SunflowersLwtech/seamless-rag.git
+<span class="nb">cd</span><span class="w"> </span>seamless-rag
 
-<span class="c1"># Multi-column — concatenated for richer vector search</span>
-seamless-rag<span class="w"> </span>embed<span class="w"> </span>--table<span class="w"> </span>products<span class="w"> </span>--columns<span class="w"> </span><span class="s2">&quot;name,category,price,rating&quot;</span>
-<span class="c1"># Internally: &quot;Widget — Tools — 29.99 — 4.5&quot;</span>
+<span class="c1"># Pick ONE of:</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[mariadb,embeddings]&quot;</span><span class="w">           </span><span class="c1"># standard</span>
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[mariadb,embeddings]&quot;</span><span class="w">        </span><span class="c1"># 10-100x faster (Astral uv)</span>
+pipx<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;seamless-rag[mariadb,embeddings]&quot;</span><span class="w">  </span><span class="c1"># isolated CLI</span>
+</code></pre></div>
+<p>Requires Python 3.10+. The <code>mariadb</code> extra needs the MariaDB Connector/C library installed system-wide (<code>brew install mariadb-connector-c</code> on macOS, <code>apt install libmariadb-dev</code> on Debian/Ubuntu).</p>
+<h3 id="3b-start-mariadb-only">3b. Start MariaDB only<a class="headerlink" href="#3b-start-mariadb-only" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--wait
+<span class="nb">export</span><span class="w"> </span><span class="nv">MARIADB_DATABASE</span><span class="o">=</span>test_seamless_rag<span class="w"> </span><span class="nv">MARIADB_PASSWORD</span><span class="o">=</span>seamless
+</code></pre></div>
+<h3 id="3c-walk-the-cli">3c. Walk the CLI<a class="headerlink" href="#3c-walk-the-cli" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>seamless-rag<span class="w"> </span>--help<span class="w">          </span><span class="c1"># see every command</span>
+seamless-rag<span class="w"> </span>init<span class="w">            </span><span class="c1"># create schema</span>
+seamless-rag<span class="w"> </span>demo<span class="w">            </span><span class="c1"># full end-to-end (ingest + 3 questions)</span>
+seamless-rag<span class="w"> </span>benchmark<span class="w">       </span><span class="c1"># TOON vs JSON on canned data</span>
+seamless-rag<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="s2">&quot;SELECT id, title FROM documents&quot;</span><span class="w">   </span><span class="c1"># any SQL → TOON</span>
+</code></pre></div>
+<hr />
+<h2 id="evaluation-path-4-run-the-test-suite-15-minutes">Evaluation Path 4 — Run the test suite (15 minutes)<a class="headerlink" href="#evaluation-path-4-run-the-test-suite-15-minutes" title="Permanent link">&para;</a></h2>
+<p>This is how we measure the project ourselves. The score dashboard is the same one we run in CI.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># One-shot: lint + unit + spec + properties + integration + eval</span>
+make<span class="w"> </span>score
 
-<span class="c1"># Now semantic + SQL filter queries work</span>
-seamless-rag<span class="w"> </span>ask<span class="w"> </span><span class="s2">&quot;cheap high-rated tools&quot;</span><span class="w"> </span>--where<span class="w"> </span><span class="s2">&quot;price &lt; 50&quot;</span>
+<span class="c1"># Or break it down:</span>
+make<span class="w"> </span>test-unit<span class="w">          </span><span class="c1"># 335 tests, no Docker, no API keys</span>
+make<span class="w"> </span>test-spec<span class="w">          </span><span class="c1"># 166 official TOON v3 conformance fixtures</span>
+make<span class="w"> </span>test-props<span class="w">         </span><span class="c1"># 12 hypothesis property-based tests</span>
+make<span class="w"> </span>test-integration<span class="w">   </span><span class="c1"># 10 tests against a real MariaDB container</span>
+make<span class="w"> </span>lint<span class="w">               </span><span class="c1"># ruff</span>
 </code></pre></div>
-<h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">seamless_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeamlessRAG</span>
-
-<span class="k">with</span> <span class="n">SeamlessRAG</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s2">&quot;seamless_rag&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rag</span><span class="p">:</span>
-    <span class="n">rag</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
-
-    <span class="c1"># Single-column embed</span>
-    <span class="n">rag</span><span class="o">.</span><span class="n">embed_table</span><span class="p">(</span><span class="s2">&quot;articles&quot;</span><span class="p">,</span> <span class="n">text_column</span><span class="o">=</span><span class="s2">&quot;content&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Multi-column embed — richer semantics</span>
-    <span class="n">rag</span><span class="o">.</span><span class="n">embed_table</span><span class="p">(</span><span class="s2">&quot;products&quot;</span><span class="p">,</span> <span class="n">text_column</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;price&quot;</span><span class="p">])</span>
-
-    <span class="c1"># Semantic search</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="s2">&quot;What are the main topics?&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">savings_pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% tokens&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Hybrid: semantic + SQL filter</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="s2">&quot;affordable tools&quot;</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="s2">&quot;price &lt; 50&quot;</span><span class="p">,</span> <span class="n">mmr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1"># Export any SQL query as TOON</span>
-    <span class="n">toon</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="s2">&quot;SELECT name, price FROM products ORDER BY price LIMIT 10&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">toon</span><span class="p">)</span>
+<p><strong>Expected dashboard</strong> (verbatim from the latest run):</p>
+<div class="highlight"><pre><span></span><code>==================================================
+  Seamless-RAG Quality Score Dashboard
+==================================================
+Overall: 100.0% (525/525 passed)
+--------------------------------------------------
+  lint            [####################] 100.0% (1/1)   PASS
+  unit            [####################] 100.0% (335/335) PASS
+  spec            [####################] 100.0% (166/166) PASS
+  props           [####################] 100.0% (12/12)  PASS
+  integration     [####################] 100.0% (10/10)  PASS
+  eval            [####################] 100.0% (1/1)   PASS
+--------------------------------------------------
+All targets met!
 </code></pre></div>
-<h2 id="sql-export">SQL Export<a class="headerlink" href="#sql-export" title="Permanent link">&para;</a></h2>
-<p>Convert any SELECT query result to TOON format:</p>
-<div class="highlight"><pre><span></span><code>seamless-rag<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="s2">&quot;SELECT id, title, avg_rating FROM movies ORDER BY avg_rating DESC LIMIT 10&quot;</span>
+<p>The integration suite needs <code>docker compose -f docker-compose.test.yml up -d --wait</code> first; <code>make test-integration</code> does this automatically.</p>
+<hr />
+<h2 id="what-to-look-for-judging-rubric-alignment">What to Look For — Judging Rubric Alignment<a class="headerlink" href="#what-to-look-for-judging-rubric-alignment" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Hackathon Criterion</th>
+<th>Where to verify</th>
+<th>Concrete artefact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Innovation</strong></td>
+<td><code>README.md</code> "Why" section, <code>docs/ARCHITECTURE.md</code></td>
+<td>First TOON-native RAG toolkit for MariaDB; both vector and text-to-SQL paths bridged to LLMs</td>
+</tr>
+<tr>
+<td><strong>MariaDB integration</strong></td>
+<td><code>tests/integration/test_vector_operations.py</code>, <code>src/seamless_rag/storage/mariadb.py</code></td>
+<td>Native VECTOR(N), VEC_DISTANCE_COSINE, HNSW index, CTE context windowing, <code>array.array('f')</code> binary protocol</td>
+</tr>
+<tr>
+<td><strong>Code quality</strong></td>
+<td><code>make score</code></td>
+<td>100% lint, 335 unit tests, 100% TOON v3 spec conformance, hypothesis property tests</td>
+</tr>
+<tr>
+<td><strong>Real performance</strong></td>
+<td><code>docs/BENCHMARK_REAL_DATA.md</code></td>
+<td>20–40% token savings on MovieLens + SF Restaurant <strong>public</strong> datasets</td>
+</tr>
+<tr>
+<td><strong>Judge friction</strong></td>
+<td>This guide + Docker Compose</td>
+<td>First query under 5 minutes, no API key required</td>
+</tr>
+<tr>
+<td><strong>Documentation</strong></td>
+<td><code>mkdocs.yml</code>, <code>docs/</code></td>
+<td>Full API ref, getting-started, providers, CLI report, benchmark methodology</td>
+</tr>
+<tr>
+<td><strong>Tests</strong></td>
+<td><code>tests/</code></td>
+<td>525 total — unit/spec/property/integration/eval, all passing in CI</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="optional-live-llm-answers">Optional — Live LLM Answers<a class="headerlink" href="#optional-live-llm-answers" title="Permanent link">&para;</a></h2>
+<p>The demo and <code>seamless-rag ask</code> work without an LLM (they show retrieval + token panel only). For live answer generation you can plug in any of:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>...<span class="w">      </span><span class="c1"># or</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EMBEDDING_API_KEY</span><span class="o">=</span>...<span class="w">   </span><span class="c1"># Google Gemini</span>
+<span class="c1"># Ollama needs no key — just `ollama serve` running on localhost</span>
 </code></pre></div>
-<p>Output:</p>
-<div class="highlight"><pre><span></span><code>[10,]{id,title,avg_rating}:
-  1,&quot;Shawshank Redemption, The (1994)&quot;,4.43
-  2,&quot;Godfather, The (1972)&quot;,4.29
-  3,Fight Club (1999),4.27
-  ...
+<p>The code under <code>src/seamless_rag/llm/</code> and <code>src/seamless_rag/providers/</code> exposes the same Protocol so you can swap providers via env var without code changes.</p>
+<hr />
+<h2 id="optional-web-ui">Optional — Web UI<a class="headerlink" href="#optional-web-ui" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>seamless-rag<span class="w"> </span>web
+<span class="c1"># opens http://127.0.0.1:7860 — Gradio interface for live queries</span>
 </code></pre></div>
-<h2 id="web-ui">Web UI<a class="headerlink" href="#web-ui" title="Permanent link">&para;</a></h2>
-<p>Launch a Gradio web interface with 6 tabs:</p>
-<div class="highlight"><pre><span></span><code>seamless-rag<span class="w"> </span>web<span class="w">              </span><span class="c1"># localhost only</span>
-seamless-rag<span class="w"> </span>web<span class="w"> </span>--share<span class="w">      </span><span class="c1"># public link (requires auth env vars)</span>
-</code></pre></div>
-<p>Tabs: Ask, Benchmark, JSON → TOON, SQL Export, Data, Status.</p>
-<h2 id="watch-mode">Watch Mode<a class="headerlink" href="#watch-mode" title="Permanent link">&para;</a></h2>
-<p>Monitor a table for new rows and auto-embed them:</p>
-<div class="highlight"><pre><span></span><code>seamless-rag<span class="w"> </span>watch<span class="w"> </span>--table<span class="w"> </span>articles<span class="w"> </span>--column<span class="w"> </span>content<span class="w"> </span>--interval<span class="w"> </span><span class="m">2</span>
-</code></pre></div>
-<p>Features: high-water mark tracking, exponential backoff retry, error isolation, Rich live display.</p>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>Configure via environment variables or a <code>.env</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># .env</span>
-<span class="nv">MARIADB_HOST</span><span class="o">=</span><span class="m">127</span>.0.0.1
-<span class="nv">MARIADB_PASSWORD</span><span class="o">=</span>seamless
-<span class="nv">EMBEDDING_PROVIDER</span><span class="o">=</span>sentence-transformers<span class="w">  </span><span class="c1"># or gemini, openai, ollama</span>
-<span class="nv">LLM_PROVIDER</span><span class="o">=</span>ollama<span class="w">                       </span><span class="c1"># or gemini, openai</span>
-</code></pre></div>
-<p>See <a href="../providers/">Providers</a> for provider-specific setup.</p>
-<h2 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>make<span class="w"> </span>test-all<span class="w">    </span><span class="c1"># lint + unit + spec (no Docker needed)</span>
-make<span class="w"> </span>test-full<span class="w">   </span><span class="c1"># all suites including integration</span>
-make<span class="w"> </span>score<span class="w">       </span><span class="c1"># quality dashboard</span>
-</code></pre></div>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mariadb: command not found</code> (Python install)</td>
+<td><code>brew install mariadb-connector-c</code> (macOS) or <code>apt install libmariadb-dev</code> (Debian) before <code>pip install</code></td>
+</tr>
+<tr>
+<td><code>Connection refused</code> on port 3306</td>
+<td>Wait for <code>docker compose ... --wait</code> to finish; the healthcheck takes ~10s after first pull</td>
+</tr>
+<tr>
+<td>Lint failure on <code>make score</code></td>
+<td><code>conda activate seamless-rag &amp;&amp; ruff check src/ tests/</code> to see specifics</td>
+</tr>
+<tr>
+<td><code>sentence-transformers</code> first run is slow</td>
+<td>One-time download of <code>all-MiniLM-L6-v2</code> (~90 MB). Cached for subsequent runs.</td>
+</tr>
+<tr>
+<td>Integration tests skipped</td>
+<td><code>docker compose -f docker-compose.test.yml ps</code> — container must be <code>healthy</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="demo-video">Demo Video<a class="headerlink" href="#demo-video" title="Permanent link">&para;</a></h2>
+<p>A 2–3 minute screencast walking through Paths 2 and 4 lives at <a href="../assets/demo.mp4"><code>docs/assets/demo.mp4</code></a> (also linked from README).</p>
+<hr />
+<h2 id="contact">Contact<a class="headerlink" href="#contact" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Author</strong></td>
+<td>Wei Liu (LiuWei)</td>
+</tr>
+<tr>
+<td><strong>University</strong></td>
+<td>Asia Pacific University of Technology &amp; Innovation (APU)</td>
+</tr>
+<tr>
+<td><strong>Email</strong></td>
+<td>TP085412@mail.apu.edu.my</td>
+</tr>
+<tr>
+<td><strong>GitHub</strong></td>
+<td><a href="https://github.com/SunflowersLwtech">SunflowersLwtech</a></td>
+</tr>
+</tbody>
+</table>
+<p>Thank you for evaluating Seamless-RAG.</p>
 
 
 
