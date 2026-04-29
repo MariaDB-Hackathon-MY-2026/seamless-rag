@@ -33,6 +33,28 @@ A 90-second screencast of the same flow lives at [`docs/assets/demo.gif`](docs/a
 
 ---
 
+## MariaDB Features We Use
+
+This project is MariaDB-native end-to-end. The pipeline only works because of features that landed in MariaDB 11.7.2+ and is explicitly tuned for them — no external vector store, no shadow index, no application-side ANN.
+
+| Feature | What we use it for | Where in the code |
+|---|---|---|
+| **`VECTOR(N)` column type** | First-class storage for 384-dim float32 embeddings, no `BLOB` workaround | [`storage/mariadb.py:112`](src/seamless_rag/storage/mariadb.py#L112) (schema), [`storage/mariadb.py:227`](src/seamless_rag/storage/mariadb.py#L227) (auto-add column for arbitrary tables) |
+| **`VECTOR INDEX … DISTANCE=cosine`** (HNSW) | Sub-linear similarity search; we tune `mhnsw_ef_search = 100` per session for recall/latency trade-off | [`storage/mariadb.py:114`](src/seamless_rag/storage/mariadb.py#L114), [`storage/mariadb.py:337`](src/seamless_rag/storage/mariadb.py#L337) |
+| **`VEC_DISTANCE_COSINE`** | Distance function in `ORDER BY` so the planner picks the HNSW index | [`storage/mariadb.py:343`](src/seamless_rag/storage/mariadb.py#L343), [`storage/mariadb.py:362`](src/seamless_rag/storage/mariadb.py#L362) |
+| **Native binary protocol** via `mariadb-connector-python` | `array.array('f', embedding)` is sent verbatim — no `VEC_FromText` round-trip, no string parsing | [`storage/mariadb.py:254`](src/seamless_rag/storage/mariadb.py#L254), [`storage/mariadb.py:288`](src/seamless_rag/storage/mariadb.py#L288) (batch insert) |
+| **CTE for context windowing** | Single round-trip retrieval: closest chunks plus their neighbours by `chunk_order` | [`storage/mariadb.py:341`](src/seamless_rag/storage/mariadb.py#L341) (`WITH closest AS …`) |
+| **Hybrid SQL filter + vector ORDER BY** | `seamless-rag ask "waterproof watches" --where "price < 50"` — SQL pre-filter narrows the candidate set, vector ranks within | [`storage/mariadb.py:315`](src/seamless_rag/storage/mariadb.py#L315) (validated WHERE), [`storage/mariadb.py:362`](src/seamless_rag/storage/mariadb.py#L362) (combined query) |
+| **Connection pool + autocommit** | `mariadb.ConnectionPool` with per-call lease, isolation-aware so the watcher never sees stale snapshots | [`storage/mariadb.py:158`](src/seamless_rag/storage/mariadb.py#L158), [`storage/mariadb.py:178`](src/seamless_rag/storage/mariadb.py#L178) |
+| **Foreign keys + composite index** | `chunks.document_id REFERENCES documents(id)` plus `INDEX idx_doc_order(document_id, chunk_order)` so the CTE neighbour-join stays index-only | [`storage/mariadb.py:117-118`](src/seamless_rag/storage/mariadb.py#L117) |
+| **Auto-schema for arbitrary tables** | `seamless-rag embed --table products --columns name,category` adds a `VECTOR(N)` column and HNSW index to your existing table without touching its other columns | [`storage/mariadb.py:227-232`](src/seamless_rag/storage/mariadb.py#L227) |
+
+**Tested against MariaDB 11.8** (the version shipped in the official `mariadb:11.8` Docker image). 10/10 integration tests pass against the real server, exercising every feature above — see [`tests/integration/test_vector_operations.py`](tests/integration/test_vector_operations.py).
+
+Without MariaDB's VECTOR + HNSW, this project would either need a sidecar vector DB (Chroma/Qdrant/pgvector) or a from-scratch ANN implementation. Neither would be MariaDB-native, neither would benefit from the same indexes that already serve OLTP traffic.
+
+---
+
 ## Why
 
 LLMs and agents consume structured data as context. The standard approach — dumping JSON — wastes tokens on repeated field names and structural characters:

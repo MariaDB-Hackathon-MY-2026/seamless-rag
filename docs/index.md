@@ -23,6 +23,26 @@ A 93-second screencast of the same flow:
 
 ---
 
+## MariaDB Features We Use
+
+This project is MariaDB-native end-to-end. The pipeline only works because of features that landed in MariaDB 11.7.2+ and is explicitly tuned for them — no external vector store, no shadow index, no application-side ANN.
+
+| Feature | What we use it for | Source |
+|---|---|---|
+| **`VECTOR(N)` column type** | First-class storage for float32 embeddings, no `BLOB` workaround | `src/seamless_rag/storage/mariadb.py` (schema, auto-add column) |
+| **`VECTOR INDEX … DISTANCE=cosine`** (HNSW) | Sub-linear similarity search; we tune `mhnsw_ef_search = 100` per session for recall/latency | same file |
+| **`VEC_DISTANCE_COSINE`** | Distance function in `ORDER BY` so the planner picks the HNSW index | same file |
+| **Native binary protocol** via `mariadb-connector-python` | `array.array('f', embedding)` sent verbatim — no `VEC_FromText` round-trip, no string parsing | same file |
+| **CTE for context windowing** | Single round-trip retrieval: closest chunks plus their neighbours by `chunk_order` | `WITH closest AS …` |
+| **Hybrid SQL filter + vector ORDER BY** | `seamless-rag ask "..." --where "price < 50"` — SQL pre-filter narrows candidates, vector ranks within | validated WHERE clause |
+| **Connection pool + autocommit** | `mariadb.ConnectionPool` with per-call lease so the watcher never sees stale snapshots | same file |
+| **Foreign keys + composite index** | `chunks.document_id REFERENCES documents(id)` plus `INDEX idx_doc_order(document_id, chunk_order)` keeps the CTE neighbour-join index-only | same file |
+| **Auto-schema for arbitrary tables** | `seamless-rag embed --table products --columns name,category` adds a `VECTOR(N)` column and HNSW index to your existing table without touching its other columns | same file |
+
+**Tested against MariaDB 11.8** (the version shipped in the official `mariadb:11.8` Docker image). 10/10 integration tests pass against the real server, exercising every feature above. Without MariaDB's VECTOR + HNSW, this project would need a sidecar vector DB (Chroma/Qdrant/pgvector) — neither MariaDB-native, neither benefiting from the same indexes that already serve OLTP traffic.
+
+---
+
 ## Features
 
 - **Auto-Embed** — Point at any MariaDB table, embed single or multiple columns
