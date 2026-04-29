@@ -814,9 +814,15 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 <td><code>seamless-rag embed --table products --columns name,category</code> adds a <code>VECTOR(N)</code> column and HNSW index to your existing table without touching its other columns</td>
 <td>same file</td>
 </tr>
+<tr>
+<td><strong>Bare <code>VEC_DISTANCE()</code> auto-pick</strong> (MariaDB-only)</td>
+<td>When the index has <code>DISTANCE=cosine</code>, plain <code>VEC_DISTANCE(...)</code> reads it from the index and applies cosine — no other RDBMS does this. Demonstrated live by <code>seamless-rag schema</code></td>
+<td><code>compare_vec_distance</code> + integration test asserting 1e-6 equivalence</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Tested against MariaDB 11.8</strong> (the version shipped in the official <code>mariadb:11.8</code> Docker image). 10/10 integration tests pass against the real server, exercising every feature above. Without MariaDB's VECTOR + HNSW, this project would need a sidecar vector DB (Chroma/Qdrant/pgvector) — neither MariaDB-native, neither benefiting from the same indexes that already serve OLTP traffic.</p>
+<p><strong>See it for yourself:</strong> <code>seamless-rag schema</code> pretty-prints <code>SHOW CREATE TABLE chunks</code>, <code>SHOW INDEX FROM chunks</code>, and runs a side-by-side <code>VEC_DISTANCE()</code> vs <code>VEC_DISTANCE_COSINE()</code> query so you can verify the auto-pick parity yourself.</p>
+<p><strong>Tested against MariaDB 11.8</strong> (the version shipped in the official <code>mariadb:11.8</code> Docker image). 11/11 integration tests pass against the real server, exercising every feature above. Without MariaDB's VECTOR + HNSW, this project would need a sidecar vector DB (Chroma/Qdrant/pgvector) — neither MariaDB-native, neither benefiting from the same indexes that already serve OLTP traffic.</p>
 <hr />
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
