@@ -48,8 +48,11 @@ This project is MariaDB-native end-to-end. The pipeline only works because of fe
 | **Connection pool + autocommit** | `mariadb.ConnectionPool` with per-call lease, isolation-aware so the watcher never sees stale snapshots | [`storage/mariadb.py:158`](src/seamless_rag/storage/mariadb.py#L158), [`storage/mariadb.py:178`](src/seamless_rag/storage/mariadb.py#L178) |
 | **Foreign keys + composite index** | `chunks.document_id REFERENCES documents(id)` plus `INDEX idx_doc_order(document_id, chunk_order)` so the CTE neighbour-join stays index-only | [`storage/mariadb.py:117-118`](src/seamless_rag/storage/mariadb.py#L117) |
 | **Auto-schema for arbitrary tables** | `seamless-rag embed --table products --columns name,category` adds a `VECTOR(N)` column and HNSW index to your existing table without touching its other columns | [`storage/mariadb.py:227-232`](src/seamless_rag/storage/mariadb.py#L227) |
+| **Bare `VEC_DISTANCE()` auto-pick** (MariaDB-only) | When the index has `DISTANCE=cosine`, plain `VEC_DISTANCE(...)` reads it from the index and applies cosine — no other RDBMS does this. Demonstrated live by `seamless-rag schema` | [`storage/mariadb.py:431`](src/seamless_rag/storage/mariadb.py#L431) (`compare_vec_distance`), [`tests/integration/test_vector_operations.py`](tests/integration/test_vector_operations.py) (1e-6 equivalence assertion) |
 
-**Tested against MariaDB 11.8** (the version shipped in the official `mariadb:11.8` Docker image). 10/10 integration tests pass against the real server, exercising every feature above — see [`tests/integration/test_vector_operations.py`](tests/integration/test_vector_operations.py).
+**See it for yourself in 5 seconds:** `seamless-rag schema` pretty-prints `SHOW CREATE TABLE chunks` (highlighting `vector(384)` and `VECTOR KEY ... DISTANCE=cosine`), `SHOW INDEX FROM chunks` (with the `VECTOR` row called out), and runs a side-by-side `VEC_DISTANCE()` vs `VEC_DISTANCE_COSINE()` query so you can verify auto-pick parity yourself.
+
+**Tested against MariaDB 11.8** (the version shipped in the official `mariadb:11.8` Docker image). 11/11 integration tests pass against the real server, exercising every feature above — see [`tests/integration/test_vector_operations.py`](tests/integration/test_vector_operations.py).
 
 Without MariaDB's VECTOR + HNSW, this project would either need a sidecar vector DB (Chroma/Qdrant/pgvector) or a from-scratch ANN implementation. Neither would be MariaDB-native, neither would benefit from the same indexes that already serve OLTP traffic.
 
