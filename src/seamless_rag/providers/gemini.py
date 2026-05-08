@@ -5,10 +5,16 @@ from google import genai
 from google.genai import types
 
 
+def _is_vertex_key(api_key: str) -> bool:
+    """Vertex AI Express Mode keys start with 'AQ.'; AI Studio keys start with 'AIza'."""
+    return api_key.startswith("AQ.")
+
+
 class GeminiEmbeddingProvider:
     """Embedding provider using Gemini models via google-genai SDK.
 
     Default model: gemini-embedding-001 (3072 dims, configurable via MRL).
+    Auto-detects Vertex AI keys (AQ. prefix) vs AI Studio keys (AIza prefix).
     """
 
     def __init__(
@@ -17,7 +23,10 @@ class GeminiEmbeddingProvider:
         model: str = "gemini-embedding-001",
         dimensions: int = 768,
     ) -> None:
-        self._client = genai.Client(api_key=api_key)
+        client_kwargs = {"api_key": api_key}
+        if _is_vertex_key(api_key):
+            client_kwargs["vertexai"] = True
+        self._client = genai.Client(**client_kwargs)
         self._model = model
         self._dimensions = dimensions
         self._config = types.EmbedContentConfig(output_dimensionality=dimensions)

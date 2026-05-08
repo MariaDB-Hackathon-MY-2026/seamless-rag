@@ -10,11 +10,22 @@ from seamless_rag.llm import RAG_SYSTEM_PROMPT
 logger = logging.getLogger(__name__)
 
 
+def _is_vertex_key(api_key: str) -> bool:
+    """Vertex AI Express Mode keys start with 'AQ.'; AI Studio keys start with 'AIza'."""
+    return api_key.startswith("AQ.")
+
+
 class GeminiLLMProvider:
-    """LLM provider using Gemini models via google-genai SDK."""
+    """LLM provider using Gemini models via google-genai SDK.
+
+    Auto-detects Vertex AI keys (AQ. prefix) vs AI Studio keys (AIza prefix).
+    """
 
     def __init__(self, api_key: str, model: str = "gemini-2.5-flash") -> None:
-        self._client = genai.Client(api_key=api_key)
+        client_kwargs = {"api_key": api_key}
+        if _is_vertex_key(api_key):
+            client_kwargs["vertexai"] = True
+        self._client = genai.Client(**client_kwargs)
         self._model = model
 
     def generate(self, prompt: str, context: str) -> str:
