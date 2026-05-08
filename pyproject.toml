@@ -1,11 +1,45 @@
 [project]
 name = "seamless-rag"
-version = "0.1.0"
-description = "TOON-Native Auto-Embedding & RAG Toolkit for MariaDB"
+version = "0.1.2"
+description = "TOON-Native Auto-Embedding & RAG Toolkit for MariaDB — VECTOR(N), HNSW, VEC_DISTANCE_COSINE, with TOON tabular output that saves 10-55% LLM tokens vs JSON."
 requires-python = ">=3.10"
 license = "Apache-2.0"
 authors = [{name = "LiuWei", email = "TP085412@mail.apu.edu.my"}]
 readme = "README.md"
+keywords = [
+    "mariadb",
+    "vector-search",
+    "vector-database",
+    "rag",
+    "retrieval-augmented-generation",
+    "embeddings",
+    "toon",
+    "llm",
+    "hnsw",
+    "semantic-search",
+    "auto-embedding",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Database",
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Linguistic",
+    "Typing :: Typed",
+]
 dependencies = [
     "typer>=0.9",
     "rich>=13.0",
@@ -15,7 +49,17 @@ dependencies = [
     "sqlglot>=26.0",
 ]
 
+[project.urls]
+Homepage = "https://mariadb-hackathon-my-2026.github.io/seamless-rag/"
+Documentation = "https://mariadb-hackathon-my-2026.github.io/seamless-rag/"
+Repository = "https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag"
+Issues = "https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/issues"
+Changelog = "https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/releases"
+"Judges' Testing Guide" = "https://mariadb-hackathon-my-2026.github.io/seamless-rag/judges-testing-guide/"
+
 [project.optional-dependencies]
+# mariadb is a C extension; macOS/Linux users may need libmariadb-dev /
+# mariadb-connector-c installed first. See README "Prerequisites" section.
 mariadb = ["mariadb>=1.1.14"]
 embeddings = ["sentence-transformers>=5.0"]
 ollama = ["ollama>=0.1"]

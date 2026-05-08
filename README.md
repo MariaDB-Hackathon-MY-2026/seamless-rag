@@ -7,7 +7,8 @@
 > Turn any MariaDB table into a searchable vector store. Query results come back in TOON v3 tabular format — a compact wire format that saves 10-55% of tokens (vs compact JSON) when feeding structured data to LLMs or agents.
 
 ![Powered by MariaDB](docs/assets/badge-mariadb.svg)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://python.org)
+[![PyPI](https://img.shields.io/pypi/v/seamless-rag.svg)](https://pypi.org/project/seamless-rag/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
 [![TOON v3](https://img.shields.io/badge/TOON%20v3-166%2F166%20conformance-blue)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-525%2F525%20passing-brightgreen)]()
@@ -126,8 +127,16 @@ Seamless-RAG is a **format + embedding bridge**, not a replacement for SQL.
 
 Your data is already in MariaDB. Seamless-RAG adds vectors and TOON.
 
+**Prerequisites** — the `mariadb` Python connector is a C extension. Install the system library first:
+- **macOS**: `brew install mariadb-connector-c`
+- **Debian/Ubuntu**: `sudo apt install libmariadb-dev`
+- **Or** use Docker (see [Quick Start for Judges](#quick-start-for-judges)) and skip pip entirely
+
 ```bash
-pip install -e ".[mariadb,embeddings]"         # install
+pip install "seamless-rag[mariadb,embeddings]"  # from PyPI
+# or, from source:
+# pip install -e ".[mariadb,embeddings]"
+
 docker compose up -d                            # MariaDB 11.8
 
 seamless-rag init                               # create VECTOR columns + HNSW index
@@ -135,6 +144,8 @@ seamless-rag embed --table products --column description  # embed existing rows
 seamless-rag ask "Which products are most relevant?"      # vector search → TOON → LLM
 seamless-rag export "SELECT id, name, price FROM products LIMIT 20"  # SQL → TOON
 ```
+
+Optional extras: `[gemini]`, `[openai]`, `[ollama]`, `[web]` (Gradio UI), or `[all]` for everything.
 
 No file loading, no document chunking — data lives in MariaDB, Seamless-RAG bridges it to vectors and LLMs.
 
@@ -269,9 +280,19 @@ seamless-rag CLI / Python API / Agent Tools
 </p>
 
 - **MariaDB 11.7+** VECTOR columns, HNSW indexes, VEC_DISTANCE_COSINE
-- **Native binary protocol** via `mariadb-connector-python` (array.array float32)
+- **Native binary protocol** via [`mariadb-connector-python`](https://mariadb.com/docs/connectors/mariadb-python/) (array.array float32, no `VEC_FromText` round-trip)
 - **Connection pooling** with unique pool names for concurrent instances
 - **Version validation** (>= 11.7.2) on init
+
+**Where this fits in the MariaDB ecosystem:**
+
+| Layer | Project | Relationship |
+|---|---|---|
+| Database | [MariaDB Server 11.7+](https://mariadb.com/kb/en/vector-overview/) | Required runtime — VECTOR/HNSW lands in 11.7.2 |
+| Driver | [mariadb-connector-python](https://github.com/mariadb-corporation/mariadb-connector-python) | Used directly via `mariadb.ConnectionPool` |
+| Knowledge Base | [VEC_DISTANCE_COSINE](https://mariadb.com/kb/en/vec_distance_cosine/), [VECTOR INDEX](https://mariadb.com/kb/en/create-table-with-vectors/) | Reference docs for the SQL we generate |
+| Hackathons | [MariaDB Python Hackathon 2025 winners](https://mariadb.org/adaptive-query-optimizer-for-mariadb-vector-innovation-winner-of-mariadb-python-hackathon-2025/) | Sister projects (Adaptive Query Optimizer, Apache Airflow integration) |
+| Distribution | [PyPI: `seamless-rag`](https://pypi.org/project/seamless-rag/) | `pip install seamless-rag[mariadb]` |
 
 ## License
 

@@ -4,14 +4,27 @@ Get Seamless-RAG running and execute your first query in under 5 minutes.
 
 ## Prerequisites
 
-- Python 3.12+
-- Docker (for MariaDB)
-- conda (recommended) or virtualenv
+- Python 3.10+
+- Docker (for MariaDB) — or a local MariaDB 11.7.2+ server
+- For the `mariadb` Python connector (C extension):
+    - **macOS**: `brew install mariadb-connector-c`
+    - **Debian/Ubuntu**: `sudo apt install libmariadb-dev`
 
 ## Installation
 
+### From PyPI (recommended)
+
 ```bash
-git clone https://github.com/SunflowersLwtech/seamless-rag.git
+pip install "seamless-rag[mariadb,embeddings]"
+# Or with everything: pip install "seamless-rag[all]"
+```
+
+Optional extras: `[gemini]`, `[openai]`, `[ollama]`, `[web]` (Gradio UI), `[all]` (all of the above).
+
+### From source (development)
+
+```bash
+git clone https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag.git
 cd seamless-rag
 
 # Create environment
