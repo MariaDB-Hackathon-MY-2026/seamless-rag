@@ -5,7 +5,7 @@ Thank you for your interest in contributing to Seamless-RAG.
 ## Development Setup
 
 ```bash
-git clone https://github.com/SunflowersLwtech/seamless-rag.git
+git clone https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag.git
 cd seamless-rag
 conda create -n seamless-rag python=3.12 -y
 conda activate seamless-rag
@@ -14,6 +14,33 @@ pip install -e ".[dev,mariadb,embeddings,gemini,openai]"
 # Start MariaDB
 docker compose up -d
 ```
+
+### Troubleshooting: editable install + Python 3.14 + sandboxed shells
+
+If `pip install -e .` succeeds but `import seamless_rag` then fails with
+`ModuleNotFoundError`, you may have hit this combination:
+
+- **Python 3.14** ships a stricter `site.py` that ignores any `.pth` file
+  carrying the macOS `UF_HIDDEN` filesystem flag (run with `python -v`
+  and you'll see `Skipping hidden .pth file`).
+- **Sandboxed shells** — the Bash tool exposed by some AI coding agents,
+  certain CI runners, some macOS app sandboxes — set `UF_HIDDEN` on
+  every file they create under `site-packages/`, including the editable-
+  install `.pth` that Hatchling drops there.
+- The result is an editable install that's invisible to the importer.
+
+Two fixes, pick whichever fits your workflow:
+
+```bash
+# A. clear the hidden flag so site.py picks the .pth back up (one-shot)
+chflags nohidden .venv/lib/python3.14/site-packages/*.pth
+
+# B. bypass site.py entirely and put the source on PYTHONPATH (per-shell)
+export PYTHONPATH="$PWD/src:${PYTHONPATH}"
+```
+
+Pinning Python to 3.12 / 3.13 sidesteps it — the `UF_HIDDEN` skip
+behaviour is only enforced from 3.14 onward.
 
 ## Running Tests
 
