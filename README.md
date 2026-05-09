@@ -15,6 +15,18 @@
 
 ---
 
+## One-Line Agent Setup
+
+If you use Claude Code, Codex, Cursor, Windsurf, or another coding agent, you can hand it the setup instructions in one sentence:
+
+> Help me clone Seamless-RAG if needed, then bootstrap it for local development by following https://raw.githubusercontent.com/MariaDB-Hackathon-MY-2026/seamless-rag/main/Install.md
+
+That prompt is intended for coding agents. It tells the agent to clone the repo if needed, prefer Docker when available (MariaDB 11.7.2+ is required for VECTOR support), and stop with the exact next command plus any missing config the user still needs to provide. The agent will not run the demo, pull models, or start long-running processes on its own — those are your call.
+
+The repo also ships **agent skills** under [`skills/public/`](skills/public/) — Anthropic-format `SKILL.md` files for `seamless-rag` (CLI + Python API + TOON format) and `text-to-sql` (turning natural-language questions into safe SELECTs over MariaDB). Drop them into your agent's skills directory if you want richer guidance after bootstrap.
+
+---
+
 ## Quick Start for Judges
 
 > Evaluating this submission? Start with the **[Judges' Testing Guide](https://mariadb-hackathon-my-2026.github.io/seamless-rag/judges-testing-guide/)** — four progressive paths from inspect-only (5 min, no install) to full test suite (15 min). The full docs site is at <https://mariadb-hackathon-my-2026.github.io/seamless-rag/>.
