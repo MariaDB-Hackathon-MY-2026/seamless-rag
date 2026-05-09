@@ -7,7 +7,26 @@ import re
 import threading
 import uuid
 
-import mariadb
+try:
+    import mariadb
+except ImportError as _e:
+    raise ImportError(
+        "The `mariadb` Python driver is required to use Seamless-RAG's "
+        "MariaDB storage but is not installed.\n"
+        "\n"
+        "Install with:\n"
+        '    pip install "seamless-rag[mariadb]"\n'
+        "\n"
+        "The driver is a C extension and needs MariaDB Connector/C headers "
+        "available at build time:\n"
+        "    macOS:         brew install mariadb-connector-c\n"
+        "    Debian/Ubuntu: sudo apt install libmariadb-dev\n"
+        "    RHEL/Fedora:   sudo dnf install mariadb-connector-c-devel\n"
+        "\n"
+        "If you only want the TOON encoder (no MariaDB), import it directly:\n"
+        "    from seamless_rag.toon import TOONEncoder"
+    ) from _e
+
 import sqlglot
 from sqlglot import exp as sqlglot_exp
 
