@@ -6,6 +6,43 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-05-09
+
+### Fixed
+
+- **`GEMINI_API_KEY` / `GOOGLE_API_KEY` / `VERTEX_AI_API_KEY` are now
+  recognized in `.env`.** Previously `Settings` only read
+  `EMBEDDING_API_KEY` and `LLM_API_KEY`, so users who copied a key
+  named with any of the three Google conventions found it silently
+  ignored — the bare `AQ.…` Vertex Express key worked fine, but only
+  if you knew to rename the env var. All three Google-side names are
+  now `validation_alias` choices on both `embedding_api_key` and
+  `llm_api_key`. The canonical names still take precedence when both
+  are set. Backward compatible — existing `.env` files keep working.
+  Locked in by 10 regression tests in `tests/unit/test_config.py`.
+- **`text-embedding-004` (Gemini) is no longer rewritten to
+  `gemini-embedding-001`.** The factory's foreign-model detection used
+  `_OPENAI_PREFIXES = ("text-embedding-",)`, which is too broad: Google
+  also ships `text-embedding-004`, `text-embedding-005`, and
+  `text-multilingual-embedding-002` under the same prefix. A user
+  picking `EMBEDDING_PROVIDER=gemini` + `EMBEDDING_MODEL=text-embedding-004`
+  was silently coerced back to the default Gemini model. Tightened to
+  the OpenAI-only suffixes (`text-embedding-3-`, `text-embedding-ada-`)
+  so the generic `text-embedding-NNN` family stays with Gemini where
+  it belongs. Locked in by 5 prefix tests in
+  `tests/unit/test_provider_factory.py`.
+
+### Documented
+
+- **CONTRIBUTING.md gained a "Troubleshooting: editable install +
+  Python 3.14 + sandboxed shells" section.** Some sandboxes (the Bash
+  tool of certain AI coding agents, restricted CI runners, macOS app
+  sandboxes) set `UF_HIDDEN` on every file they create under
+  `site-packages/`, and Python 3.14's `site.py` silently skips
+  `.pth` files with that flag — making editable installs invisible.
+  Two recovery commands documented (`chflags nohidden …` or
+  `PYTHONPATH=…/src`); pinning to Python 3.12/3.13 also avoids it.
+
 ## [0.1.6] - 2026-05-09
 
 ### Fixed
@@ -126,7 +163,8 @@ Initial development release. **Do not use** — `pip install seamless-rag`
 fails because of the import-time `mariadb` C-extension dependency. Fixed
 in 0.1.2 / 0.1.3.
 
-[Unreleased]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.3...v0.1.4
