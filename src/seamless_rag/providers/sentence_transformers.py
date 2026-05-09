@@ -1,7 +1,22 @@
 """SentenceTransformers embedding provider — local, free, no API key needed."""
 from __future__ import annotations
 
-from sentence_transformers import SentenceTransformer
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError as _e:
+    raise ImportError(
+        "The `sentence-transformers` package is required for the "
+        "sentence-transformers embedding provider but is not installed.\n"
+        "\n"
+        "Install with:\n"
+        '    pip install "seamless-rag[embeddings]"\n'
+        "\n"
+        "This pulls in PyTorch (~500 MB). If you don't need local embeddings, "
+        "switch provider:\n"
+        "    EMBEDDING_PROVIDER=gemini   (then: pip install \"seamless-rag[gemini]\")\n"
+        "    EMBEDDING_PROVIDER=openai   (then: pip install \"seamless-rag[openai]\")\n"
+        "    EMBEDDING_PROVIDER=ollama   (no extra dep, needs local Ollama)"
+    ) from _e
 
 
 class SentenceTransformersProvider:

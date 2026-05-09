@@ -3,7 +3,20 @@ from __future__ import annotations
 
 import logging
 
-from google import genai
+try:
+    from google import genai
+except ImportError as _e:
+    raise ImportError(
+        "The `google-genai` SDK is required for the Gemini LLM provider but "
+        "is not installed.\n"
+        "\n"
+        "Install with:\n"
+        '    pip install "seamless-rag[gemini]"\n'
+        "\n"
+        "Or pin a different LLM provider in your environment, for example:\n"
+        "    LLM_PROVIDER=ollama   (local, no extra deps)\n"
+        "    LLM_PROVIDER=openai   (then: pip install \"seamless-rag[openai]\")"
+    ) from _e
 
 from seamless_rag.llm import RAG_SYSTEM_PROMPT
 

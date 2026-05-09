@@ -3,7 +3,20 @@ from __future__ import annotations
 
 import logging
 
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except ImportError as _e:
+    raise ImportError(
+        "The `openai` SDK is required for the OpenAI LLM provider but is "
+        "not installed.\n"
+        "\n"
+        "Install with:\n"
+        '    pip install "seamless-rag[openai]"\n'
+        "\n"
+        "Or pin a different LLM provider, e.g.:\n"
+        "    LLM_PROVIDER=ollama   (local, no extra deps)\n"
+        "    LLM_PROVIDER=gemini   (then: pip install \"seamless-rag[gemini]\")"
+    ) from _e
 
 from seamless_rag.llm import RAG_SYSTEM_PROMPT
 

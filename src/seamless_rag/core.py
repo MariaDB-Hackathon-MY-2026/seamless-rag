@@ -94,13 +94,18 @@ class SeamlessRAG:
         return self._embedder
 
     def _get_llm(self) -> LLMProvider | None:
-        """Get LLM provider, creating it on first call. Returns None if unavailable."""
+        """Get LLM provider, creating it on first call.
+
+        Raises ValueError if the configured provider is missing required
+        config (e.g. API key) and ImportError if the corresponding SDK is
+        not installed. Both errors include actionable install/config hints
+        in their messages — we let them propagate up rather than silently
+        falling back, because a broken LLM channel is a real failure that
+        the caller needs to see.
+        """
         if not self._llm_attempted:
             self._llm_attempted = True
-            try:
-                self._llm = _make_llm(self._settings)
-            except (ValueError, ImportError) as e:
-                logger.warning("LLM provider not available: %s", e)
+            self._llm = _make_llm(self._settings)
         return self._llm
 
     def _ensure_rag(self) -> RAGEngine:
@@ -114,10 +119,18 @@ class SeamlessRAG:
     def init(self, dimensions: int | None = None) -> None:
         """Create schema (documents + chunks tables) if not exists.
 
-        If dimensions is not specified, uses the embedding provider's dimensions.
+        Resolution order for the VECTOR(N) column dimension:
+        1. Explicit ``dimensions`` argument.
+        2. ``EMBEDDING_DIMENSIONS`` from settings (env / .env), default 384.
+
+        Note: we deliberately do NOT construct an embedding provider here so
+        that ``seamless-rag init`` works without sentence-transformers / torch
+        installed. Provider construction is deferred until embed/ask is
+        actually called. If the configured dimension does not match the chosen
+        embedding model, the first embed will raise a clear error.
         """
         if dimensions is None:
-            dimensions = self._ensure_provider().dimensions
+            dimensions = self._settings.embedding_dimensions
         self._store.init_schema(dimensions=dimensions)
         logger.info("Schema initialized (dimensions=%d)", dimensions)
 

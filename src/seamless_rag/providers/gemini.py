@@ -1,8 +1,22 @@
 """Gemini embedding provider — uses google-genai SDK."""
 from __future__ import annotations
 
-from google import genai
-from google.genai import types
+try:
+    from google import genai
+    from google.genai import types
+except ImportError as _e:
+    raise ImportError(
+        "The `google-genai` SDK is required for the Gemini embedding "
+        "provider but is not installed.\n"
+        "\n"
+        "Install with:\n"
+        '    pip install "seamless-rag[gemini]"\n'
+        "\n"
+        "Or pin a different EMBEDDING_PROVIDER in your environment, e.g.:\n"
+        "    EMBEDDING_PROVIDER=sentence-transformers   "
+        '(then: pip install "seamless-rag[embeddings]")\n'
+        "    EMBEDDING_PROVIDER=ollama"
+    ) from _e
 
 
 def _is_vertex_key(api_key: str) -> bool:

@@ -1,7 +1,20 @@
 """OpenAI embedding provider — uses openai SDK."""
 from __future__ import annotations
 
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except ImportError as _e:
+    raise ImportError(
+        "The `openai` SDK is required for the OpenAI embedding provider but "
+        "is not installed.\n"
+        "\n"
+        "Install with:\n"
+        '    pip install "seamless-rag[openai]"\n'
+        "\n"
+        "Or pin a different EMBEDDING_PROVIDER, e.g.:\n"
+        "    EMBEDDING_PROVIDER=sentence-transformers   "
+        '(then: pip install "seamless-rag[embeddings]")'
+    ) from _e
 
 
 class OpenAIEmbeddingProvider:
