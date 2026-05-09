@@ -108,6 +108,15 @@ Savings scale with row count and stabilize at the dataset's natural ceiling:
 
 TOON is not magic — it shines on **structured tabular data with many columns and short values**, which is exactly what comes out of database queries. All measurements use compact JSON (`separators=(",",":")`) as baseline.
 
+### Where TOON does NOT help
+
+TOON gets its savings by writing field names once in the header and one value-row per record. Two scenarios where this mechanic doesn't apply, and the cost table will report ~0% savings:
+
+- **`seamless-rag ask` over prose / blob chunks.** When ingested chunks are free-form text stored in a single `content` column, the retrieved context is essentially one long string per chunk. There are no repeated field names to deduplicate, so TOON encoding the result list (id, content, distance) saves only the structural overhead — typically negligible. Use TOON for the **query result shape**, not the chunk text itself.
+- **Single-row results.** `[1,]{...}:` plus one value row is roughly the same size as `[{...}]`. The break-even point is around 3–5 rows.
+
+If you want the real TOON win on data that already lives in MariaDB, use `seamless-rag export "SELECT …"` directly — that path is row-level structured by construction, and the benchmarks in this section reflect it. CSV is a fair competitor on uniform numeric columns; TOON pulls ahead as schemas get wider, values get more varied, and you start nesting (e.g. `JSON_EXTRACT` columns).
+
 ## Where It Fits
 
 For structured database data, the industry uses two retrieval approaches. Seamless-RAG bridges both to LLMs:
