@@ -94,6 +94,24 @@ class TestEmbeddingProviderFactory:
             provider = create_embedding_provider(s)
         assert provider.dimensions == 768
 
+    def test_gemini_text_embedding_004_passed_through(self):
+        # End-to-end regression for the prefix-collision bug: a user
+        # picking Google's `text-embedding-004` must reach the Gemini
+        # provider with that exact model name, not be silently rewritten
+        # to gemini-embedding-001.
+        s = Settings(
+            embedding_provider="gemini",
+            embedding_model="text-embedding-004",
+            embedding_dimensions=768,
+            embedding_api_key="test-key",
+        )
+        with patch("seamless_rag.providers.gemini.genai.Client"):
+            provider = create_embedding_provider(s)
+        assert type(provider).__name__ == "GeminiEmbeddingProvider"
+        # Internal state — the provider stored what we asked for.
+        assert provider._model == "text-embedding-004"
+        assert provider.dimensions == 768
+
 
 class TestIsForeignModel:
     """Test the _is_foreign_model helper."""
@@ -111,3 +129,28 @@ class TestIsForeignModel:
     def test_local_model_is_foreign_for_both(self):
         assert _is_foreign_model("BAAI/bge-small-en-v1.5", "gemini")
         assert _is_foreign_model("BAAI/bge-small-en-v1.5", "openai")
+
+    # Regression: `text-embedding-` is a shared prefix between OpenAI's
+    # `text-embedding-3-{small,large}` / `text-embedding-ada-002` and
+    # Google's `text-embedding-004`, `text-embedding-005`,
+    # `text-multilingual-embedding-002`. The previous implementation had
+    # _OPENAI_PREFIXES = ("text-embedding-",), which silently rewrote any
+    # Gemini user setting EMBEDDING_MODEL=text-embedding-004 back to
+    # gemini-embedding-001. The fix is to match OpenAI-specific suffixes
+    # only, so generic text-embedding-NNN names are left for Gemini.
+    def test_gemini_text_embedding_004_not_foreign_for_gemini(self):
+        assert not _is_foreign_model("text-embedding-004", "gemini")
+
+    def test_gemini_text_embedding_005_not_foreign_for_gemini(self):
+        assert not _is_foreign_model("text-embedding-005", "gemini")
+
+    def test_gemini_text_multilingual_embedding_not_foreign_for_gemini(self):
+        assert not _is_foreign_model("text-multilingual-embedding-002", "gemini")
+
+    def test_openai_text_embedding_3_still_foreign_for_gemini(self):
+        # The fix must not break the original direction: OpenAI's
+        # text-embedding-3-large should still be detected as foreign
+        # when EMBEDDING_PROVIDER=gemini.
+        assert _is_foreign_model("text-embedding-3-large", "gemini")
+        assert _is_foreign_model("text-embedding-3-small", "gemini")
+        assert _is_foreign_model("text-embedding-ada-002", "gemini")

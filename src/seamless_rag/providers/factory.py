@@ -13,9 +13,17 @@ _OPENAI_DEFAULTS = {"model": "text-embedding-3-large", "dimensions": 3072}
 _LOCAL_MODELS = {"BAAI/bge-small-en-v1.5", "all-MiniLM-L6-v2"}
 _LOCAL_DIMENSIONS = 384
 
-# Prefixes that identify each provider's models
+# Prefixes that identify each provider's embedding models. Order them so any
+# model name matching the prefix is unambiguously that provider.
+#
+# OpenAI is the tricky case: Google's Gemini API ALSO publishes models named
+# `text-embedding-004`, `text-embedding-005`, `text-multilingual-embedding-002`.
+# So `text-embedding-` is NOT a sufficient OpenAI marker — we have to match
+# the OpenAI-specific suffixes (`-3-` or `-ada-`) only. Models like
+# `text-embedding-004` then correctly fall through as "could be Gemini",
+# which is what users picking that model name actually want.
 _GEMINI_PREFIXES = ("gemini-",)
-_OPENAI_PREFIXES = ("text-embedding-",)
+_OPENAI_PREFIXES = ("text-embedding-3-", "text-embedding-ada-")
 _LOCAL_PREFIXES = ("BAAI/", "all-", "sentence-transformers/")
 
 
