@@ -6,6 +6,35 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-05-09
+
+### Fixed
+
+- **GitHub Release notes are now extracted from the right CHANGELOG
+  section.** The awk script in `release.yml` used `$0 ~ "## [<ver>]"`,
+  where the brackets got interpreted as a regex character class, so no
+  line ever matched and every release shipped with the fallback
+  `Release X. See CHANGELOG.md for details.` text. Switched to
+  `index($0, target) == 1` for a literal anchored-at-start string match
+  that doesn't depend on regex metacharacters. Verified locally against
+  every section in this changelog.
+
+### Verified (no code change)
+
+- **Vertex AI Express keys (`AQ.` prefix) work end-to-end through the
+  google-genai SDK** — both embedding (already known) and LLM
+  generation. The earlier worry that Vertex requires a manual
+  `role: "user"` wrapper applies only to direct HTTP calls; the SDK
+  handles it transparently in both AI Studio and Vertex modes. All 4
+  Gemini-dependent integration tests now pass (15/15 integration tests
+  green when `LLM_API_KEY` is supplied).
+- **`seamless-rag --help`, `init`, `schema` (on empty table), `export`,
+  and `benchmark` load zero provider modules** (no torch, no
+  google-genai, no openai) — audited via `sys.modules` inspection. So
+  `pip install seamless-rag[mariadb]` is a viable minimal install for
+  read-only / SQL-export use cases; embedders are only loaded by the
+  commands that actually need them (`embed`, `watch`, `ingest`, `ask`).
+
 ## [0.1.5] - 2026-05-09
 
 First tag-driven release through the new `release.yml` GitHub Actions
@@ -97,7 +126,8 @@ Initial development release. **Do not use** — `pip install seamless-rag`
 fails because of the import-time `mariadb` C-extension dependency. Fixed
 in 0.1.2 / 0.1.3.
 
-[Unreleased]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.2...v0.1.3

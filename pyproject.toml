@@ -1,6 +1,6 @@
 [project]
 name = "seamless-rag"
-version = "0.1.5"
+version = "0.1.6"
 description = "TOON-Native Auto-Embedding & RAG Toolkit for MariaDB — VECTOR(N), HNSW, VEC_DISTANCE_COSINE, with TOON tabular output that saves 10-55% LLM tokens vs JSON."
 requires-python = ">=3.10"
 license = "Apache-2.0"
