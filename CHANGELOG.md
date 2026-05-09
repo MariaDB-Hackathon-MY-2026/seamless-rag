@@ -6,6 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-05-09
+
+First tag-driven release through the new `release.yml` GitHub Actions
+pipeline. No code changes versus 0.1.4 — this version exists to verify
+the full publish path end-to-end (verify tag matches pyproject → build
+→ twine check → PyPI upload via `PYPI_API_TOKEN` secret → GitHub
+Release with notes auto-extracted from this changelog).
+
+If you're already on 0.1.4 there is no functional reason to upgrade.
+
 ## [0.1.4] - 2026-05-09
 
 ### Fixed
@@ -87,7 +97,8 @@ Initial development release. **Do not use** — `pip install seamless-rag`
 fails because of the import-time `mariadb` C-extension dependency. Fixed
 in 0.1.2 / 0.1.3.
 
-[Unreleased]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/MariaDB-Hackathon-MY-2026/seamless-rag/releases/tag/v0.1.2
