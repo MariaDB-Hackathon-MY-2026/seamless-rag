@@ -1,7 +1,18 @@
 """Pydantic Settings — environment variables and .env file configuration."""
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings
+
+# Google publishes its API keys under several names depending on which surface
+# the user copied from (AI Studio, Vertex AI, or generic Cloud). We accept all
+# of them so users don't have to rename what's already in their .env. The
+# canonical name in our docs stays EMBEDDING_API_KEY / LLM_API_KEY; the rest
+# are convenience aliases.
+_GOOGLE_KEY_ALIASES = (
+    "GEMINI_API_KEY",       # AI Studio convention
+    "GOOGLE_API_KEY",       # Google general convention
+    "VERTEX_AI_API_KEY",    # Vertex Express convention
+)
 
 
 class Settings(BaseSettings):
@@ -21,7 +32,10 @@ class Settings(BaseSettings):
     embedding_provider: str = Field(default="sentence-transformers", alias="EMBEDDING_PROVIDER")
     embedding_model: str = Field(default="all-MiniLM-L6-v2", alias="EMBEDDING_MODEL")
     embedding_dimensions: int = Field(default=384, alias="EMBEDDING_DIMENSIONS")
-    embedding_api_key: str = Field(default="", alias="EMBEDDING_API_KEY")
+    embedding_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("EMBEDDING_API_KEY", *_GOOGLE_KEY_ALIASES),
+    )
 
     # Watch mode
     watch_interval: float = Field(default=2.0, alias="WATCH_INTERVAL")
@@ -34,7 +48,10 @@ class Settings(BaseSettings):
     # For development/demo: set LLM_PROVIDER=gemini in .env
     llm_provider: str = Field(default="ollama", alias="LLM_PROVIDER")
     llm_model: str = Field(default="qwen3:8b", alias="LLM_MODEL")
-    llm_api_key: str = Field(default="", alias="LLM_API_KEY")
+    llm_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("LLM_API_KEY", *_GOOGLE_KEY_ALIASES),
+    )
     llm_base_url: str = Field(default="", alias="LLM_BASE_URL")
 
     # OpenAI (secondary — for token counting and optional generation)
