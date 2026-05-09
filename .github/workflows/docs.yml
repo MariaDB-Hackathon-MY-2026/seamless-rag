@@ -4,10 +4,13 @@ on:
   push:
     branches: [main]
 
+# Push the built site directly to the gh-pages branch.
+# Avoids the `github-pages` deployment environment, which is org-protected
+# in MariaDB-Hackathon-MY-2026 and blocks deploys from main.
+# GitHub's built-in pages-build-deployment workflow then publishes
+# gh-pages → https://mariadb-hackathon-my-2026.github.io/seamless-rag/
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
@@ -15,19 +18,18 @@ concurrency:
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install mkdocs-material
-      - run: mkdocs build
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Build and deploy to gh-pages
+        run: mkdocs gh-deploy --force --no-history
