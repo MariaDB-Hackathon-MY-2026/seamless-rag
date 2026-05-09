@@ -130,37 +130,75 @@ def schema(
             rprint(f"[green]Identical ranking: {same_ids}[/green]")
 
 
+def _slide_window(text: str, size: int, overlap: int) -> list[str]:
+    """Last-resort character window slicer for inputs with no usable delimiters."""
+    if not text:
+        return [text]
+    step = max(1, size - max(0, overlap))
+    return [text[i : i + size] for i in range(0, len(text), step)]
+
+
 def _chunk_text(text: str, size: int, overlap: int) -> list[str]:
-    """Split text into chunks at sentence boundaries with overlap."""
+    """Split text into chunks of at most ``size`` chars with ``overlap`` between them.
+
+    Tries sentence boundaries first (good for prose), then falls back through
+    progressively coarser delimiters (newlines → fixed character windows) so
+    structured inputs like TSV/CSV/log/code don't end up as one giant chunk.
+    """
     import re as _re
 
-    sentences = _re.split(r"(?<=[.!?])\s+", text.strip())
+    text = text.strip()
+    if not text:
+        return [text]
+    if len(text) <= size:
+        return [text]
+
+    sentences = _re.split(r"(?<=[.!?])\s+", text)
+    # If sentence splitting didn't actually break the text up (no terminal
+    # punctuation), fall through to line-based splitting, then to fixed windows.
+    if len(sentences) <= 1:
+        sentences = [s for s in text.split("\n") if s.strip()]
+    if len(sentences) <= 1:
+        return _slide_window(text, size, overlap)
+
     chunks: list[str] = []
     current: list[str] = []
     current_len = 0
+
+    def flush() -> None:
+        nonlocal current, current_len
+        if not current:
+            return
+        joined = " ".join(current)
+        # If a single segment is itself larger than size (very long line, no
+        # punctuation in a paragraph), slice it. Otherwise emit as-is.
+        if len(joined) > size:
+            chunks.extend(_slide_window(joined, size, overlap))
+        else:
+            chunks.append(joined)
+        # Keep overlap: retain last N chars worth of segments.
+        kept: list[str] = []
+        kept_len = 0
+        for s in reversed(current):
+            if kept_len + len(s) > overlap:
+                break
+            kept.insert(0, s)
+            kept_len += len(s) + 1
+        current = kept
+        current_len = kept_len
 
     for sent in sentences:
         sent = sent.strip()
         if not sent:
             continue
+        # A single segment that's larger than size will be window-sliced on flush.
         if current_len + len(sent) > size and current:
-            chunks.append(" ".join(current))
-            # Keep overlap: retain last N chars worth of sentences
-            kept: list[str] = []
-            kept_len = 0
-            for s in reversed(current):
-                if kept_len + len(s) > overlap:
-                    break
-                kept.insert(0, s)
-                kept_len += len(s) + 1
-            current = kept
-            current_len = kept_len
+            flush()
         current.append(sent)
         current_len += len(sent) + 1
 
-    if current:
-        chunks.append(" ".join(current))
-    return chunks if chunks else [text.strip()]
+    flush()
+    return chunks if chunks else [text]
 
 
 @app.command()
