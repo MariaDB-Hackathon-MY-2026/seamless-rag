@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,3 L0,6 Z" fill="#003545"/>
+    </marker>
+    <filter id="shadow">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="300" rx="8" fill="#F8F9FA"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="system-ui, -apple-system, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#003545">Seamless-RAG Pipeline</text>
+
+  <!-- Box 1: MariaDB -->
+  <g filter="url(#shadow)">
+    <rect x="20" y="100" width="110" height="70" rx="6" fill="#003545"/>
+    <text x="75" y="132" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">MariaDB</text>
+    <text x="75" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#88C0D0">VECTOR columns</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <line x1="130" y1="135" x2="160" y2="135" stroke="#003545" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Box 2: Embedding -->
+  <g filter="url(#shadow)">
+    <rect x="162" y="100" width="110" height="70" rx="6" fill="#FFFFFF" stroke="#C0765A" stroke-width="1.5"/>
+    <text x="217" y="128" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#003545">Embedding</text>
+    <text x="217" y="144" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#666">SentenceTransformers</text>
+    <text x="217" y="157" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#666">Gemini / OpenAI</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <line x1="272" y1="135" x2="302" y2="135" stroke="#003545" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Box 3: Vector Search -->
+  <g filter="url(#shadow)">
+    <rect x="304" y="100" width="110" height="70" rx="6" fill="#FFFFFF" stroke="#003545" stroke-width="1.5"/>
+    <text x="359" y="128" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#003545">Vector Search</text>
+    <text x="359" y="144" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#666">HNSW Cosine</text>
+    <text x="359" y="157" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#666">Top-K retrieval</text>
+  </g>
+
+  <!-- Arrow 3 -->
+  <line x1="414" y1="135" x2="444" y2="135" stroke="#003545" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Box 4: TOON Format -->
+  <g filter="url(#shadow)">
+    <rect x="446" y="100" width="110" height="70" rx="6" fill="#C0765A"/>
+    <text x="501" y="128" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">TOON Format</text>
+    <text x="501" y="144" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#FFF3EE">Tabular v3 encoder</text>
+    <text x="501" y="157" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#FFF3EE">58% fewer tokens</text>
+  </g>
+
+  <!-- Arrow 4 -->
+  <line x1="556" y1="135" x2="586" y2="135" stroke="#003545" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Box 5: LLM -->
+  <g filter="url(#shadow)">
+    <rect x="588" y="100" width="110" height="70" rx="6" fill="#FFFFFF" stroke="#C0765A" stroke-width="1.5"/>
+    <text x="643" y="128" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#003545">LLM</text>
+    <text x="643" y="144" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#666">Ollama / Gemini</text>
+    <text x="643" y="157" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#666">OpenAI</text>
+  </g>
+
+  <!-- Arrow 5 -->
+  <line x1="698" y1="135" x2="718" y2="135" stroke="#003545" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Box 6: Answer -->
+  <g filter="url(#shadow)">
+    <rect x="720" y="105" width="60" height="60" rx="30" fill="#003545"/>
+    <text x="750" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Answer</text>
+  </g>
+
+  <!-- Bottom: Protocol labels -->
+  <g transform="translate(0, 200)">
+    <rect x="80" y="10" width="640" height="55" rx="6" fill="#F0F0F0" stroke="#DDD" stroke-width="0.5"/>
+    <text x="400" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#003545">Pluggable Protocol Architecture</text>
+    <text x="170" y="50" text-anchor="middle" font-family="monospace" font-size="8" fill="#666">EmbeddingProvider</text>
+    <text x="400" y="50" text-anchor="middle" font-family="monospace" font-size="8" fill="#666">VectorStore</text>
+    <text x="610" y="50" text-anchor="middle" font-family="monospace" font-size="8" fill="#666">LLMProvider</text>
+    <!-- Dots between labels -->
+    <text x="280" y="50" text-anchor="middle" font-family="monospace" font-size="8" fill="#CCC">|</text>
+    <text x="510" y="50" text-anchor="middle" font-family="monospace" font-size="8" fill="#CCC">|</text>
+  </g>
+</svg>
