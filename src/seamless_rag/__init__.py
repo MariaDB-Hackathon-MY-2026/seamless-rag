@@ -1,6 +1,6 @@
 """Seamless-RAG: TOON-Native Auto-Embedding & RAG Toolkit for MariaDB."""
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 __all__ = ["SeamlessRAG"]
 
